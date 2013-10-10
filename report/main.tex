@@ -57,7 +57,7 @@
     or \string\bottomrule\space instead depending on where in the
     table the line appears}}
 
-\newcommand{\email}[1]{\href{mailto:#1@univ.edu}{#1}}
+\newcommand{\email}[1]{\href{mailto:#1@cs.cmu.edu}{#1}}
 
 % cleveref configuration
 \crefname{figure}{Figure}{Figures}
@@ -96,20 +96,23 @@
 % Custom commands
 \newcommand{\Tool}{\textsc{XYZ}\xspace}
 
-\sloppy
+%\sloppy
 % start doc
 \begin{document}
 
-\title{Title}
+\title{Hardware Transactional Memory Support for Multi-key Transactions\\
+\large{CS 15-712 Project Proposal}}
 
-\author{a1 a2\\ \email{a1} \email{a2} \\ univ}
+\author{Joy Arulraj \hspace{0.05in} Jesse Dunietz \hspace{0.05in} Thomas Marshall\\ 
+{\email{jarulraj}, \email{jdunietz}, \email{twmarsha}} \\
+Carnegie Mellon University}
 
 \date{}
 \maketitle
 
 \input{section/abstract}
 \input{section/introduction}
-\input{section/common}
+%\input{section/common}
 
 \bibliographystyle{plain}
 \bibliography{ref}
