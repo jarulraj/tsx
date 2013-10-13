@@ -29,11 +29,8 @@ wherein the transactional semantics are just skipped after the first transaction
 abort. \\ 
 \end{itemize}
 
-These hardware primitives can be used to implement an interface to access a
-key-value store - the concurrency control part of the interface in particular.
-Synchronizing access to a single key using this interface has already been
-implemented. We are interested in extending the implementation to support atomic
-accesses to multiple keys. We assume that the read/write set of each transaction
-is known in advance. Relaxing this assumption would be our stretch goal for this
-project.
-
+These hardware primitives can be used to implement the concurrency control 
+required for synchronizing accesses to data structures. In this project,
+we plan to focus on multi-key transactions on a key-value store. In \Cref{sec:tm},
+we formulate the problem of synchronizing accesses to a key-value store, especially
+in the context of hardware transactional memory support.

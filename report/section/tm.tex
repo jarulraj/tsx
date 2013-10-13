@@ -1,0 +1,15 @@
+\section{Concurrency Control in Key-Value Stores} \label{sec:tm}
+
+A key-value store presents an associative data access interface that maps a set of keys $K$ to a set of values $V$, where the keys and values can be arbitrary objects. The interface can be implemented using different data structures, including hash tables, red-black trees, etc. The keys are generally hashed to obtain an uniform distribution. The values can be stored separately and fixed-length pointers can be used to represent them in the key-value store implementation.  
+
+The main operations provided in the key-value store's interface include : \textsc{GET}(key), \textsc{PUT}(key,value), and \textsc{DELETE}(key). The readers can conflict with writers and the writers can conflict with other writers. So, a concurrency control mechanism is required to provide isolation between conflicting accesses. 
+
+A simple mechanism that can be used to provide isolation is coarse-grained locks. This adds some complexity to the code to provide increased concurrency. However, this is a pessimistic approach that targets high contention workloads. For low contention workloads, an optimistic concurrency control scheme will provide better performance. These schemes check for conflicts at the end of the transaction. The concurrency control mechanism is essentially not exposed to the user and this allows non-conflicting accesses to avoid the locking overhead.
+
+\subsection{Optimistic Concurrency Control}
+
+A timestamp-based ordering protocol is a mechanism that can be used to provide optimistic concurrency control, i.e. the transaction's isolation properties are checked at the end of the transaction. In contrast, locks enforce the ordering of transactions at the start of the transaction and hence are blocking by design. Optimistic concurrency control mechanisms still rely on locking, although they move this functionality to the language runtime layer in the case of software transactional memory schemes (STM) or to the hardware layer in the case of hardware transaction memory schemes (HTM). The programmer is presented the higher-level abstraction of transactions. We focus primarily on HTM in this project.
+
+HTM simplifies concurrent programming by providing support for atomic execution of a set of load and store instructions by using transactional caches. Intel TSX is an implementation of HTM. It allows non-conflicting transactions to elide locks entirely, while conflicting transactions need to be serialized. For instance, if two transactions write the same key at the same time, they will be aborted and executed again. They can get locks the second time to avoid conflicts. 
+
+Conflict resolution mechanism is flexible in the RTM interface. The programmer can define the fallback mechanism to resolve conflicts. The HLE interface relies on the processor to handle conflicts, and this is will be more conservative policy. We plan to evaluate both interfaces in our project.
