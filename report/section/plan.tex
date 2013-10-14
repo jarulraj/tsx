@@ -1,0 +1,43 @@
+\section{Project Plan} \label{sec:intro}
+
+Broadly speaking, we plan to:
+\begin{itemize}
+\item implement two different TSX-based concurrency control schemes for a simple key-value store
+\item evaluate the performance of that concurrency control scheme under different workloads
+\end{itemize}
+The goals of the project are as follows:
+\begin{itemize}
+\item \textbf{75\% goal:} Implement concurrency control for a key-value store with both HLE and RTM, and compare the performance of these two schemes against each other.
+\item \textbf{100\% goal:} Additionally, compare the above approaches with traditional pessimistic concurrency control schemes, specifically spin-locks and a basic lock manager. This will demonstrate the advantages of the hardware-based approach for this task, or else show that this task is not one where the hardware-based approach helps.
+\item \textbf{125\% goal:} Additionally, implement a software-based (i.e., timestamp-based) OCC scheme and compare it against the above approaches. This will serve as a basic check that it is in fact the hardware that is the cause of any differences in performance, not just the optimistic approach to concurrency.
+\end{itemize}
+
+\subsection{Resources Required}
+The only resource absolutely necessary for this project is access to a machine with a Haswell processor. Dong has granted us access to a CMU-owned machine.
+
+It would be useful, though not essential, to have access to the existing codebase that has been used by Professor Andersen's lab to run similar HTM experiments in the past. In particular, it would be helpful to have access to the key-value store implementation used in the lab's in-progress study. We are expecting that Dong will be able to give us access to this, as well.
+
+\subsection{Experiments}
+Our experiments are inspired by those reported in \citep{tm-eval-paper}. We will restrict ourselves to a small, fixed number of key-value store entries. In each experiment, we will measure the time it takes to run a randomly generated workload of datastore operations, given a particular CC scheme. Each workload will simply consist of looking up some set of keys and trivially modifying their values (e.g., incrementing). Specifically, we will run the following experiments for each type of CC mechanism:
+\begin{enumerate}
+\item With several fixed sizes for read/write sets and numbers of threads, vary the contention level between operations on different threads. This will allow us to determine how each of the CC mechanisms scales with respect to contention.
+\item With several different fixed contention levels and numbers of threads, vary the size of the read/write sets. This will allow us to determine how each of the CC mechanisms scales with respect to the read/write set. (For HTM, this may be a very important factor, since transactions abort based on conflicts anywhere in the read/write set.)
+\item With several different fixed contention levels and read/write set sizes, vary the number of threads running. This will allow us to determine how much benefit each mechanism is able to benefit from adding more parallelism.
+\end{enumerate}
+
+\subsection{Work Plan}
+The required steps for executing this project are as follows:
+\begin{enumerate}
+\item Familiarize ourselves with an existing basic key-value store system, such as that built by Professor Andersen's group, or (if that turns out to be impractical) implement our own. If we end up choosing the latter approach, we can minimize implementation effort by keeping the data structures very simple -- just 1-2 hash tables, one for the data and one for locks or to group data entries larger than a cache line (if applicable).
+\item Design the structure of the transaction manager to support multiple CC mechanisms.
+\item Using the Haswell TSX APIs, implement a transaction manager that optimistically attempts to execute a transaction, and retries according to either an HLE strategy or a custom RTM-specified strategy.
+\item Write a system to generate test workloads with different amounts of contention. It should also allow specifying thread assignments if necessary.
+\item Run the experiments for the two HTM approaches. Some tweaking will be necessary to find the most informative thread numbers, read/write set sizes, and contention levels.
+\item Implement spin-locks and a lock manager.
+\item Rerun the experiments for the pessimistic concurrency control approaches.
+\item Implement software-based OCC.
+\item Rerun the experiments for OCC.
+\item Collate/visualize data and write up report.
+\end{enumerate}
+
+All of us will work together on items 1 and 2. Two of us (jdunietz and jarulraj) will collaborate (via pair programming) to implement the TSX-based transaction manager. In parallel, twmarsha will implement the workload generator using an agreed-upon interface. jarulraj and twmarsha will each run preliminary versions of one experiment for item 5, and jdunietz will use their results to run the final experiments and collate/visualize the data. twmarsha will implement a lock manager, jarulraj will implement spin-locks, and jdunietz will implement OCC.
