@@ -6,24 +6,23 @@ fine-grained read/write access to multiple memory words in a lock-free manner
 and software. For instance, the load linked/store conditional primitive available
 in modern processors is a special form of TM, where access is regulated to only
 one memory word. Hardware implementations generally rely on extensions to the
-cache-coherence protocol. Software implementations on the other hand provide
+cache-coherence protocol. Software implementations, on the other hand, provide
 transactional interfaces by using basic hardware primitives like atomic compare and
 swap (CAS).
 
 In recent Intel Haswell processors, transactional memory support has been added
 in the form of instruction set extensions known as Transaction Synchronization
-Extensions (TSX). TSX supports two interfaces \citep{tsx-intro} : \\
-
+Extensions (TSX). TSX supports two interfaces \citep{tsx-intro}: \\
 
 \begin{itemize} 
 \item \textbf{Hardware Lock Elision (HLE)} \\ This is a backward
 compatible extension which allows specification of transaction regions using
 \textrm{XACQUIRE} and \textrm{XRELEASE} prefixes. It is compatible with the lock-based programming
 model. In HLE, when the transaction execution fails, the TM implementation
-simply skips the transactional semantics during re-execution. \\ 
+simply reverts to normal lock semantics during re-execution. \\ 
 
 \item \textbf{Restricted Transactional Memory (RTM)} \\ This is a more
-flexible albeit not backward compatibile extension which allows specification of
+flexible extension, albeit not a backward compatible one, which allows specification of
 transactions using \textrm{XBEGIN, XEND and XABORT} instructions. It allows the
 programmer to specify the fallback path when the transaction fails.  \\ 
 \end{itemize}
@@ -38,5 +37,3 @@ We then present the traditional pessimistic concurrency control protocols
 we plan to use for comparison in \Cref{sec:pessimistic}. Finally, we
 define the goals of this project and our plan to split the workload
 in \Cref{sec:plan}.
-
-
