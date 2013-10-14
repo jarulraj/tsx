@@ -1,36 +1,42 @@
 \section{Introduction} \label{sec:intro}
 
-Transactional memory (TM) has been a relatively esoteric approach to provide
+Transactional memory (TM) is a mechanism to provide
 fine-grained read/write access to multiple memory words in a lock-free manner
-\citep{Herlihy93}. Sevaral implementations of TM have been realized in hardware
-or software. For instance, the load linked/store conditional primitive available
+\citep{Herlihy93}. Several implementations of TM have been realized in hardware
+and software. For instance, the load linked/store conditional primitive available
 in modern processors is a special form of TM, where access is regulated to only
 one memory word. Hardware implementations generally rely on extensions to the
 cache-coherence protocol. Software implementations on the other hand provide
-interfaces that build upon the basic hardware primitives like atomic compare and
+transactional interfaces by using basic hardware primitives like atomic compare and
 swap (CAS).
 
 In recent Intel Haswell processors, transactional memory support has been added
 in the form of instruction set extensions known as Transaction Synchronization
-Extensions (TSX).  TSX supports two interfaces \citep{tsx-intro} : \\
+Extensions (TSX). TSX supports two interfaces \citep{tsx-intro} : \\
 
 
 \begin{itemize} 
 \item \textbf{Hardware Lock Elision (HLE)} \\ This is a backward
 compatible extension which allows specification of transaction regions using
-XACQUIRE and XRELEASE prefixes. It is compatible with the lock-based programming
-model. \\ 
+\textrm{XACQUIRE} and \textrm{XRELEASE} prefixes. It is compatible with the lock-based programming
+model. In HLE, when the transaction execution fails, the TM implementation
+simply skips the transactional semantics during re-execution. \\ 
 
 \item \textbf{Restricted Transactional Memory (RTM)} \\ This is a more
 flexible albeit not backward compatibile extension which allows specification of
-transactions using XBEGIN, XEND and XABORT instructions. It allows the
-programmer to define the fallback path when the transaction fails unlike HLE
-wherein the transactional semantics are just skipped after the first transaction
-abort. \\ 
+transactions using \textrm{XBEGIN, XEND and XABORT} instructions. It allows the
+programmer to specify the fallback path when the transaction fails.  \\ 
 \end{itemize}
 
-These hardware primitives can be used to implement the concurrency control 
+These hardware primitives can be used to implement concurrency control 
 required for synchronizing accesses to data structures. In this project,
-we plan to focus on multi-key transactions on a key-value store. In \Cref{sec:tm},
-we formulate the problem of synchronizing accesses to a key-value store, especially
-in the context of hardware transactional memory support.
+we plan to focus specifically on \textit{multi-key transactions} on a
+\textit{key-value store}. In \Cref{sec:tm},
+we describe the problem of synchronizing multi-key transactions on a 
+key-value store using hardware TM support.
+We then present the traditional pessimistic concurrency control protocols 
+we plan to use for comparison in \Cref{sec:pessimistic}. Finally, we
+define the goals of this project and our plan to split the workload
+in \Cref{sec:plan}.
+
+
