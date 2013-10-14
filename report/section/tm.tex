@@ -1,15 +1,58 @@
 \section{Concurrency Control in Key-Value Stores} \label{sec:tm}
 
-A key-value store presents an associative data access interface that maps a set of keys $K$ to a set of values $V$, where the keys and values can be arbitrary objects. The interface can be implemented using different data structures, including hash tables, red-black trees, etc. The keys are generally hashed to obtain an uniform distribution. The values can be stored separately and fixed-length pointers can be used to represent them in the key-value store implementation.  
+We will describe the interface presented by key-value stores. We will then
+present how an optimistic concurrency control scheme can be used for
+synchronizing accesses to the key-value store.
 
-The main operations provided in the key-value store's interface include : \textsc{GET}(key), \textsc{PUT}(key,value), and \textsc{DELETE}(key). The readers can conflict with writers and the writers can conflict with other writers. So, a concurrency control mechanism is required to provide isolation between conflicting accesses. 
+\subsection{Key-Value Store}
 
-A simple mechanism that can be used to provide isolation is coarse-grained locks. This adds some complexity to the code to provide increased concurrency. However, this is a pessimistic approach that targets high contention workloads. For low contention workloads, an optimistic concurrency control scheme will provide better performance. These schemes check for conflicts at the end of the transaction. The concurrency control mechanism is essentially not exposed to the user and this allows non-conflicting accesses to avoid the locking overhead.
+A key-value store presents an associative data access interface that maps a set
+of keys $K$ to a set of values $V$, where the keys and values can be arbitrary
+objects. The keys are generally prehashed to obtain an uniform distribution. The
+values can be stored separately and fixed-length pointers can be used to
+represent them in the key-value store implementation.  
 
-\subsection{Optimistic Concurrency Control}
+The main operations provided in the key-value store's interface include :
+\textsc{GET}(key),\textsc{PUT}(key,value), and \textsc{DELETE}(key).  Readers
+can conflict with writers and writers can conflict with other writers. So, a
+concurrency control mechanism is required to provide isolation between these
+conflicting accesses to a set of keys (\textit{multi-key transactions}).
 
-A timestamp-based ordering protocol is a mechanism that can be used to provide optimistic concurrency control, i.e. the transaction's isolation properties are checked at the end of the transaction. In contrast, locks enforce the ordering of transactions at the start of the transaction and hence are blocking by design. Optimistic concurrency control mechanisms still rely on locking, although they move this functionality to the language runtime layer in the case of software transactional memory schemes (STM) or to the hardware layer in the case of hardware transaction memory schemes (HTM). The programmer is presented the higher-level abstraction of transactions. We focus primarily on HTM in this project.
+\subsection{Optimistic Concurrency Control in Haswell}
 
-HTM simplifies concurrent programming by providing support for atomic execution of a set of load and store instructions by using transactional caches. Intel TSX is an implementation of HTM. It allows non-conflicting transactions to elide locks entirely, while conflicting transactions need to be serialized. For instance, if two transactions write the same key at the same time, they will be aborted and executed again. They can get locks the second time to avoid conflicts. 
+A simple mechanism that can be used to provide isolation is coarse-grained
+locks. This provides increased concurrency.  However, this is a pessimistic
+concurrency control protocol that targets high contention workloads. Read
+accesses also need to incur the locking overhead in this scheme. 
 
-Conflict resolution mechanism is flexible in the RTM interface. The programmer can define the fallback mechanism to resolve conflicts. The HLE interface relies on the processor to handle conflicts, and this is will be more conservative policy. We plan to evaluate both interfaces in our project.
+For low contention workloads like read-dominant workloads, an optimistic
+concurrency control scheme will provide better performance as the validation is
+postponed to the end of the transaction. The concurrency control protocol is
+essentially not exposed to the user and this allows non-conflicting accesses to
+avoid the locking overhead.  Optimistic concurrency control mechanisms still
+rely on locking, although they move this functionality to the language runtime
+layer in the case of software transactional memory schemes (STM) or to the
+hardware layer in the case of hardware transaction memory schemes (HTM). The
+programmer is presented the higher-level abstraction of transactions. We focus
+primarily on HTM in this project.
+
+HTM simplifies concurrent programming by providing support for atomic execution
+of a set of load and store instructions by using transactional caches. Intel TSX
+provides an HTM implementation. It allows non-conflicting transactions to elide
+locks entirely, while only conflicting transactions need to be serialized. 
+
+Conflict resolution mechanism is flexible in the RTM interface. The programmer
+can define the fallback mechanism to resolve conflicts. For instance, a group
+sum operation using RTM interface in Intel Haswell is shown in \Cref{fig:rtm}.
+In contrast, the HLE interface relies on the processor to handle conflicts, and
+this is will be more conservative policy. We plan to evaluate both interfaces in
+our project.
+
+\lstset{basicstyle=\ttfamily\fontsize{9}{10}\selectfont,
+morekeywords={if,else,end}, numbers=left} \begin{figure}
+    \parbox[t]{0.45\textwidth}{\lstinputlisting{figure/rtm.c}} \caption{Group
+        sum operation using RTM interface. A mutex is obtained in fallback path
+to avoid data race with the normal transaction execution path.} \label{fig:rtm}
+\end{figure}
+
+
