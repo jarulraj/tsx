@@ -2,30 +2,29 @@
 
 In order to have a baseline against which to compare the performance of HTM, we
 will be implementing two different forms of traditional, software based
-pessimistic concurrency control using locks - a lock manager and spin locks.
+pessimistic concurrency control protocols using locks - a lock manager and spin locks.
 
 \subsection{Lock Manager}
 
 Traditional locking schemes make use of a lock manager, which arbitrates access
 to record in the key-value store by granting locks to requesting transactions on
 a per key-value pair basis. A lock manager consists of a lock table hashed on
-keys. Each lock record contains a mode, either read, write, or free, and a list
+keys. Each lock record contains a mode (either read, write, or free) and a list
 of transactions waiting to acquire the lock. A transaction may only access a
 given key-value pair once it has requested and been granted the appropriate
 lock, preventing conflicts.
 
 When a process requests a lock, the lock manager grants the request if it is
 compatible with the lock's mode, where writes are incompatible with reads and
-other writes. This is because only writes can cause conflicts - any number of
-transactions can execute concurrent reads without affecting each other. When the
+other writes.  When the
 transaction currently holding the lock releases it, the lock manager grants the
 lock to the transaction at the head of the waiting queue.
 
 We will prevent deadlocks by enforcing an ordering in which a transaction may
 request locks, ensuring that no circular dependencies between transactions
 waiting on locks may occur. This works well under our assumption that the read
-and write sets of transactions are static, but can be difficult if the read and
-write sets cannot always be known at the start of the transactions.\\
+and write sets of transactions are static, but is difficult if the read and
+write sets are dynamic.\\
 
 \subsection{Spin Locks}
 
@@ -50,8 +49,7 @@ HTM implementation.
 %Time required to access a given number of objects using different concurrency
 %control protocols, based on their simulation, is shown in \Cref{fig:overhead}. 
 
-% jarulraj: Removed figure for now -- not sure if we need to show it in proposal
-
+% jarulraj: Removed figure for now -- not sure if we can use it
 %\begin{figure}[h!] \centering
 %\includegraphics[width=0.45\textwidth]{figure/overhead.jpg} \caption{Overhead
 %of different concurrency control protocols under low contention workloads
