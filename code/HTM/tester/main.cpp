@@ -16,17 +16,15 @@
 
 using namespace std;
 
-inline string GenRandomString(int length) {
+// Replaces every character in the provided string with a random alphanumeric
+// character.
+inline void GenRandomString(string *result) {
     static const char ALPHANUM_CHARS[] = "0123456789"
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             "abcdefghijklmnopqrstuvwxyz";
-
-    string result(length, '\0');
-    for (int i = 0; i < length; ++i) {
-        result[i] = ALPHANUM_CHARS[rand() % (sizeof(ALPHANUM_CHARS) - 1)];
+    for (size_t i = 0; i < result->size(); ++i) {
+        (*result)[i] = ALPHANUM_CHARS[rand() % (sizeof(ALPHANUM_CHARS) - 1)];
     }
-
-    return result;
 }
 
 // It probably doesn't really matter how long the value strings are...
@@ -40,26 +38,34 @@ void RunWorkloadThread(TxnManager *manager, int ops_per_txn, int txn_period_ms,
 
     default_random_engine generator;
     // Use p_sum to effectively make sure probabilities are normalized.
-    uniform_real_distribution<double> normed_distribution(0.0, p_sum);
+    uniform_real_distribution<double> operation_distribution(0.0, p_sum);
     uniform_int_distribution<int> key_distribution(0, key_max);
+
+    // Initializing all vector and string values here essentially eliminates
+    // contention for the STL allocator locks. We want there to be no memory
+    // management happening inside the main loop of the thread.
+    vector<OpDescription> txn_ops(ops_per_txn);
+    for (OpDescription &op : txn_ops) {
+        op.value.resize(VALUE_LENGTH);
+    }
 
     time_t end_time = time(NULL) + seconds_to_run;
     do {
-        vector<OpDescription> txn_ops;
         for (int i = 0; i < ops_per_txn; ++i) {
-            double action_chooser = normed_distribution(generator);
-            OpDescription next_op;
+            double action_chooser = operation_distribution(generator);
+            // Modify operation description in place. (Values left around from
+            // old insert actions will just be ignored.)
+            OpDescription &next_op = txn_ops[i];
             next_op.key = key_distribution(generator);
 
             if (action_chooser < p_insert) {
                 next_op.type = INSERT;
-                next_op.value = GenRandomString(VALUE_LENGTH);
+                GenRandomString(&next_op.value);
             } else if (action_chooser < get_threshold) {
                 next_op.type = GET;
             } else {
                 next_op.type = DELETE;
             }
-            txn_ops.push_back(next_op);
         }
 
         manager->RunTxn(txn_ops);
