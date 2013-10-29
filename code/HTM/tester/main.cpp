@@ -29,6 +29,7 @@ inline void GenRandomString(string *result) {
 
 // It probably doesn't really matter how long the value strings are...
 const int VALUE_LENGTH = 10;
+const int MAX_KEY = 10000;
 
 void RunWorkloadThread(TxnManager *manager, int ops_per_txn, int txn_period_ms,
         int key_max, int seconds_to_run, double p_insert, double p_get,
@@ -95,6 +96,12 @@ int main(int argc, const char* argv[]) {
     string manager_type = argv[1];
     TxnManager *manager;
     HashTable table; // TODO: make this properly construct a HashTable
+
+    // Make sure all the keys we'll be using are there so GETs don't fail
+    for (uint64 i = 0; i <= MAX_KEY; ++i) {
+        table.Insert(i, "");
+    }
+
     if (manager_type == HTM_TYPE) {
         manager = new HTMTxnManager(&table);
     } else if(manager_type == PESSIMISTIC_TYPE) {
@@ -107,7 +114,7 @@ int main(int argc, const char* argv[]) {
     vector<thread> threads;
     for (int i = 0; i < num_threads; ++i) {
         threads.push_back(
-                thread(RunWorkloadThread, manager, 10, 1, 10000, 10, 1 / 3.0,
+                thread(RunWorkloadThread, manager, 10, 1, MAX_KEY, 10, 1 / 3.0,
                         1 / 3.0, 1 / 3.0));
     }
 
