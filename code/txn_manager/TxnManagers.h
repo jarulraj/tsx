@@ -1,8 +1,10 @@
 #ifndef TXNMANAGERS_H_
 #define TXNMANAGERS_H_
 
-#include <vector>
+#include <unordered_map>
+#include <mutex>
 #include <string>
+#include <vector>
 
 #include "hashtable.h"
 
@@ -44,11 +46,16 @@ private:
 };
 
 
-class PessimisticTxnManager : public TxnManager {
+class LockTableTxnManager : public TxnManager {
 public:
-    PessimisticTxnManager(HashTable *table) : TxnManager(table) {}
+    LockTableTxnManager(HashTable *table) : TxnManager(table) {}
     // TODO: Implement me
     virtual bool RunTxn(const std::vector<OpDescription> &operations);
+
+private:
+    unordered_map<uint64_t, mutex*> lockTable;
+    // Prevents concurrent insertions to the lock table.
+    mutex tableMutex;
 };
 
 

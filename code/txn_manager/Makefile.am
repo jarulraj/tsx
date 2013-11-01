@@ -20,8 +20,8 @@ MAINTAINERCLEANFILES = Makefile.in
 
 INCLUDES	= -I$(top_builddir)/hashtable 
 
-noinst_HEADERS	= TxnManagers.h
+noinst_LIBRARIES = libtxn_manager.a
 
-#txn_manager_SOURCES	= TxnManagers.cpp 
+libtxn_manager_a_SOURCES = TxnManagers.h TxnManagers.cpp 
 #txn_manager_LDADD	= 
 
