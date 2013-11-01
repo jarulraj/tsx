@@ -20,7 +20,7 @@ ACLOCAL_AMFLAGS		= -I m4
 
 EXTRA_DIST		= bootstrap
 
-SUBDIRS 		= tester txn_manager hash_table
+SUBDIRS 		= hashtable txn_manager tester
 
 MAINTAINERCLEANFILES 	= Makefile.in aclocal.m4 configure \
 			  config-h.in stamp-h.in

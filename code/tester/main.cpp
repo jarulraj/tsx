@@ -67,7 +67,7 @@ void RunWorkloadThread(TxnManager *manager, int ops_per_txn, int txn_period_ms,
 }
 
 const char *INVALID_MSG =
-            "Invalid arguments. Usage: htm-test [htm | pess] <num_threads>";
+            "Invalid arguments. Usage: htm-test [htm | pess] <num_threads> \n";
 const char *HTM_TYPE = "htm";
 const char *PESSIMISTIC_TYPE = "pess";
 
@@ -88,14 +88,18 @@ int main(int argc, const char* argv[]) {
 
     string manager_type = argv[1];
     TxnManager *manager;
-    HashTable table; // TODO: make this properly construct a HashTable
 
+    // Initializae hashtable
+    HashTable* table = new HashTable((ht_flags)(HT_KEY_CONST | HT_VALUE_CONST), 0.05);
+
+    std::string empty = "";
     // Make sure all the keys we'll be using are there so GETs don't fail
-    for (uint64 i = 0; i <= MAX_KEY; ++i) {
-        // TODO : Make it fit with HashTable
-        //table.Insert(i, "");
+    for (uint64_t i = 0; i <= MAX_KEY; ++i) {
+        table->Insert((void*)&i, sizeof(i), (void*)empty.c_str(), sizeof(empty.c_str()));
     }
 
+    std::cout<<"Keys inserted :: "<< table->GetSize()<<endl;
+    
     if (manager_type == HTM_TYPE) {
         // TODO : Add HTM Manager
         //manager = new HTMTxnManager(&table);

@@ -55,10 +55,10 @@ save_LIBS="$LIBS"
 test x"${with_readline-no}" != xno && LIBS="$LIBS -lreadline"
 AC_REPLACE_FUNCS([readline])
 AC_CHECK_FUNCS([add_history])
-LIBS="$save_LIBS -lrt"
+LIBS="$save_LIBS"
 
 AC_CONFIG_FILES([Makefile 
-                 hash_table/Makefile 
+                 hashtable/Makefile 
                  txn_manager/Makefile 
                  tester/Makefile],
                 [test -z "$CONFIG_HEADERS" || echo timestamp > stamp-h.in])

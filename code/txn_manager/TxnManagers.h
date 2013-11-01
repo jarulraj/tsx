@@ -16,7 +16,7 @@ typedef enum OpType {
 
 typedef struct OpDescription {
     OpType type;
-    uint64 key;
+    uint64_t key;
     std::string value;
 } OpDescription;
 

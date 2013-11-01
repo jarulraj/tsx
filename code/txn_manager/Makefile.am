@@ -18,7 +18,7 @@
 
 MAINTAINERCLEANFILES = Makefile.in
 
-INCLUDES	= -I$(top_builddir)/hash_table 
+INCLUDES	= -I$(top_builddir)/hashtable 
 
 noinst_HEADERS	= TxnManagers.h
 
