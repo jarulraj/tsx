@@ -30,13 +30,12 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([1.9 foreign])
 
 AC_PROG_CC
-AC_PROG_RANLIB
 
 AC_PROG_CXX
 AX_CXX_COMPILE_STDCXX_11([ext])
 AC_LANG_PUSH([C++])
 
-AM_CONDITIONAL(DEBUG, test x"$debug" = x"true")
+LT_INIT([disable-static])
 
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
@@ -47,7 +46,7 @@ AC_TYPE_PID_T
 AC_TYPE_SIZE_T
 AC_C_VOLATILE
 
-AC_CHECK_FUNCS([bzero memset], [break])
+AC_CHECK_FUNCS([memcpy memset], [break])
 AC_CHECK_FUNCS([calloc strchr strrchr])
 AC_REPLACE_FUNCS([basename strspn strcspn strerror strsignal waitpid])
 

@@ -1,18 +1,27 @@
-Setup
------
+========================================================================
+Transactional Memory + Concurrency Control in Key-Value Store
+========================================================================
+Evaluation of HTM support for concurrency control in key-value stores.
 
-(A) Use bootstrap : 
+Setup
+========================================================================
+
+(0) Install autoconf and libtool
+On Ubuntu : sudo apt-get install autoconf libtool 
+
+(1) Bootstrap, configure and build
 ./bootstrap
 
-(B) Configure :
 ./configure 
-To enable DEBUG preprocessor flag :
+To enable DEBUG mode :
 ./configure CXXFLAGS="-DDEBUG"
 
-(C) Finally, make :
 make
 
-(D) Test :
-./hash_table/test
+(2) Test
 
+Test framework :
+./tester/main
+Test hashtable :
+./hashtable/test
 
