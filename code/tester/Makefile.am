@@ -25,6 +25,7 @@ noinst_HEADERS	=
 
 bin_PROGRAMS	= main
 
-main_SOURCES	= main.cpp 
+main_SOURCES	= main.cpp
+main_LDFLAGS    = -pthread 
+main_CXXFLAGS   = -pthread 
 main_LDADD	    = -lrt $(top_builddir)/hashtable/libhashtable.la
-

@@ -16,7 +16,7 @@ double default_max_load_factor = 0.05 ;
 // HashTable functions
 //-----------------------------------
  
-void HashTable::InitHashTable(ht_flags flags, double max_load_factor){
+HashTable::HashTable(ht_flags flags, double max_load_factor) {
     array_size = HT_INITIAL_SIZE;
     array = (HashEntry**) malloc(array_size * sizeof(*(array)));
 
@@ -34,16 +34,6 @@ void HashTable::InitHashTable(ht_flags flags, double max_load_factor){
     for(i = 0; i < array_size; i++){
         array[i] = NULL;
     }
-}
-
-HashTable::HashTable()
-{
-    InitHashTable((ht_flags)HT_NONE, default_max_load_factor);
-}
-
-HashTable::HashTable(ht_flags flags, double max_load_factor)
-{
-    InitHashTable((ht_flags)flags, max_load_factor);
 }
 
 void HashTable::Destroy()

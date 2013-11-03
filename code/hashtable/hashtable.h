@@ -63,11 +63,7 @@ class HashTable {
 
     public:
         
-        void InitHashTable(ht_flags flags, double max_load_factor);
-        
-        HashTable();
-
-        HashTable(ht_flags flags, double max_load_factor);
+        HashTable(ht_flags flags = (ht_flags)HT_NONE, double max_load_factor = 0.05);
 
         void Destroy();
 
