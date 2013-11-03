@@ -25,7 +25,7 @@ inline void GenRandomString(string *result) {
 
 // It probably doesn't really matter how long the value strings are...
 constexpr int VALUE_LENGTH = 10;
-constexpr int MAX_KEY = 9;
+constexpr int NUM_KEYS = 9;
 
 // This thread performs a large number of single-operation transactions. It
 // cycles through all possible keys, with each transaction writing to the next
@@ -85,7 +85,8 @@ void RunTestReaderThread(TxnManager *manager, uint64_t max_key, int num_reads,
             const string &next_result = *result_iter;
             if (result != next_result) {
                 cerr << "ERROR: all reads should have returned '" << result
-                        << "'; got '" << next_result << "' instead";
+                        << "'; got '" << next_result << "' instead" << endl;
+                break;
             }
         }
 
@@ -183,21 +184,21 @@ int main(int argc, const char* argv[]) {
     }
 
     // Make sure all the keys we'll be using are there so GETs don't fail
-    string empty = "";
-    for (uint64_t i = 0; i < MAX_KEY; ++i) {
-        table.Insert((void*)&i, sizeof(i), (void*)empty.c_str(), sizeof(char));
+    string initial = "0";
+    for (uint64_t i = 0; i < NUM_KEYS; ++i) {
+        table.Insert((void*)&i, sizeof(i), (void*)initial.c_str(), 2 * sizeof(char));
     }
 
     cout << "Keys inserted: " << table.GetSize() << endl;
 
     vector<thread> threads;
-    threads.push_back(thread(RunTestWriterThread, manager, MAX_KEY, 10));
+    threads.push_back(thread(RunTestWriterThread, manager, NUM_KEYS, 10));
     // Each transaction reads twice as many times as there are keys. Since the
     // writer thread is cycling through keys one per transaction, it's pretty
     // likely that it'll write to the value that's being read during the time of
     // the transaction, so we should notice non-repeatable reads if concurrency
     // control is failing.
-    threads.push_back(thread(RunTestReaderThread, manager, MAX_KEY, 10 * MAX_KEY, 10));
+    threads.push_back(thread(RunTestReaderThread, manager, NUM_KEYS, 10 * NUM_KEYS, 10));
     /*
     for (int i = 0; i < num_threads; ++i) {
         threads.push_back(

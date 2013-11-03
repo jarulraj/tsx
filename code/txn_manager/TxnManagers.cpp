@@ -17,10 +17,13 @@ bool TxnManager::ExecuteTxnOps(const vector<OpDescription> &operations,
         if (op.type == INSERT) {
             table_->Insert((void*)&op.key, sizeof(op.key), (void*)op.value.c_str(), (op.value.length()+1) * sizeof(char));
         } else if (op.type == GET) {
-            string result;
-            //if (!table_->Get(op.key, &result)) {
-            //    return false;
-            //}
+            size_t result_size;
+            void *result_ptr = table_->Get((void*)&op.key, sizeof(op.key), &result_size);
+            if (result_ptr == NULL) {
+                return false;
+            }
+            string result = (char*)result_ptr;
+
             if (get_results != NULL) {
                 get_results->push_back(result);
             }
