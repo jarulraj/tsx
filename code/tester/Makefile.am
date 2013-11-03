@@ -18,7 +18,7 @@
 
 MAINTAINERCLEANFILES = Makefile.in
 
-INCLUDES	= -I$(top_builddir)/hashtable -I$(top_builddir)/txn_manager
+INCLUDES	= -I$(top_builddir)
 
 
 noinst_HEADERS	= 
@@ -26,6 +26,5 @@ noinst_HEADERS	=
 bin_PROGRAMS	= main
 
 main_SOURCES	= main.cpp
-main_LDFLAGS    = -pthread 
 main_CXXFLAGS   = -pthread 
-main_LDADD	    = -lrt $(top_builddir)/hashtable/libhashtable.la
+main_LDADD	    = -lrt $(top_builddir)/hashtable/libhashtable.la $(top_builddir)/txn_manager/libtxn_manager.a

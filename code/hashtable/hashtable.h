@@ -64,6 +64,7 @@ class HashTable {
     public:
         
         HashTable(ht_flags flags = (ht_flags)HT_NONE, double max_load_factor = 0.05);
+        ~HashTable() { Destroy(); }
 
         void Destroy();
 

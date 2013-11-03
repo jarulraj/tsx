@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "hashtable.h"
+#include "hashtable/hashtable.h"
 
 using namespace std;
 

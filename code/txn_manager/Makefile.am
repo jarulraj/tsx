@@ -18,7 +18,7 @@
 
 MAINTAINERCLEANFILES = Makefile.in
 
-INCLUDES	= -I$(top_builddir)/hashtable 
+INCLUDES	= -I$(top_builddir) 
 
 noinst_LIBRARIES = libtxn_manager.a
 

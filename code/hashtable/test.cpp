@@ -138,7 +138,6 @@ int main(int argc, char *argv[])
         ht->Remove(&(many_keys[i]), sizeof(many_keys[i]));
     }
     test(ht->GetSize() == 0, "%d keys remaining", ht->GetSize());
-    ht->Destroy();
 
     free(many_keys);
     free(many_values);

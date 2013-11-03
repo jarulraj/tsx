@@ -2,12 +2,15 @@
 #include <ctime>
 #include <iostream>
 #include <random>
+#include <mutex>
 #include <thread>
 
-#include "hashtable.h"
-#include "TxnManagers.h"
+#include "hashtable/hashtable.h"
+#include "txn_manager/TxnManagers.h"
 
 using namespace std;
+
+std::mutex global_cout_mutex;
 
 // Replaces every character in the provided string with a random alphanumeric
 // character.
@@ -44,7 +47,9 @@ void RunTestWriterThread(TxnManager *manager, uint64_t max_key,
         ++txn_counter;
     } while (time(NULL) <= end_time);
 
+    global_cout_mutex.lock();
     cout << "Write transactions: " << txn_counter << endl;
+    global_cout_mutex.unlock();
 }
 
 // This thread performs a series of transactions in which the same key is read
@@ -53,7 +58,7 @@ void RunTestWriterThread(TxnManager *manager, uint64_t max_key,
 void RunTestReaderThread(TxnManager *manager, uint64_t max_key, int num_reads,
         int seconds_to_run) {
     time_t end_time = time(NULL) + seconds_to_run;
-    vector<OpDescription> ops(max_key);
+    vector<OpDescription> ops(num_reads);
 
     if (num_reads <= 0) {
         return;
@@ -68,7 +73,10 @@ void RunTestReaderThread(TxnManager *manager, uint64_t max_key, int num_reads,
             ops[i].type = GET;
             ops[i].key = key;
         }
-        manager->RunTxn(ops, &get_results);
+        if (!manager->RunTxn(ops, &get_results)) {
+            cerr << "ERROR: transaction failed.";
+            return;
+        }
 
         // We know there must be at least one result, because num_reads > 0.
         auto result_iter = get_results.begin();
@@ -82,9 +90,13 @@ void RunTestReaderThread(TxnManager *manager, uint64_t max_key, int num_reads,
         }
 
         get_results.clear();  // Doesn't actually change allocation
+        key = (key + 1) % max_key;
+        ++txn_counter;
     } while (time(NULL) <= end_time);
 
-    cout << "Read transactions: " << txn_counter << endl;
+    global_cout_mutex.lock();
+    cout << "Read transactions:  " << txn_counter << endl;
+    global_cout_mutex.unlock();
 }
 
 void RunWorkloadThread(TxnManager *manager, int ops_per_txn, int txn_period_ms,
@@ -125,7 +137,10 @@ void RunWorkloadThread(TxnManager *manager, int ops_per_txn, int txn_period_ms,
             }
         }
 
-        manager->RunTxn(txn_ops, NULL);
+        if (!manager->RunTxn(txn_ops, NULL)) {
+            cerr << "ERROR: transaction failed.";
+            return;
+        }
     } while (time(NULL) <= end_time);
 }
 
@@ -155,12 +170,11 @@ int main(int argc, const char* argv[]) {
 
     // Initialize hashtable
     HashTable table(static_cast<ht_flags>(HT_KEY_CONST | HT_VALUE_CONST), 0.05);
-    
     TxnManager *manager;
     if (manager_type == HTM_TYPE) {
         //manager = new HTMTxnManager(&table);
     } else if(manager_type == LOCK_TABLE_TYPE) {
-        //manager = new LockTableTxnManager(&table);
+        manager = new LockTableTxnManager(&table);
     } else if(manager_type == SPIN_LOCK_TYPE) {
         // TODO: Add spin lock manager
     } else {
@@ -171,7 +185,7 @@ int main(int argc, const char* argv[]) {
     // Make sure all the keys we'll be using are there so GETs don't fail
     string empty = "";
     for (uint64_t i = 0; i < MAX_KEY; ++i) {
-        table.Insert((void*)&i, sizeof(i), (void*)empty.c_str(), sizeof(empty.c_str()));
+        table.Insert((void*)&i, sizeof(i), (void*)empty.c_str(), sizeof(char));
     }
 
     cout << "Keys inserted: " << table.GetSize() << endl;
@@ -183,7 +197,7 @@ int main(int argc, const char* argv[]) {
     // likely that it'll write to the value that's being read during the time of
     // the transaction, so we should notice non-repeatable reads if concurrency
     // control is failing.
-    threads.push_back(thread(RunTestReaderThread, manager, MAX_KEY, 2 * MAX_KEY, 10));
+    threads.push_back(thread(RunTestReaderThread, manager, MAX_KEY, 10 * MAX_KEY, 10));
     /*
     for (int i = 0; i < num_threads; ++i) {
         threads.push_back(
@@ -192,11 +206,12 @@ int main(int argc, const char* argv[]) {
     }
     */
 
-    // TODO: Is this necessary? If main() exits and threads are still running,
-    // does the program keep running?
     for (thread &t : threads) {
         t.join();
     }
+
+    // TODO: Why the heck is this necessary???
+    std::this_thread::sleep_for(std::chrono::seconds(11));
 
     return 0;
 }
