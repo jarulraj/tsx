@@ -21,8 +21,71 @@ inline void GenRandomString(string *result) {
 }
 
 // It probably doesn't really matter how long the value strings are...
-const int VALUE_LENGTH = 10;
-const int MAX_KEY = 10000;
+constexpr int VALUE_LENGTH = 10;
+constexpr int MAX_KEY = 9;
+
+// This thread performs a large number of single-operation transactions. It
+// cycles through all possible keys, with each transaction writing to the next
+// key.
+void RunTestWriterThread(TxnManager *manager, uint64_t max_key,
+        int seconds_to_run) {
+    time_t end_time = time(NULL) + seconds_to_run;
+    vector<OpDescription> ops(1);
+    ops[0].value.resize(VALUE_LENGTH);
+
+    uint64_t key = 0;
+    int txn_counter = 0;
+    do {
+        ops[0].type = INSERT;
+        ops[0].key = key;
+        GenRandomString(&ops[0].value);
+        manager->RunTxn(ops, NULL);
+        key = (key + 1) % max_key;
+        ++txn_counter;
+    } while (time(NULL) <= end_time);
+
+    cout << "Write transactions: " << txn_counter << endl;
+}
+
+// This thread performs a series of transactions in which the same key is read
+// num_reads times. It complains if the reads are not repeatable. Like
+// RunTestWriterThread, it cycles through all possible keys.
+void RunTestReaderThread(TxnManager *manager, uint64_t max_key, int num_reads,
+        int seconds_to_run) {
+    time_t end_time = time(NULL) + seconds_to_run;
+    vector<OpDescription> ops(max_key);
+
+    if (num_reads <= 0) {
+        return;
+    }
+
+    vector<string> get_results;
+    get_results.reserve(num_reads);
+    uint64_t key = 0;
+    int txn_counter = 0;
+    do {
+        for (int i = 0; i < num_reads; ++i) {
+            ops[i].type = GET;
+            ops[i].key = key;
+        }
+        manager->RunTxn(ops, &get_results);
+
+        // We know there must be at least one result, because num_reads > 0.
+        auto result_iter = get_results.begin();
+        const string &result = *result_iter;
+        for (; result_iter != get_results.end(); ++result_iter) {
+            const string &next_result = *result_iter;
+            if (result != next_result) {
+                cerr << "ERROR: all reads should have returned '" << result
+                        << "'; got '" << next_result << "' instead";
+            }
+        }
+
+        get_results.clear();  // Doesn't actually change allocation
+    } while (time(NULL) <= end_time);
+
+    cout << "Read transactions: " << txn_counter << endl;
+}
 
 void RunWorkloadThread(TxnManager *manager, int ops_per_txn, int txn_period_ms,
         int key_max, int seconds_to_run, double p_insert, double p_get,
@@ -62,14 +125,16 @@ void RunWorkloadThread(TxnManager *manager, int ops_per_txn, int txn_period_ms,
             }
         }
 
-        manager->RunTxn(txn_ops);
+        manager->RunTxn(txn_ops, NULL);
     } while (time(NULL) <= end_time);
 }
 
-const char *INVALID_MSG =
-            "Invalid arguments. Usage: htm-test [htm | pess] <num_threads> \n";
 const char *HTM_TYPE = "htm";
-const char *PESSIMISTIC_TYPE = "pess";
+const char *LOCK_TABLE_TYPE = "locktbl";
+const char *SPIN_LOCK_TYPE = "spinlock";
+const string INVALID_MSG = string("Invalid arguments. Usage: htm-test [")
+        + HTM_TYPE + " | " + LOCK_TABLE_TYPE + " | " + SPIN_LOCK_TYPE
+        + "] <num_threads> \n";
 
 int main(int argc, const char* argv[]) {
     if (argc != 3) {
@@ -87,36 +152,45 @@ int main(int argc, const char* argv[]) {
     int num_threads = atoi(num_threads_str.c_str());
 
     string manager_type = argv[1];
-    TxnManager *manager;
 
-    // Initializae hashtable
-    HashTable* table = new HashTable((ht_flags)(HT_KEY_CONST | HT_VALUE_CONST), 0.05);
-
-    std::string empty = "";
-    // Make sure all the keys we'll be using are there so GETs don't fail
-    for (uint64_t i = 0; i <= MAX_KEY; ++i) {
-        table->Insert((void*)&i, sizeof(i), (void*)empty.c_str(), sizeof(empty.c_str()));
-    }
-
-    std::cout<<"Keys inserted :: "<< table->GetSize()<<endl;
+    // Initialize hashtable
+    HashTable table(static_cast<ht_flags>(HT_KEY_CONST | HT_VALUE_CONST), 0.05);
     
+    TxnManager *manager;
     if (manager_type == HTM_TYPE) {
-        // TODO : Add HTM Manager
         //manager = new HTMTxnManager(&table);
-    } else if(manager_type == PESSIMISTIC_TYPE) {
-        // TODO : ADD PCC Manager
-        //manager = new PessimisticTxnManager(&table);
+    } else if(manager_type == LOCK_TABLE_TYPE) {
+        //manager = new LockTableTxnManager(&table);
+    } else if(manager_type == SPIN_LOCK_TYPE) {
+        // TODO: Add spin lock manager
     } else {
         cerr << INVALID_MSG;
         exit(1);
     }
 
+    // Make sure all the keys we'll be using are there so GETs don't fail
+    string empty = "";
+    for (uint64_t i = 0; i < MAX_KEY; ++i) {
+        table.Insert((void*)&i, sizeof(i), (void*)empty.c_str(), sizeof(empty.c_str()));
+    }
+
+    cout << "Keys inserted: " << table.GetSize() << endl;
+
     vector<thread> threads;
+    threads.push_back(thread(RunTestWriterThread, manager, MAX_KEY, 10));
+    // Each transaction reads twice as many times as there are keys. Since the
+    // writer thread is cycling through keys one per transaction, it's pretty
+    // likely that it'll write to the value that's being read during the time of
+    // the transaction, so we should notice non-repeatable reads if concurrency
+    // control is failing.
+    threads.push_back(thread(RunTestReaderThread, manager, MAX_KEY, 2 * MAX_KEY, 10));
+    /*
     for (int i = 0; i < num_threads; ++i) {
         threads.push_back(
                 thread(RunWorkloadThread, manager, 10, 1, MAX_KEY, 10, 1 / 3.0,
                         1 / 3.0, 1 / 3.0));
     }
+    */
 
     // TODO: Is this necessary? If main() exits and threads are still running,
     // does the program keep running?

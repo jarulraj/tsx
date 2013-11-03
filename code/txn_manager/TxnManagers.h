@@ -33,13 +33,16 @@ public:
 
     // Does whatever transaction initialization is needed, calls ExecuteTxnOps
     // to actually perform the operations, then does any necessary transaction
-    // finalization/cleanup.
-    virtual bool RunTxn(const std::vector<OpDescription> &operations) = 0;
+    // finalization/cleanup.  If get_results is non-null, it contains the
+    // results of all GET operations when the function returns.
+    virtual bool RunTxn(const std::vector<OpDescription> &operations,
+            std::vector<string> *get_results) = 0;
 
 protected:
     // Returns false iff the operations were semantically ill-formed (for now,
-    // this just means there were GETs on non-existent keys).
-    virtual bool ExecuteTxnOps(const std::vector<OpDescription> &operations);
+    // this just means there were GETs or DELETEs on non-existent keys).
+    virtual bool ExecuteTxnOps(const std::vector<OpDescription> &operations,
+            std::vector<string> *get_results);
 
 private:
     HashTable *table_;
@@ -50,7 +53,8 @@ class LockTableTxnManager : public TxnManager {
 public:
     LockTableTxnManager(HashTable *table) : TxnManager(table) {}
     // TODO: Implement me
-    virtual bool RunTxn(const std::vector<OpDescription> &operations);
+    virtual bool RunTxn(const std::vector<OpDescription> &operations,
+            std::vector<string> *get_results);
 
 private:
     unordered_map<uint64_t, mutex*> lockTable;
@@ -63,7 +67,8 @@ class HTMTxnManager : public TxnManager {
 public:
     HTMTxnManager(HashTable *table) : TxnManager(table) {}
     // TODO: Implement me
-    virtual bool RunTxn(const std::vector<OpDescription> &operations);
+    virtual bool RunTxn(const std::vector<OpDescription> &operations,
+            std::vector<string> *get_results);
 };
 
 #endif /* TXNMANAGERS_H_ */
