@@ -46,7 +46,12 @@ void RunTestWriterThread(TxnManager *manager, uint64_t max_key,
     do {
         ops[0].type = INSERT;
         ops[0].key = key;
-        GenRandomString(&ops[0].value);
+        // NOTE: THIS IS A TERRIBLE HACK. This is only safe because we resized
+        // this buffer above. The only reason to tolerate this sort of code is
+        // that it allows reusing the buffer without extra reallocations or
+        // copies.
+        snprintf(const_cast<char*>(ops[0].value.c_str()), VALUE_LENGTH, "%d",
+                txn_counter);
         manager->RunTxn(ops, NULL);
         key = (key + 1) % max_key;
         ++txn_counter;
