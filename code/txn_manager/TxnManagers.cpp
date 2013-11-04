@@ -16,15 +16,18 @@ bool TxnManager::ExecuteTxnOps(const vector<OpDescription> &operations,
     for (const OpDescription &op : operations) {
         if (op.type == INSERT) {
             table_->Insert(op.key, op.value);
-        } else if (op.type == GET) {
+        } 
+        else if (op.type == GET) {
             string result;
             if (!table_->Get(op.key, &result)) {
                 return false;
             }
+      
             if (get_results != NULL) {
                 get_results->push_back(result);
             }
-        } else { // op.type == DELETE
+        } 
+        else { // op.type == DELETE
             table_->Delete(op.key);
         }
     }
@@ -81,12 +84,12 @@ bool SpinLockTxnManager::RunTxn(const std::vector<OpDescription> &operations,
         tableMutex.lock();
         if (lockTable.count(key) == 0) {
             atomic_flag *a = new atomic_flag();
-	    a->test_and_set(memory_order_acquire);
+            a->test_and_set(memory_order_acquire);
             lockTable[key] = a;
             tableMutex.unlock();
         } else {
             tableMutex.unlock();
-	    while (lockTable[key]->test_and_set(memory_order_acquire));
+            while (lockTable[key]->test_and_set(memory_order_acquire));
         }
     }
 

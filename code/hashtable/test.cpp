@@ -146,10 +146,13 @@ int main(int argc, char *argv[])
     free(many_keys);
     free(many_values);
 
-    // SANITY CHECK
+    // SANITY CHECK SIMPLE API
 
     ht->Clear();
     ht->display();
+    
+    // INSERT
+    cout<<"TEST : INSERT" <<endl;
     
     std::string tvalue = "test";
     for (int i = 0; i < 9; ++i) {
@@ -159,7 +162,34 @@ int main(int argc, char *argv[])
     cout << "Keys inserted: " << ht->GetSize() << endl;
     ht->display();
 
-    return report_results();
+    // GET
+
+    cout<<"TEST : GET" <<endl;
+    
+    std::string result ;
+    for (int i = 0; i < 11; ++i) {
+        if(!ht->Get(i,&result))
+            cout << "NOT Found : "<<i << endl;
+        else
+            cout << "Found     : "<<i << " "<<result<<endl;
+    }
+
+    // DELETE
+ 
+    cout<<"TEST : DELETE" <<endl;
+
+    ht->Delete(0);
+    ht->Delete(5);
+
+    for (int i = 0; i < 11; ++i) {
+        if(!ht->Get(i,&result))
+            cout << "NOT Found : "<<i << endl;
+        else
+            cout << "Found     : "<<i << " "<<result<<endl;
+    }
+ 
+
+    return 0;
 }
 
 
