@@ -105,7 +105,7 @@ void HashTable::InsertEntry(HashEntry *entry){
     {
         // if the keys are identical, throw away the old entry
         // and stick the new one into the table
-        entry->SetValue(flags, tmp->value, tmp->value_size);
+        tmp->SetValue(flags, entry->value, entry->value_size);
     }
     else
     {
