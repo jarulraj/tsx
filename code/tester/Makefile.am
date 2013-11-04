@@ -20,12 +20,12 @@ MAINTAINERCLEANFILES = Makefile.in
 
 INCLUDES  = -I$(top_builddir)/hash_table -I$(top_builddir)/txn_manager
 
-noinst_HEADERS	= 
+noinst_HEADERS	=
 
 bin_PROGRAMS	= main
 
 main_SOURCES	= $(top_builddir)/hashtable/murmur.cpp $(top_builddir)/hashtable/hashtable.cpp \
 				  $(top_builddir)/txn_manager/TxnManagers.cpp \
 				  main.cpp
-main_CXXFLAGS   = -pthread 
-main_LDADD	    = -lrt  
+main_CXXFLAGS   = -pthread
+main_LDADD	    = -lrt

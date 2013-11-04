@@ -23,9 +23,14 @@ inline void GenRandomString(string *result) {
     }
 }
 
+// Stupid dummy function to make threading library link properly
+void pause_thread(int n) {
+  std::this_thread::sleep_for(std::chrono::seconds(n));
+}
+
 // It probably doesn't really matter how long the value strings are...
 constexpr int VALUE_LENGTH = 10;
-constexpr int NUM_KEYS = 9;
+constexpr int NUM_KEYS = 10;
 
 // This thread performs a large number of single-operation transactions. It
 // cycles through all possible keys, with each transaction writing to the next
@@ -212,9 +217,6 @@ int main(int argc, const char* argv[]) {
     for (thread &t : threads) {
         t.join();
     }
-
-    // TODO: Why the heck is this necessary???
-    std::this_thread::sleep_for(std::chrono::seconds(11));
 
     return 0;
 }
