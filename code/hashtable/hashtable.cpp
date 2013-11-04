@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstring>
 #include <string>
+#include <iostream>
 
 using namespace std;
  
@@ -64,7 +65,7 @@ void HashTable::Destroy()
     array = NULL;
 }
 
-void HashTable::Insert(void *key, size_t key_size, void *value, size_t value_size)
+void HashTable::HT_Insert(void *key, size_t key_size, void *value, size_t value_size)
 {
     // Use HT flags
     HashEntry* entry = new HashEntry(this->flags, key, key_size, value, value_size);
@@ -124,7 +125,7 @@ void HashTable::InsertEntry(HashEntry *entry){
     }
 }
 
-void* HashTable::Get(void *key, size_t key_size, size_t *value_size)
+void* HashTable::HT_Get(void *key, size_t key_size, size_t *value_size)
 {
     unsigned int index = GetIndex(key, key_size);
     HashEntry *entry = array[index];
@@ -152,7 +153,7 @@ void* HashTable::Get(void *key, size_t key_size, size_t *value_size)
     return NULL;
 }
 
-void HashTable::Remove(void *key, size_t key_size)
+void HashTable::HT_Remove(void *key, size_t key_size)
 {
     unsigned int index = GetIndex(key, key_size);
     HashEntry *entry = array[index];
@@ -207,6 +208,101 @@ bool HashTable::HasKey(void *key, size_t key_size)
     }
 
     return false;
+}
+
+/** Wrappers **/
+void HashTable::Insert(uint64_t key, const std::string &value){
+    char* HT_key;
+    char* HT_value;
+
+    HT_key = new char[21]; // Max size for uint64_t
+    sprintf(HT_key, "%ld", key);
+
+    HT_value = new char[value.length() + 1];
+    strcpy(HT_value,value.c_str());
+
+    HT_Insert(HT_key, strlen(HT_key), HT_value, strlen(HT_value));
+
+    //free(HT_value);
+}
+
+void HashTable::Delete(uint64_t key){
+    char* HT_key;
+    
+    HT_key = new char[21]; 
+    sprintf(HT_key, "%ld", key);
+    
+    HT_Remove(HT_key, strlen(HT_key));
+}
+
+const bool HashTable::Get(uint64_t key, std::string *result){
+    char* HT_key;
+    char* HT_value;
+    size_t HT_value_size;
+
+    HT_key = new char[21]; 
+    sprintf(HT_key, "%ld", key);
+    
+    if(!HasKey(HT_key,strlen(HT_key))){
+        std::string HT_value_string("NULL");
+        *result = HT_value_string;
+        return false;
+    }
+    else{
+        HT_value = (char*) HT_Get(HT_key, strlen(HT_key), &HT_value_size);
+        std::string HT_value_string(HT_value, HT_value + HT_value_size);
+        *result = HT_value_string;
+        return true;
+    }
+}
+
+void HashTable::display(){
+    if(this->key_count == 0){
+        printf("Empty Map \n");
+        return;
+    }
+
+    void** ret;
+    unsigned int itr = 0;
+
+    // array of pointers to keys
+    ret = (void**) malloc(this->key_count * sizeof(void *));
+    if(ret == NULL) {
+        debug("GetKeys failed to allocate memory\n");
+    }
+
+    unsigned int i;
+    HashEntry *tmp;
+
+    printf("---------------------------------\n");
+    printf("Num Buckets :: %d \n", array_size);
+    
+    // loop over all of the chains, walk the chains,
+    // add each entry to the array of keys
+    for(i = 0; i < array_size; i++)
+    {
+        tmp = array[i];
+
+        if(tmp != NULL)
+            printf("Bucket %d :: \n", i);
+
+        while(tmp != NULL)
+        {
+            ret[itr]=tmp->key;
+           
+            printf("[ %s : %s ]\n", (char*)tmp->key, (char*)tmp->value);
+            //printf("[ %d : %d ]\n", *((int*)tmp->key), *((int*)tmp->value)); # FOR <int*, int*> Hashtables
+            
+            itr += 1;
+            tmp = tmp->next;
+            // sanity check, should never actually happen
+            if(itr >= this->key_count) {
+                debug("GetKeys : too many keys, expected %d, got %d\n", this->key_count, itr);
+            }
+        }
+
+    }
+    printf("---------------------------------\n");
 }
 
 unsigned int HashTable::GetSize()
@@ -266,7 +362,7 @@ void HashTable::Clear()
     collisions = new_table->collisions;
     flags = new_table->flags;
     max_load_factor = new_table->max_load_factor;
-    
+
 }
 
 unsigned int HashTable::GetIndex(void *key, size_t key_size)
@@ -319,7 +415,7 @@ void HashTable::Resize(unsigned int new_size)
     collisions = new_table->collisions;
     flags = new_table->flags;
     max_load_factor = new_table->max_load_factor;
-   
+
 }
 
 void HashTable::SetSeed(uint32_t seed){
@@ -360,7 +456,7 @@ void HashEntry::InitHashEntry(int flags, void *key, size_t key_size, void *value
     this->next = NULL;
     this->flags = flags; 
 }
- 
+
 HashEntry::HashEntry()
 {
     // TODO : Convention
@@ -369,7 +465,7 @@ HashEntry::HashEntry()
 
     InitHashEntry(ht_flags(HT_NONE), (void*) &key , sizeof(key), (void*) &value, sizeof(value));
 }
- 
+
 HashEntry::HashEntry(int flags, void *key, size_t key_size, void *value, size_t value_size)
 {
     InitHashEntry(flags, key, key_size, value, value_size);

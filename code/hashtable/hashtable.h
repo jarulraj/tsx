@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <string.h>
 #include <stdint.h>
+#include <string>
 
 using namespace std;
 
@@ -68,13 +69,23 @@ class HashTable {
 
         void Destroy();
 
-        void Insert(void *key, size_t key_size, void *value, size_t value_size);
+        /* Original interface */
+
+        void Insert(uint64_t key, const std::string &value);
+
+        void Delete(uint64_t key);
+
+        const bool Get(uint64_t key, std::string *result);
+
+        void display();
+
+        void HT_Insert(void *key, size_t key_size, void *value, size_t value_size);
 
         void InsertEntry(HashEntry *entry);
 
-        void* Get(void *key, size_t key_size, size_t *value_size);
+        void* HT_Get(void *key, size_t key_size, size_t *value_size);
 
-        void Remove(void *key, size_t key_size);
+        void HT_Remove(void *key, size_t key_size);
 
         bool HasKey(void *key, size_t key_size);
 

@@ -4,6 +4,7 @@
 
 #include <cstring>
 #include <cstdlib>
+#include <iostream>
 
 using namespace std;
 
@@ -15,13 +16,13 @@ int main(int argc, char *argv[])
     char *s2 = (char*)"teststring 2";
     char *s3 = (char*)"teststring 3";
 
-    ht->Insert(s1, strlen(s1)+1, s2, strlen(s2)+1);
+    ht->HT_Insert(s1, strlen(s1)+1, s2, strlen(s2)+1);
 
     int contains = ht->HasKey(s1, strlen(s1)+1);
     test(contains, "Checking for key \"%s\"", s1);
 
     size_t value_size;
-    char *got = (char*) ht->Get(s1, strlen(s1)+1, &value_size);
+    char *got = (char*) ht->HT_Get(s1, strlen(s1)+1, &value_size);
 
     fprintf(stderr, "Value size: %zu\n", value_size);
     fprintf(stderr, "Got: {\"%s\": \"%s\"}\n", s1, got);
@@ -31,7 +32,9 @@ int main(int argc, char *argv[])
             value_size, strlen(s2)+1);
 
     fprintf(stderr, "Replacing {\"%s\": \"%s\"} with {\"%s\": \"%s\"}\n", s1, s2, s1, s3);
-    ht->Insert(s1, strlen(s1)+1, s3, strlen(s3)+1);
+    ht->HT_Insert(s1, strlen(s1)+1, s3, strlen(s3)+1);
+
+    ht->display();
 
     unsigned int num_keys;
     void **keys;
@@ -42,7 +45,7 @@ int main(int argc, char *argv[])
     test(keys != NULL, "Keys is not null");
     if(keys)
       free(keys);
-    got = (char*) ht->Get(s1, strlen(s1)+1, &value_size);
+    got = (char*) ht->HT_Get(s1, strlen(s1)+1, &value_size);
 
     fprintf(stderr, "Value size: %zu\n", value_size);
     fprintf(stderr, "Got: {\"%s\": \"%s\"}\n", s1, got);
@@ -52,7 +55,7 @@ int main(int argc, char *argv[])
             value_size, strlen(s3)+1);
 
     fprintf(stderr, "Removing entry with key \"%s\"\n", s1);
-    ht->Remove(s1, strlen(s1)+1);
+    ht->HT_Remove(s1, strlen(s1)+1);
 
     contains = ht->HasKey(s1, strlen(s1)+1);
     test(!contains, "Checking for removal of key \"%s\"", s1);
@@ -83,7 +86,7 @@ int main(int argc, char *argv[])
 
     for(i = 0; i < key_count; i++)
     {
-        ht->Insert(&(many_keys[i]), sizeof(many_keys[i]), &(many_values[i]), sizeof(many_values[i]));
+        ht->HT_Insert(&(many_keys[i]), sizeof(many_keys[i]), &(many_values[i]), sizeof(many_values[i]));
     }
 
     t2 = snap_time();
@@ -99,7 +102,7 @@ int main(int argc, char *argv[])
             size_t value_size;
             int value;
 
-            value = *(int*)ht->Get(&(many_keys[i]), sizeof(many_keys[i]), &value_size);
+            value = *(int*)ht->HT_Get(&(many_keys[i]), sizeof(many_keys[i]), &value_size);
 
             if(value != many_values[i])
             {
@@ -127,21 +130,35 @@ int main(int argc, char *argv[])
 
     for(i = 0; i < key_count; i++)
     {
-        ht->Insert(&(many_keys[i]), sizeof(many_keys[i]), &(many_values[i]), sizeof(many_values[i]));
+        ht->HT_Insert(&(many_keys[i]), sizeof(many_keys[i]), &(many_values[i]), sizeof(many_values[i]));
     }
 
     t2 = snap_time();
 
     fprintf(stderr, "Inserting %d keys (on preallocated table) took %.2f seconds\n", key_count, get_elapsed(t1, t2));
+    
     for(i = 0; i < key_count; i++)
     {
-        ht->Remove(&(many_keys[i]), sizeof(many_keys[i]));
+        ht->HT_Remove(&(many_keys[i]), sizeof(many_keys[i]));
     }
     test(ht->GetSize() == 0, "%d keys remaining", ht->GetSize());
 
     free(many_keys);
     free(many_values);
+
+    // SANITY CHECK
+
+    ht->Clear();
+    ht->display();
     
+    std::string tvalue = "test";
+    for (int i = 0; i < 9; ++i) {
+        ht->Insert(i,tvalue);
+    }
+    
+    cout << "Keys inserted: " << ht->GetSize() << endl;
+    ht->display();
+
     return report_results();
 }
 

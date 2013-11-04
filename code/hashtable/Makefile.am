@@ -22,9 +22,6 @@ INCLUDES	= -I$(top_builddir)/hashtable
 
 bin_PROGRAMS = test
 
-lib_LTLIBRARIES = libhashtable.la
-libhashtable_la_SOURCES = murmur.cpp hashtable.cpp
-
-test_SOURCES = test.cpp
-test_LDADD	= -lrt libhashtable.la
+test_SOURCES = murmur.cpp hashtable.cpp test.cpp
+test_LDADD	= -lrt 
 

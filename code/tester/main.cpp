@@ -5,8 +5,8 @@
 #include <mutex>
 #include <thread>
 
-#include "hashtable/hashtable.h"
-#include "txn_manager/TxnManagers.h"
+#include "hashtable.h"
+#include "TxnManagers.h"
 
 using namespace std;
 
@@ -182,13 +182,15 @@ int main(int argc, const char* argv[]) {
         exit(1);
     }
 
+    table.display();
     // Make sure all the keys we'll be using are there so GETs don't fail
-    string empty = "";
+    std::string tvalue = "test";
     for (uint64_t i = 0; i < MAX_KEY; ++i) {
-        table.Insert((void*)&i, sizeof(i), (void*)empty.c_str(), sizeof(char));
+        table.Insert(i,tvalue);
     }
 
     cout << "Keys inserted: " << table.GetSize() << endl;
+    table.display();
 
     vector<thread> threads;
     threads.push_back(thread(RunTestWriterThread, manager, MAX_KEY, 10));
