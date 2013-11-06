@@ -1,4 +1,4 @@
-## Makefile.am -- Process this file with automake to produce Makefile.in
+# Makefile.am -- Process this file with automake to produce Makefile.in
 ## Copyright (C) 2000 Gary V. Vaughan
 ##
 ## This program is free software; you can redistribute it and/or modify
@@ -18,9 +18,8 @@
 
 MAINTAINERCLEANFILES = Makefile.in
 
-INCLUDES	= -I$(top_builddir) 
+INCLUDES	= -I$(top_builddir)  
 
 noinst_HEADERS  = TxnManager.h
 
-#txn_manager_LDADD	= 
-
+AM_LDFLAGS = $(AM_LDFLAGS) -fgnu-tm

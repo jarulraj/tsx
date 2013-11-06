@@ -31,4 +31,6 @@ main_SOURCES	= $(top_builddir)/hashtable/murmur.cpp $(top_builddir)/hashtable/ha
 				  $(top_builddir)/txn_manager/HTMTxnManager.cpp \
 				  main.cpp
 main_CXXFLAGS   = -pthread 
+
+main_LDFLAGS	= -fgnu-tm
 main_LDADD	    = -lrt

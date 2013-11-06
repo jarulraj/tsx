@@ -20,6 +20,8 @@ ACLOCAL_AMFLAGS		= -I m4
 
 EXTRA_DIST		= bootstrap
 
+AM_LDFLAGS = $(AM_LDFLAGS) -fgnu-tm
+
 SUBDIRS 		= hashtable txn_manager tester
 
 MAINTAINERCLEANFILES 	= Makefile.in aclocal.m4 configure \

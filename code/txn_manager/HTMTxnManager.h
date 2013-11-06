@@ -12,10 +12,7 @@ public:
     // TODO: Implement me
     virtual bool RunTxn(const std::vector<OpDescription> &operations,
             std::vector<string> *get_results);
-private:
-    unordered_map<uint64_t, atomic_flag*> lockTable;
-    // Prevents concurrent insertions to the lock table.
-    mutex tableMutex; 
+
 };
 
 

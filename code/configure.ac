@@ -20,19 +20,19 @@
 
 # @start 2
 
-AC_PREREQ([2.59])
+AC_PREREQ([2.64])
 
 AC_INIT([kvCC], [0.1], [xyz@cs.cmu.edu])
 AC_CONFIG_HEADERS([config.h:config-h.in])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_MACRO_DIR([m4])
 
-AM_INIT_AUTOMAKE([1.9 foreign])
+AM_INIT_AUTOMAKE([1.0 foreign])
 
 AC_PROG_CC
 
 AC_PROG_CXX
-AX_CXX_COMPILE_STDCXX_11([ext])
+AX_CXX_COMPILE_STDCXX_11([ext],[mandatory])
 AC_LANG_PUSH([C++])
 
 AC_PROG_RANLIB
