@@ -1,0 +1,23 @@
+\begin{thebibliography}{1}
+
+\bibitem{Herlihy93}
+Maurice Herlihy and J.~Eliot~B. Moss.
+\newblock Transactional memory: architectural support for lock-free data
+  structures.
+\newblock In {\em Proceedings of the 20th annual international symposium on
+  computer architecture}, ISCA '93, pages 289--300, New York, NY, USA, 1993.
+  ACM.
+
+\bibitem{tsx-intro}
+James Reinders.
+\newblock Transactional synchronization in {H}aswell.
+\newblock
+  \url{http://software.intel.com/en-us/blogs/2012/02/07/transactional-synchronization-in-haswell},
+  2013.
+
+\bibitem{tran2010}
+Khai~Q Tran, Spyros Blanas, and Jeffrey~F Naughton.
+\newblock On transactional memory, spinlocks, and database transactions.
+\newblock 2010.
+
+\end{thebibliography}
