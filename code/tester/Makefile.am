@@ -26,6 +26,8 @@ bin_PROGRAMS	= main
 
 main_SOURCES	= $(top_builddir)/hashtable/murmur.cpp $(top_builddir)/hashtable/hashtable.cpp \
 				  $(top_builddir)/txn_manager/TxnManagers.cpp \
+				  $(top_builddir)/txn_manager/LockTableTxnManager.cpp \
+				  $(top_builddir)/txn_manager/SpinLockTxnManager.cpp \
 				  main.cpp
-main_CXXFLAGS   = -pthread
+main_CXXFLAGS   = -pthread 
 main_LDADD	    = -lrt

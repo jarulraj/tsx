@@ -155,29 +155,39 @@ void RunWorkloadThread(TxnManager *manager, int ops_per_txn, int txn_period_ms,
     } while (time(NULL) <= end_time);
 }
 
-const char *HTM_TYPE = "htm";
-const char *LOCK_TABLE_TYPE = "locktbl";
-const char *SPIN_LOCK_TYPE = "spinlock";
-const string INVALID_MSG = string("Invalid arguments. Usage: htm-test [")
-        + HTM_TYPE + " | " + LOCK_TABLE_TYPE + " | " + SPIN_LOCK_TYPE
-        + "] <num_threads> \n";
 
-int main(int argc, const char* argv[]) {
-    if (argc != 3) {
-        cerr << INVALID_MSG;
-        exit(1);
-    }
-
-    string num_threads_str = argv[2];
-    for (const char c : num_threads_str) {
+const int HTM_TYPE = 0;
+const int LOCK_TABLE_TYPE = 1;
+const int SPIN_LOCK_TYPE = 2;
+const string INVALID_MSG = string("Invalid arguments. Usage: htm-test <manager_type>[ ")
+        + std::to_string(HTM_TYPE)        + " (htm) | " 
+        + std::to_string(LOCK_TABLE_TYPE) + " (locktbl) | " 
+        + std::to_string(SPIN_LOCK_TYPE)  + " (spinlock) ] " 
+        +" <num_threads> <num_seconds_to_run>\n";
+ 
+void checkArg(const char* arg){
+    string str = arg;
+    for (const char c : str) {
         if (!isdigit(c)) {
             cerr << INVALID_MSG;
             exit(1);
         }
     }
-    int num_threads = atoi(num_threads_str.c_str());
+}
 
-    string manager_type = argv[1];
+int main(int argc, const char* argv[]) {
+    if (argc != 4) {
+        cerr << INVALID_MSG;
+        exit(1);
+    }
+
+    checkArg(argv[1]);
+    checkArg(argv[2]);
+    checkArg(argv[3]);
+    
+    int manager_type = atoi(argv[1]);
+    int num_threads = atoi(argv[2]);
+    int num_seconds_to_run = atoi(argv[3]);
 
     // Initialize hashtable
     HashTable table(static_cast<ht_flags>(HT_KEY_CONST | HT_VALUE_CONST), 0.05);
@@ -187,7 +197,7 @@ int main(int argc, const char* argv[]) {
     } else if(manager_type == LOCK_TABLE_TYPE) {
         manager = new LockTableTxnManager(&table);
     } else if(manager_type == SPIN_LOCK_TYPE) {
-        // TODO: Add spin lock manager
+        manager = new SpinLockTxnManager(&table);
     } else {
         cerr << INVALID_MSG;
         exit(1);
@@ -204,13 +214,13 @@ int main(int argc, const char* argv[]) {
     table.display();
 
     vector<thread> threads;
-    threads.push_back(thread(RunTestWriterThread, manager, NUM_KEYS, 10));
-    // Each transaction reads twice as many times as there are keys. Since the
+    threads.push_back(thread(RunTestWriterThread, manager, NUM_KEYS, num_seconds_to_run));
+    // Each transaction reads keys multiple times. Since the
     // writer thread is cycling through keys one per transaction, it's pretty
     // likely that it'll write to the value that's being read during the time of
     // the transaction, so we should notice non-repeatable reads if concurrency
     // control is failing.
-    threads.push_back(thread(RunTestReaderThread, manager, NUM_KEYS, 10 * NUM_KEYS, 10));
+    threads.push_back(thread(RunTestReaderThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
     /*
     for (int i = 0; i < num_threads; ++i) {
         threads.push_back(

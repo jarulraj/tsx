@@ -264,6 +264,7 @@ void HashTable::display(){
 
     void** ret;
     unsigned int itr = 0;
+    bool flag;
 
     // array of pointers to keys
     ret = (void**) malloc(this->key_count * sizeof(void *));
@@ -282,15 +283,18 @@ void HashTable::display(){
     for(i = 0; i < array_size; i++)
     {
         tmp = array[i];
+        flag = false;
 
-        if(tmp != NULL)
-            printf("Bucket %d :: \n", i);
+        if(tmp != NULL){
+            flag = true;
+            printf("B %d :: ", i);
+        }
 
         while(tmp != NULL)
         {
             ret[itr]=tmp->key;
            
-            printf("[ %s : %s ]\n", (char*)tmp->key, (char*)tmp->value);
+            printf("[ %s : %s ]", (char*)tmp->key, (char*)tmp->value);
             //printf("[ %d : %d ]\n", *((int*)tmp->key), *((int*)tmp->value)); # FOR <int*, int*> Hashtables
             
             itr += 1;
@@ -299,6 +303,11 @@ void HashTable::display(){
             if(itr >= this->key_count) {
                 debug("GetKeys : too many keys, expected %d, got %d\n", this->key_count, itr);
             }
+        }
+
+        if(flag){
+            flag = false;
+            printf("\n");
         }
 
     }
