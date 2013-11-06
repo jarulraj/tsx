@@ -70,17 +70,71 @@ The required steps for executing this project are as follows:
 \item Collate/visualize data and write up report.
 \end{enumerate}
 
-% jdunietz: Unfortunately, the assignment specifically says "suggesting how it
-% can be partitioned among you".
-\subsubsection{Work Plan}
-One very tentative way of partitioning the work is as follows: All of us will
-work together on items 1 and 2. Two of us (jdunietz and jarulraj) will
-collaborate (via pair programming) to implement item 3. In parallel, twmarsha
-will implement the workload generator using an agreed-upon interface. jarulraj
-and twmarsha will each run preliminary versions of one experiment for item 5,
-and jdunietz will use their results to run the final experiments and
-collate/visualize the data. twmarsha will implement a lock manager, jarulraj
-will implement spin-locks, and jdunietz will modify the pessimistic protocols to
-work with dynamic read/write sets. All of us will work together to design and
-implement a modified HTM protocol for dynamic read/write sets.
+\subsection{Progress}
+As of this report's writing, we have made significant progress towards 
+achieving our 100\% goal. In particular, we have implemented the following
+pieces:
+\begin{itemize}
+\item \textbf{Key value store:} Implemented by Joy in C++, the key value store 
+uses a hash table as its underlying data structure, relying on the open source
+MurmurHash algorithm to hash keys. The kv store supports arbitrary keys and 
+values as well as convenience methods for 64-bit integer keys and string 
+values, which will be used by the testing framework. By implementing the hash 
+buckets as linked lists, the kv store is safe in the face of concurrent 
+insertions to the same bucket.
+\item \textbf{Pessimistic locking schemes:} Implemented by Thomas, we currently 
+support both a spin lock implementation, as described in 
+\Cref{sec:pessimistic}, and a simple version of a lock table, without 
+reader/writer locks or an explicit queue of waiting transactions, instead 
+relying on C++'s built-in mutex implementation.
+\item \textbf{Testing framework:} Implemented by Jesse, the testing framework 
+currently acts as a sanity check to ensure that our concurrency control schemes 
+are implemented correctly. It accomplishes this by spawning two threads, each 
+of which repeatedly runs one transaction - a transaction that writes a random 
+value to a given key, and a transaction that repeatedly reads the value of a 
+single key. The reader thread then checks that the value that it read did not 
+change between reads of the same transaction, ensuring that the reader and 
+writer transactions were not allowed to operate on the same key concurrently.
+\end{itemize}
+
+\subsection{Completion Timeline}
+Now that the fundamental pieces are in place in terms of the key value store, 
+testing framework, transaction manager, and interaction between them, we have 
+a few tasks left to complete before writing our final report.
+\begin{itemize}
+\item \textbf{HTM transaction manager:} Probably the most important remaining 
+piece of the project, the HTM transaction manager will be implemented by Joy. 
+We have already begun to look into the instructions necessary to make this 
+work, so implementing it should be fairly straight forward, and we anticipate 
+completing this by 11/16.
+\item \textbf{Testing framework:} The next most important thing will be to 
+flesh out the testing framework, providing support for varying the number of 
+threads, level of contention in the workload, and size of the transaction's 
+working sets. This will be implemented by Jesse, and should also be finished by 
+11/16.
+\item \textbf{Data gathering:} The final component necessary for us to reach 
+our 100\% goal is to run a large number of experiments using the testing 
+framework, record the data, and generate graphs as appropriate for the paper. 
+A more extensive discussion of this is included in \Cref{sec:eval}. This task 
+is assigned to Thomas, and should be completed by 11/23.
+\item \textbf{Refinement:} Once we have a baseline of results, we intend to 
+refine all of our concurrency schemes to achieve the best performance possible. 
+Some examples of refinements include implementing reader/writer locks in the 
+lock manager scheme and maintaining an explicit queue of waiting transactions 
+to ensure fairness. This will be an iterative process alongside the performance 
+testing, will be performed by all team members, and should be finished at the 
+same time as the data gathering, 11/23.
+\item \textbf{Stretch goal:} Once we have completed our 100\% goals, we will 
+move on to our stretch goals. If the results of our testing indicate that HTM 
+is significantly faster than the pessimistic schemes, we intend to implement 
+software based OCC to determine whether the speed up is the result of the use 
+of optimistic concurency control or the use of hardware based control. 
+Otherwise, we will explore the effects of dynamic read/write sets on the 
+performance of the different CC schemes. We will cut off work on the stretch 
+goals by 12/6 to ensure we have enough remaining time to complete the final 
+paper.
+\item \textbf{Final Paper:} Each member of the group will be responsible for 
+the sections of the paper that relate to the aspects of the project they 
+implemented. We intend to finish the paper 5 minutes before the deadline.
+\end{itemize}
 
