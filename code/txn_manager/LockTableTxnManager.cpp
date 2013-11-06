@@ -4,7 +4,8 @@
 #include <iostream>
 #include <set>
 
-#include "TxnManagers.h"
+#include "TxnManager.h"
+#include "LockTableTxnManager.h"
                     
 bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
         std::vector<string> *get_results) {

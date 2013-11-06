@@ -25,9 +25,10 @@ noinst_HEADERS	=
 bin_PROGRAMS	= main
 
 main_SOURCES	= $(top_builddir)/hashtable/murmur.cpp $(top_builddir)/hashtable/hashtable.cpp \
-				  $(top_builddir)/txn_manager/TxnManagers.cpp \
+				  $(top_builddir)/txn_manager/TxnManager.cpp \
 				  $(top_builddir)/txn_manager/LockTableTxnManager.cpp \
 				  $(top_builddir)/txn_manager/SpinLockTxnManager.cpp \
+				  $(top_builddir)/txn_manager/HTMTxnManager.cpp \
 				  main.cpp
 main_CXXFLAGS   = -pthread 
 main_LDADD	    = -lrt

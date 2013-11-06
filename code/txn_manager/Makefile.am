@@ -20,7 +20,7 @@ MAINTAINERCLEANFILES = Makefile.in
 
 INCLUDES	= -I$(top_builddir) 
 
-noinst_HEADERS  = TxnManagers.h
+noinst_HEADERS  = TxnManager.h
 
 #txn_manager_LDADD	= 
 

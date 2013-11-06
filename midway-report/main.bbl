@@ -12,8 +12,8 @@ Maurice Herlihy and J.~Eliot~B. Moss.
 James Reinders.
 \newblock Transactional synchronization in {H}aswell.
 \newblock
-  \url{http://software.intel.com/en-us/blogs/2012/02/07/transactional-synchronization-in-haswell},
-  2013.
+  \url{http://software.intel.com/en-us/blogs/2012/02/07/transactional-synchron%
+ization-in-haswell}, 2013.
 
 \bibitem{tran2010}
 Khai~Q Tran, Spyros Blanas, and Jeffrey~F Naughton.

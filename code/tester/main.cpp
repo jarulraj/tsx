@@ -6,7 +6,11 @@
 #include <thread>
 
 #include "hashtable.h"
-#include "TxnManagers.h"
+#include "TxnManager.h"
+
+#include "HTMTxnManager.h"
+#include "SpinLockTxnManager.h"
+#include "LockTableTxnManager.h"
 
 using namespace std;
 
@@ -193,7 +197,7 @@ int main(int argc, const char* argv[]) {
     HashTable table(static_cast<ht_flags>(HT_KEY_CONST | HT_VALUE_CONST), 0.05);
     TxnManager *manager;
     if (manager_type == HTM_TYPE) {
-        //manager = new HTMTxnManager(&table);
+        manager = new HTMTxnManager(&table);
     } else if(manager_type == LOCK_TABLE_TYPE) {
         manager = new LockTableTxnManager(&table);
     } else if(manager_type == SPIN_LOCK_TYPE) {

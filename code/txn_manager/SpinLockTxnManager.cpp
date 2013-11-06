@@ -4,7 +4,7 @@
 #include <iostream>
 #include <set>
 
-#include "TxnManagers.h"       
+#include "SpinLockTxnManager.h"       
 
 bool SpinLockTxnManager::RunTxn(const std::vector<OpDescription> &operations,
         std::vector<string> *get_results) {
