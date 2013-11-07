@@ -1,3 +1,6 @@
+#ifndef _MAIN_CPP_
+#define _MAIN_CPP_
+
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
@@ -239,3 +242,5 @@ int main(int argc, const char* argv[]) {
 
     return 0;
 }
+
+#endif /* _MAIN_CPP_ */
