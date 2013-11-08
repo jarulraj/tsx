@@ -1,6 +1,3 @@
-#ifndef _SPIN_LOCK_TXN_MANAGER_CPP_
-#define _SPIN_LOCK_TXN_MANAGER_CPP_
-
 #include <iostream>
 #include <set>
 
@@ -41,5 +38,3 @@ bool SpinLockTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 }
  
 
-
-#endif /* _SPIN_LOCK_TXN_MANAGER_CPP_ */

@@ -32,4 +32,8 @@ bool TxnManager::ExecuteTxnOps(const vector<OpDescription> &operations,
     return true;
 }
 
+void TxnManager::getStats(){
+    std:cout<<"Print Stats"<<std::endl;
+}
+
 #endif /* _TXN_MANAGER_CPP */

@@ -8,16 +8,17 @@ spinlock_t HLETxnManager::table_lock = { 0 } ;
 
 HLETxnManager::HLETxnManager(HashTable *table)
     : TxnManager(table) {
-               
-        int rtm = cpu_has_rtm();
+         
         int hle = cpu_has_hle();
-        printf("TSX HLE: %s\nTSX RTM: %s\n", hle ? "YES" : "NO", rtm ? "YES" : "NO");
 
-        if(rtm == 0){
-            cout<<"RTM not found on machine "<<endl;
+        if(hle == 0){
+            cout<<"HLE not found on machine "<<endl;
             exit(-1);
         }
-
+        else{
+            cout<<"HLE AVAILABLE" <<endl;
+        }
+ 
     }
 
 

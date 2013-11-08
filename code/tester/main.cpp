@@ -11,7 +11,8 @@
 #include "hashtable.h"
 #include "TxnManager.h"
 
-#include "HTMTxnManager.h"
+#include "RTMTxnManager.h"
+#include "HLETxnManager.h"
 #include "SpinLockTxnManager.h"
 #include "LockTableTxnManager.h"
 
@@ -163,11 +164,13 @@ void RunWorkloadThread(TxnManager *manager, int ops_per_txn, int txn_period_ms,
 }
 
 
-const int HTM_TYPE = 0;
-const int LOCK_TABLE_TYPE = 1;
-const int SPIN_LOCK_TYPE = 2;
+const int HLE_TYPE = 0;
+const int RTM_TYPE = 1;
+const int LOCK_TABLE_TYPE = 2;
+const int SPIN_LOCK_TYPE = 3;
 const string INVALID_MSG = string("Invalid arguments. Usage: htm-test <manager_type>[ ")
-        + std::to_string(HTM_TYPE)        + " (htm) | " 
+        + std::to_string(HLE_TYPE)        + " (hle) | " 
+        + std::to_string(RTM_TYPE)        + " (rtm) | " 
         + std::to_string(LOCK_TABLE_TYPE) + " (locktbl) | " 
         + std::to_string(SPIN_LOCK_TYPE)  + " (spinlock) ] " 
         +" <num_threads> <num_seconds_to_run>\n";
@@ -199,8 +202,10 @@ int main(int argc, const char* argv[]) {
     // Initialize hashtable
     HashTable table(static_cast<ht_flags>(HT_KEY_CONST | HT_VALUE_CONST), 0.05);
     TxnManager *manager;
-    if (manager_type == HTM_TYPE) {
-        manager = new HTMTxnManager(&table);
+    if (manager_type == HLE_TYPE) {
+        manager = new HLETxnManager(&table);
+    }else if (manager_type == RTM_TYPE) {
+        manager = new RTMTxnManager(&table);
     } else if(manager_type == LOCK_TABLE_TYPE) {
         manager = new LockTableTxnManager(&table);
     } else if(manager_type == SPIN_LOCK_TYPE) {
@@ -238,6 +243,10 @@ int main(int argc, const char* argv[]) {
 
     for (thread &t : threads) {
         t.join();
+    }
+
+    if(manager_type == HLE_TYPE){
+        manager->getStats();
     }
 
     return 0;

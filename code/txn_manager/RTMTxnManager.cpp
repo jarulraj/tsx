@@ -10,12 +10,13 @@ RTMTxnManager::RTMTxnManager(HashTable *table)
     : TxnManager(table) {
                
         int rtm = cpu_has_rtm();
-        int hle = cpu_has_hle();
-        printf("TSX HLE: %s\nTSX RTM: %s\n", hle ? "YES" : "NO", rtm ? "YES" : "NO");
 
         if(rtm == 0){
             cout<<"RTM not found on machine "<<endl;
             exit(-1);
+        }
+        else{
+            cout<<"RTM AVAILABLE" <<endl;
         }
 
     }
@@ -31,21 +32,21 @@ bool RTMTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 
     // Lock keys in order.
     for (uint64_t key : keys) {
-        hle_spinlock_acquire(&table_lock);
+        rtm_spinlock_acquire(&table_lock);
         
         if (lockTable.count(key) == 0) {
             spinlock_t key_lock;
             dyn_spinlock_init(&key_lock);
             
-            hle_spinlock_acquire(&key_lock);
+            rtm_spinlock_acquire(&key_lock);
 
             lockTable[key] = &key_lock;
 
-            hle_spinlock_release(&table_lock);
+            rtm_spinlock_release(&table_lock);
         } else {
-            hle_spinlock_release(&table_lock);
+            rtm_spinlock_release(&table_lock);
             
-            hle_spinlock_acquire(lockTable[key]);
+            rtm_spinlock_acquire(lockTable[key]);
         }
     }
 
@@ -55,7 +56,7 @@ bool RTMTxnManager::RunTxn(const std::vector<OpDescription> &operations,
     // Unlock all keys in reverse order.
     std::set<uint64_t>::reverse_iterator rit;
     for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
-        hle_spinlock_release(lockTable[*rit]);
+        rtm_spinlock_release(lockTable[*rit]);
     }
 
     return true;

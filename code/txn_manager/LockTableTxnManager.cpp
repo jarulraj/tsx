@@ -1,6 +1,3 @@
-#ifndef _LOCK_TABLE_TXN_MANAGER_CPP_
-#define _LOCK_TABLE_TXN_MANAGER_CPP_
-
 #include <iostream>
 #include <set>
 
@@ -41,4 +38,3 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
     return true;
 }        
 
-#endif /* _LOCK_TABLE_TXN_MANAGER_CPP_ */

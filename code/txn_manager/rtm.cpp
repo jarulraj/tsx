@@ -101,9 +101,9 @@ rtm_spinlock_acquire(spinlock_t* lock) EXCLUSIVE_LOCK_FUNCTION(lock)
       if (code == 0xff) goto tm_fail; /* Lock was taken; fallback */
     }
 
-#ifndef NDEBUG
+#ifdef DEBUG
     fprintf(stderr, "TSX RTM: failure; (code %d)\n", tm_status);
-#endif /* NDEBUG */
+#endif /* DEBUG */
   tm_fail:
     __sync_add_and_fetch(&g_locks_failed, 1);
     hle_spinlock_acquire(lock);
@@ -152,11 +152,11 @@ pop_list(list_t* list)
 static void
 update_ctx(intobj_t* obj) EXCLUSIVE_LOCKS_REQUIRED(g_lock)
 {
-#ifndef NDEBUG
+#ifdef DEBUG
   /* The following print is disabled because the synchronization otherwise
      kills any possible TSX transactions. */
   /* fprintf(stderr, "Node insert: %d:0x%p\n", obj->v, obj); */
-#endif /* NDEBUG */
+#endif /* DEBUG */
   g_testval++;
   push_list(&g_list, &obj->node);
 }
@@ -213,9 +213,9 @@ begin(int nthr)
   node_t* cur = g_list.root.next;
   while (cur != NULL) {
     intobj_t* obj = container_of(cur, intobj_t, node);
-#ifndef NDEBUG
+#ifdef DEBUG
     fprintf(stderr, "Read value (%d:0x%p): %d\n", total_entries+1, obj, obj->v);
-#endif /* NDEBUG */
+#endif /* DEBUG */
     cur = cur->next;
     free(obj);
     total_entries++;
@@ -241,10 +241,10 @@ void __attribute__((constructor))
 init()
 {
   int rtm = cpu_has_rtm();
-#ifndef NDEBUG
+#ifdef DEBUG
   int hle = cpu_has_hle();
   printf("TSX HLE: %s\nTSX RTM: %s\n", hle ? "YES" : "NO", rtm ? "YES" : "NO");
-#endif /* NDEBUG */
+#endif /* DEBUG */
 
   /*
   if (rtm == true) {

@@ -39,6 +39,9 @@ public:
     virtual bool RunTxn(const std::vector<OpDescription> &operations,
             std::vector<string> *get_results) = 0;
 
+    // Print stats
+    virtual void getStats();
+
 protected:
     // Returns false iff the operations were semantically ill-formed (for now,
     // this just means there were GETs or DELETEs on non-existent keys).

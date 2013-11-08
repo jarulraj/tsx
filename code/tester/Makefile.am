@@ -29,7 +29,8 @@ main_SOURCES	= $(top_builddir)/hashtable/murmur.cpp $(top_builddir)/hashtable/ha
 				  $(top_builddir)/txn_manager/LockTableTxnManager.cpp \
 				  $(top_builddir)/txn_manager/SpinLockTxnManager.cpp \
 				  $(top_builddir)/txn_manager/rtm.cpp \
-				  $(top_builddir)/txn_manager/HTMTxnManager.cpp \
+				  $(top_builddir)/txn_manager/HLETxnManager.cpp \
+				  $(top_builddir)/txn_manager/RTMTxnManager.cpp \
 				  main.cpp
 main_CXXFLAGS   = -pthread 
 
