@@ -118,6 +118,60 @@ void RunTestReaderThread(TxnManager *manager, uint64_t max_key, int num_reads,
     global_cout_mutex.unlock();
 }
 
+// This thread performs a series of transactions in which the same key is
+// written and then read num_reads times. It complains if the reads do not
+// return the written value. Like the other threads, it cycles through keys.
+// This is to test writer/writer conflicts for the read/write lock manager.
+void RunTestReaderWriterThread(TxnManager *manager, uint64_t max_key, int num_reads,
+        int seconds_to_run) {
+    time_t end_time = time(NULL) + seconds_to_run;
+    vector<OpDescription> ops(num_reads + 1);
+    ops[0].value.resize(VALUE_LENGTH);
+
+    if (num_reads <= 0) {
+        return;
+    }
+
+    vector<string> get_results;
+    get_results.reserve(num_reads);
+    uint64_t key = 0;
+    int txn_counter = 0;
+    do {
+	ops[0].type = INSERT;
+	ops[0].key = key;
+        snprintf(const_cast<char*>(ops[0].value.c_str()), VALUE_LENGTH, "%d",
+                txn_counter);
+        for (int i = 1; i <= num_reads; ++i) {
+            ops[i].type = GET;
+            ops[i].key = key;
+        }
+        if (!manager->RunTxn(ops, &get_results)) {
+            cerr << "ERROR: transaction failed.";
+            return;
+        }
+
+        // We know there must be at least one result, because num_reads > 0.
+        auto result_iter = get_results.begin();
+        const string &result = ops[0].value;
+        for (; result_iter != get_results.end(); ++result_iter) {
+            const string &next_result = *result_iter;
+            if (result.compare(next_result) == 0) {
+                cerr << "ERROR: all reads should have returned '" << result
+                        << "'; got '" << next_result << "' instead" << endl;
+                break;
+            }
+        }
+
+        get_results.clear();  // Doesn't actually change allocation
+        key = (key + 1) % max_key;
+        ++txn_counter;
+    } while (time(NULL) <= end_time);
+
+    global_cout_mutex.lock();
+    cout << "Read transactions:  " << txn_counter << endl;
+    global_cout_mutex.unlock();
+}
+
 void RunWorkloadThread(TxnManager *manager, int ops_per_txn, int txn_period_ms,
         int key_max, int seconds_to_run, double p_insert, double p_get,
         double p_delete) {
@@ -233,6 +287,7 @@ int main(int argc, const char* argv[]) {
     // the transaction, so we should notice non-repeatable reads if concurrency
     // control is failing.
     threads.push_back(thread(RunTestReaderThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
+    threads.push_back(thread(RunTestReaderWriterThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
     /*
     for (int i = 0; i < num_threads; ++i) {
         threads.push_back(
