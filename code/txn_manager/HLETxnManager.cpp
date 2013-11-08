@@ -1,13 +1,12 @@
-#ifndef _HTM_TXN_MANAGER_CPP_
-#define _HTM_TXN_MANAGER_CPP_
-
 #include <iostream>
 #include <set>
 
-#include "HTMTxnManager.h"       
+#include "HLETxnManager.h"       
 #include "rtm.h"
 
-HTMTxnManager::HTMTxnManager(HashTable *table)
+spinlock_t HLETxnManager::table_lock = { 0 } ;
+
+HLETxnManager::HLETxnManager(HashTable *table)
     : TxnManager(table) {
                
         int rtm = cpu_has_rtm();
@@ -18,9 +17,11 @@ HTMTxnManager::HTMTxnManager(HashTable *table)
             cout<<"RTM not found on machine "<<endl;
             exit(-1);
         }
+
     }
 
-bool HTMTxnManager::RunTxn(const std::vector<OpDescription> &operations,
+
+bool HLETxnManager::RunTxn(const std::vector<OpDescription> &operations,
         std::vector<string> *get_results) {
     // Construct an ordered set of keys to lock.
     set<uint64_t> keys;
@@ -30,15 +31,21 @@ bool HTMTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 
     // Lock keys in order.
     for (uint64_t key : keys) {
-        tableMutex.lock();
+        hle_spinlock_acquire(&table_lock);
+        
         if (lockTable.count(key) == 0) {
-            atomic_flag *a = new atomic_flag();
-            a->test_and_set(memory_order_acquire);
-            lockTable[key] = a;
-            tableMutex.unlock();
+            spinlock_t key_lock;
+            dyn_spinlock_init(&key_lock);
+            
+            hle_spinlock_acquire(&key_lock);
+
+            lockTable[key] = &key_lock;
+
+            hle_spinlock_release(&table_lock);
         } else {
-            tableMutex.unlock();
-            while (lockTable[key]->test_and_set(memory_order_acquire));
+            hle_spinlock_release(&table_lock);
+            
+            hle_spinlock_acquire(lockTable[key]);
         }
     }
 
@@ -48,13 +55,16 @@ bool HTMTxnManager::RunTxn(const std::vector<OpDescription> &operations,
     // Unlock all keys in reverse order.
     std::set<uint64_t>::reverse_iterator rit;
     for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
-        lockTable[*rit]->clear(memory_order_release);
+        hle_spinlock_release(lockTable[*rit]);
     }
-
 
     return true;
 }
 
+void HLETxnManager::getStats(){
+    /** Stats **/
+    std::cout<<"Stats"<<std::endl;    
+    
+}
 
 
-#endif /* _HTM_TXN_MANAGER_CPP_ */
