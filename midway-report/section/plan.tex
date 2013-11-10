@@ -83,10 +83,8 @@ values, which will be used by the testing framework. By implementing the hash
 buckets as linked lists, the kv store is safe in the face of concurrent 
 insertions to the same bucket.
 \item \textbf{Pessimistic locking schemes:} Implemented by Thomas, we currently 
-support both a spin lock implementation, as described in 
-\Cref{sec:pessimistic}, and a simple version of a lock table, without 
-reader/writer locks or an explicit queue of waiting transactions, instead 
-relying on C++'s built-in mutex implementation.
+support both spin locks and a lock table with reader/writer locks, as described 
+in \Cref{sec:pessimistic}.
 \item \textbf{Testing framework:} Implemented by Jesse, the testing framework 
 currently acts as a sanity check to ensure that our concurrency control schemes 
 are implemented correctly. It accomplishes this by spawning two threads, each 
@@ -115,15 +113,10 @@ working sets. This will be implemented by Jesse, and should also be finished by
 \item \textbf{Data gathering:} The final component necessary for us to reach 
 our 100\% goal is to run a large number of experiments using the testing 
 framework, record the data, and generate graphs as appropriate for the paper. 
-A more extensive discussion of this is included in \Cref{sec:eval}. This task 
-is assigned to Thomas, and should be completed by 11/23.
-\item \textbf{Refinement:} Once we have a baseline of results, we intend to 
-refine all of our concurrency schemes to achieve the best performance possible. 
-Some examples of refinements include implementing reader/writer locks in the 
-lock manager scheme and maintaining an explicit queue of waiting transactions 
-to ensure fairness. This will be an iterative process alongside the performance 
-testing, will be performed by all team members, and should be finished at the 
-same time as the data gathering, 11/23.
+A more extensive discussion of this is included in \Cref{sec:eval}. We will 
+also work to refine the various CC schemes here to achieve the best performance 
+possible for each. This task is assigned to Thomas, and should be completed by 
+11/23.
 \item \textbf{Stretch goal:} Once we have completed our 100\% goals, we will 
 move on to our stretch goals. If the results of our testing indicate that HTM 
 is significantly faster than the pessimistic schemes, we intend to implement 
