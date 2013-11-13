@@ -38,7 +38,7 @@ void pause_thread(int n) {
 
 // It probably doesn't really matter how long the value strings are...
 constexpr int VALUE_LENGTH = 10;
-constexpr int NUM_KEYS = 10;
+constexpr int NUM_KEYS = 16;
 
 // This thread performs a large number of single-operation transactions. It
 // cycles through all possible keys, with each transaction writing to the next
@@ -54,15 +54,13 @@ void RunTestWriterThread(TxnManager *manager, uint64_t max_key,
     do {
         ops[0].type = INSERT;
         ops[0].key = key;
-        // NOTE: THIS IS A TERRIBLE HACK. This is only safe because we resized
-        // this buffer above. The only reason to tolerate this sort of code is
-        // that it allows reusing the buffer without extra reallocations or
-        // copies.
-        snprintf(const_cast<char*>(ops[0].value.c_str()), VALUE_LENGTH, "%d",
-                txn_counter);
+        ops[0].value = std::to_string(key);
+        
+        //cout << "Write Txn Run : " << txn_counter << endl;
         manager->RunTxn(ops, NULL);
         key = (key + 1) % max_key;
         ++txn_counter;
+        //cout << "Write Txn End : " << txn_counter << endl;
     } while (time(NULL) <= end_time);
 
     global_cout_mutex.lock();
@@ -96,11 +94,14 @@ void RunTestReaderThread(TxnManager *manager, uint64_t max_key, int num_reads,
             return;
         }
 
+        //cout << "Read Txn Data : " << txn_counter << endl;
         // We know there must be at least one result, because num_reads > 0.
         auto result_iter = get_results.begin();
         const string &result = *result_iter;
+        //cout<<result<<" ";
         for (; result_iter != get_results.end(); ++result_iter) {
             const string &next_result = *result_iter;
+            //cout<<next_result<<" ";
             if (result != next_result) {
                 cerr << "ERROR: all reads should have returned '" << result
                         << "'; got '" << next_result << "' instead" << endl;
@@ -111,6 +112,7 @@ void RunTestReaderThread(TxnManager *manager, uint64_t max_key, int num_reads,
         get_results.clear();  // Doesn't actually change allocation
         key = (key + 1) % max_key;
         ++txn_counter;
+        //cout << "Read Txn End : " << txn_counter << endl;
     } while (time(NULL) <= end_time);
 
     global_cout_mutex.lock();
@@ -137,10 +139,10 @@ void RunTestReaderWriterThread(TxnManager *manager, uint64_t max_key, int num_re
     uint64_t key = 0;
     int txn_counter = 0;
     do {
-	ops[0].type = INSERT;
-	ops[0].key = key;
-        snprintf(const_cast<char*>(ops[0].value.c_str()), VALUE_LENGTH, "%d",
-                txn_counter);
+        ops[0].type = INSERT;
+        ops[0].key = key;
+        ops[0].value = std::to_string(txn_counter);
+        
         for (int i = 1; i <= num_reads; ++i) {
             ops[i].type = GET;
             ops[i].key = key;
@@ -157,7 +159,7 @@ void RunTestReaderWriterThread(TxnManager *manager, uint64_t max_key, int num_re
             const string &next_result = *result_iter;
             if (result.compare(next_result) == 0) {
                 cerr << "ERROR: all reads should have returned '" << result
-                        << "'; got '" << next_result << "' instead" << endl;
+                    << "'; got '" << next_result << "' instead" << endl;
                 break;
             }
         }
@@ -168,7 +170,6 @@ void RunTestReaderWriterThread(TxnManager *manager, uint64_t max_key, int num_re
     } while (time(NULL) <= end_time);
 
     global_cout_mutex.lock();
-    cout << "Read transactions:  " << txn_counter << endl;
     global_cout_mutex.unlock();
 }
 
@@ -223,12 +224,12 @@ const int RTM_TYPE = 1;
 const int LOCK_TABLE_TYPE = 2;
 const int SPIN_LOCK_TYPE = 3;
 const string INVALID_MSG = string("Invalid arguments. Usage: htm-test <manager_type>[ ")
-        + std::to_string(HLE_TYPE)        + " (hle) | " 
-        + std::to_string(RTM_TYPE)        + " (rtm) | " 
-        + std::to_string(LOCK_TABLE_TYPE) + " (locktbl) | " 
-        + std::to_string(SPIN_LOCK_TYPE)  + " (spinlock) ] " 
-        +" <num_threads> <num_seconds_to_run>\n";
- 
++ std::to_string(HLE_TYPE)        + " (hle) | " 
++ std::to_string(RTM_TYPE)        + " (rtm) | " 
++ std::to_string(LOCK_TABLE_TYPE) + " (locktbl) | " 
++ std::to_string(SPIN_LOCK_TYPE)  + " (spinlock) ] " 
++" <num_threads> <num_seconds_to_run>\n";
+
 void checkArg(const char* arg){
     string str = arg;
     for (const char c : str) {
@@ -248,7 +249,7 @@ int main(int argc, const char* argv[]) {
     checkArg(argv[1]);
     checkArg(argv[2]);
     checkArg(argv[3]);
-    
+
     int manager_type = atoi(argv[1]);
     int num_threads = atoi(argv[2]);
     int num_seconds_to_run = atoi(argv[3]);
@@ -271,9 +272,8 @@ int main(int argc, const char* argv[]) {
 
     table.display();
     // Make sure all the keys we'll be using are there so GETs don't fail
-    std::string initvalue = "test";
     for (uint64_t i = 0; i < NUM_KEYS; ++i) {
-        table.Insert(i,initvalue);
+        table.Insert(i, std::to_string(i));
     }
 
     cout << "Keys inserted: " << table.GetSize() << endl;
@@ -287,14 +287,14 @@ int main(int argc, const char* argv[]) {
     // the transaction, so we should notice non-repeatable reads if concurrency
     // control is failing.
     threads.push_back(thread(RunTestReaderThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
-    threads.push_back(thread(RunTestReaderWriterThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
+    //threads.push_back(thread(RunTestReaderWriterThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
     /*
-    for (int i = 0; i < num_threads; ++i) {
-        threads.push_back(
-                thread(RunWorkloadThread, manager, 10, 1, MAX_KEY, 10, 1 / 3.0,
-                        1 / 3.0, 1 / 3.0));
-    }
-    */
+       for (int i = 0; i < num_threads; ++i) {
+       threads.push_back(
+       thread(RunWorkloadThread, manager, 10, 1, MAX_KEY, 10, 1 / 3.0,
+       1 / 3.0, 1 / 3.0));
+       }
+       */
 
     for (thread &t : threads) {
         t.join();
