@@ -115,11 +115,6 @@ int cpu_has_hle(void) ;
 #define _XABORT_NESTED          (1 << 5)
 #define _XABORT_CODE(x)         (((x) >> 24) & 0xff)
 
-#define _mm_pause()                             \
-  ({                                            \
-    __asm__ __volatile__("pause" ::: "memory"); \
-  })                                            \
-
 #define _xbegin()                                       \
   ({                                                    \
     int ret = _XBEGIN_STARTED;                          \

@@ -1,6 +1,3 @@
-#ifndef _RTM_CPP_
-#define _RTM_CPP_
-
 /* 
  * spinlock-rtm.c: A spinlock implementation with dynamic lock elision.
  * Copyright (c) 2013 Austin Seipp
@@ -20,6 +17,8 @@
  */
 
 #include "rtm.h"
+#include "immintrin.h"  /* for _mm_pause() */
+#include <iostream>
 
 using namespace std;
 
@@ -43,228 +42,75 @@ int cpu_has_hle(void)
     return 0;
 }
 
-
-/* -------------------------------------------------------------------------- */
-/* -- A simple spinlock implementation with lock elision -------------------- */
-
-void
-dyn_spinlock_init(spinlock_t* lock)
+void dyn_spinlock_init(spinlock_t* lock)
 {
-  lock->v = 0;
+    lock->v = 0;
 }
 
-void
-hle_spinlock_acquire(spinlock_t* lock) EXCLUSIVE_LOCK_FUNCTION(lock)
-{
-  while (__sync_lock_test_and_set(&lock->v, 1) != 0)
-  {
-    int val;
-    do {
-      _mm_pause();
-      val = __sync_val_compare_and_swap(&lock->v, 1, 1);
-    } while (val == 1);
-  }
+void hle_spinlock_acquire(spinlock_t* lock) EXCLUSIVE_LOCK_FUNCTION(lock)
+{            
+    while (__atomic_exchange_n(&lock->v, 1, __ATOMIC_ACQUIRE|__ATOMIC_HLE_ACQUIRE) != 0) { 
+        int val; 
+        /* Wait for lock to become free again before retrying. */ 
+        do { 
+            _mm_pause(); 
+            /* Abort speculation */ 
+            val = __atomic_load_n(&lock->v, __ATOMIC_CONSUME); 
+        } while (val == 1); 
+    } 
 }
 
-bool
-hle_spinlock_isfree(spinlock_t* lock)
+bool hle_spinlock_isfree(spinlock_t* lock)
 {
-  return (__sync_bool_compare_and_swap(&lock->v, 0, 0) ? true : false);
+    return (__sync_bool_compare_and_swap(&lock->v, 0, 0) ? true : false);
 }
 
-void
-hle_spinlock_release(spinlock_t* lock) UNLOCK_FUNCTION(lock)
+void hle_spinlock_release(spinlock_t* lock) UNLOCK_FUNCTION(lock)
 {
-  __sync_lock_release(&lock->v);
+    __atomic_clear(&lock->v, __ATOMIC_RELEASE|__ATOMIC_HLE_RELEASE);
 }
 
-void
-rtm_spinlock_acquire(spinlock_t* lock) EXCLUSIVE_LOCK_FUNCTION(lock)
+void rtm_spinlock_acquire(spinlock_t* lock) EXCLUSIVE_LOCK_FUNCTION(lock)
 {
-  unsigned int tm_status = 0;
+    unsigned int tm_status = 0;
 
- tm_try:
-  if ((tm_status = _xbegin()) == _XBEGIN_STARTED) {
-    /* If the lock is free, speculatively elide acquisition and continue. */
-    if (hle_spinlock_isfree(lock)) return;
+tm_try:
+    if ((tm_status = _xbegin()) == _XBEGIN_STARTED) {
+        /* If the lock is free, speculatively elide acquisition and continue. */
+        if (hle_spinlock_isfree(lock)) return;
 
-    /* Otherwise fall back to the spinlock by aborting. */
-    _xabort(0xff); /* 0xff canonically denotes 'lock is taken'. */
-  } else {
-    /* _xbegin could have had a conflict, been aborted, etc */
-    if (tm_status & _XABORT_RETRY) {
-      __sync_add_and_fetch(&g_rtm_retries, 1);
-      goto tm_try; /* Retry */
+        /* Otherwise fall back to the spinlock by aborting. */
+        _xabort(0xff); /* 0xff canonically denotes 'lock is taken'. */
+    } else {
+        /* _xbegin could have had a conflict, been aborted, etc */
+        if (tm_status & _XABORT_RETRY) {
+            __sync_add_and_fetch(&g_rtm_retries, 1);
+            goto tm_try; /* Retry */
+        }
+        if (tm_status & _XABORT_EXPLICIT) {
+            int code = _XABORT_CODE(tm_status);
+            if (code == 0xff) goto tm_fail; /* Lock was taken; fallback */
+        }
+
+#ifdef DEBUG
+        fprintf(stderr, "TSX RTM: failure; (code %d)\n", tm_status);
+#endif /* DEBUG */
+tm_fail:
+        __sync_add_and_fetch(&g_locks_failed, 1);
+        hle_spinlock_acquire(lock);
     }
-    if (tm_status & _XABORT_EXPLICIT) {
-      int code = _XABORT_CODE(tm_status);
-      if (code == 0xff) goto tm_fail; /* Lock was taken; fallback */
+}
+
+void rtm_spinlock_release(spinlock_t* lock) UNLOCK_FUNCTION(lock)
+{
+    /* If the lock is still free, we'll assume it was elided. This implies
+       we're in a transaction. */
+    if (hle_spinlock_isfree(lock)) {
+        g_locks_elided += 1;
+        _xend(); /* Commit transaction */
+    } else {
+        /* Otherwise, the lock was taken by us, so release it too. */
+        hle_spinlock_release(lock);
     }
-
-#ifdef DEBUG
-    fprintf(stderr, "TSX RTM: failure; (code %d)\n", tm_status);
-#endif /* DEBUG */
-  tm_fail:
-    __sync_add_and_fetch(&g_locks_failed, 1);
-    hle_spinlock_acquire(lock);
-  }
 }
 
-void
-rtm_spinlock_release(spinlock_t* lock) UNLOCK_FUNCTION(lock)
-{
-  /* If the lock is still free, we'll assume it was elided. This implies
-     we're in a transaction. */
-  if (hle_spinlock_isfree(lock)) {
-    g_locks_elided += 1;
-    _xend(); /* Commit transaction */
-  } else {
-    /* Otherwise, the lock was taken by us, so release it too. */
-    hle_spinlock_release(lock);
-  }
-}
-
-/* -------------------------------------------------------------------------- */
-/* -- Intrusive linked list ------------------------------------------------- */
-
-void
-new_list(list_t* list)
-{
-  list->root.next = NULL;
-}
-
-void
-push_list(list_t* list, node_t* node)
-{
-  node->next = list->root.next;
-  list->root.next = node;
-}
-
-void
-pop_list(list_t* list)
-{
-  list->root.next = list->root.next;
-}
-
-/* -------------------------------------------------------------------------- */
-/* -- Sample threaded application #1 ---------------------------------------- */
-
-static void
-update_ctx(intobj_t* obj) EXCLUSIVE_LOCKS_REQUIRED(g_lock)
-{
-#ifdef DEBUG
-  /* The following print is disabled because the synchronization otherwise
-     kills any possible TSX transactions. */
-  /* fprintf(stderr, "Node insert: %d:0x%p\n", obj->v, obj); */
-#endif /* DEBUG */
-  g_testval++;
-  push_list(&g_list, &obj->node);
-}
-
-static void*
-runThread(void* voidctx)
-{
-#define NOBJS 32
-  threadctx_t* ctx = (threadctx_t*)voidctx;
-  intobj_t* objs[NOBJS];
-
-  for (int i = 0; i < NOBJS; i++) {
-    objs[i] = (intobj_t*) malloc(sizeof(intobj_t));
-    objs[i]->v = (i+1)*(ctx->id);
-  }
-
-  for (int i = 0; i < NOBJS; i++) {
-    rtm_spinlock_acquire(&g_lock);
-    //hle_spinlock_acquire(&g_lock);
-    update_ctx(objs[i]);
-    rtm_spinlock_release(&g_lock);
-    //hle_spinlock_release(&g_lock);
-  }
-  return NULL;
-#undef NOBJS
-}
-
-int
-begin(int nthr)
-{
-  /* Initialize contexts */
-  pthread_t* threads = (pthread_t*) malloc(sizeof(pthread_t) * nthr);
-  threadctx_t* ctxs = (threadctx_t*) malloc(sizeof(threadctx_t) * nthr);
-  if (threads == NULL || ctxs == NULL) {
-    printf("ERROR: could not allocate thread structures!\n");
-    return -1;
-  }
-  for (int i = 0; i < nthr; i++) ctxs[i].id = i+1;
-
-  /* Spawn threads & wait */
-  new_list(&g_list);
-  dyn_spinlock_init(&g_lock);
-  fprintf(stderr, "Creating %d threads...\n", nthr);
-  for (int i = 0; i < nthr; i++) {
-    if (pthread_create(&threads[i], NULL, runThread, (void*)&ctxs[i])) {
-      printf("ERROR: could not create threads #%d!\n", i);
-      return -1;
-    }
-  }
-  for (int i = 0; i < nthr; i++) pthread_join(threads[i], NULL);
-
-  /* free list contents */
-  int total_entries = 0;
-  node_t* cur = g_list.root.next;
-  while (cur != NULL) {
-    intobj_t* obj = container_of(cur, intobj_t, node);
-#ifdef DEBUG
-    fprintf(stderr, "Read value (%d:0x%p): %d\n", total_entries+1, obj, obj->v);
-#endif /* DEBUG */
-    cur = cur->next;
-    free(obj);
-    total_entries++;
-  }
-
-  fprintf(stderr, "OK, done.\n");
-  fprintf(stderr, "Stats:\n");
-  fprintf(stderr, "  total entries:\t\t%d\n", total_entries);
-  fprintf(stderr, "  g_testval:\t\t\t%d\n", g_testval);
-  fprintf(stderr, "  Successful RTM elisions:\t%d\n", g_locks_elided);
-  fprintf(stderr, "  Failed RTM elisions:\t\t%d\n", g_locks_failed);
-  fprintf(stderr, "  RTM retries:\t\t\t%d\n", g_rtm_retries);
-  free(ctxs);
-  free(threads);
-
-  return 0;
-}
-
-/* -------------------------------------------------------------------------- */
-/* -- Boilerplate & driver -------------------------------------------------- */
-
-void __attribute__((constructor))
-init()
-{
-  int rtm = cpu_has_rtm();
-#ifdef DEBUG
-  int hle = cpu_has_hle();
-  printf("TSX HLE: %s\nTSX RTM: %s\n", hle ? "YES" : "NO", rtm ? "YES" : "NO");
-#endif /* DEBUG */
-
-  /*
-  if (rtm == true) {
-#if __has_feature(thread_sanitizer) || __has_feature(address_sanitizer)
-    // Iff we're using thread/addr sanitizer, fallback to the normal
-    //   locks, which it can properly test/sanitize against. Clang
-    //   only. 
-    dyn_spinlock_acquire = &hle_spinlock_acquire;
-    dyn_spinlock_release = &hle_spinlock_release;
-#else
-    // Otherwise, attempt elision via hardware 
-    dyn_spinlock_acquire = &rtm_spinlock_acquire;
-    dyn_spinlock_release = &rtm_spinlock_release;
-#endif
-  } else {
-    dyn_spinlock_acquire = &hle_spinlock_acquire;
-    dyn_spinlock_release = &hle_spinlock_release;
-  }
-  */
-
-}
-
-#endif /* __RTM_CPP_ */

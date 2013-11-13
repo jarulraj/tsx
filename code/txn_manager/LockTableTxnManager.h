@@ -5,6 +5,7 @@
 #include <queue>
 #include <set>
 #include <thread>
+#include <condition_variable>
 
 #include "TxnManager.h"
 
