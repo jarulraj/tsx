@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#define HT_INITIAL_SIZE 1048576  // Initial HT size
+#define HT_INITIAL_SIZE 64  // Initial HT size
 
 // HT initialization flags
 typedef enum {

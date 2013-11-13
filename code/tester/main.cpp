@@ -287,7 +287,7 @@ int main(int argc, const char* argv[]) {
     // the transaction, so we should notice non-repeatable reads if concurrency
     // control is failing.
     threads.push_back(thread(RunTestReaderThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
-    threads.push_back(thread(RunTestReaderWriterThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
+    //threads.push_back(thread(RunTestReaderWriterThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
     /*
        for (int i = 0; i < num_threads; ++i) {
        threads.push_back(
