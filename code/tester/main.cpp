@@ -38,7 +38,7 @@ void pause_thread(int n) {
 
 // It probably doesn't really matter how long the value strings are...
 constexpr int VALUE_LENGTH = 10;
-constexpr int NUM_KEYS = 16;
+constexpr int NUM_KEYS = 1024;
 
 // This thread performs a large number of single-operation transactions. It
 // cycles through all possible keys, with each transaction writing to the next
@@ -102,7 +102,7 @@ void RunTestReaderThread(TxnManager *manager, uint64_t max_key, int num_reads,
         for (; result_iter != get_results.end(); ++result_iter) {
             const string &next_result = *result_iter;
             //cout<<next_result<<" ";
-            if (result != next_result) {
+            if (result.compare(next_result) != 0) {
                 cerr << "ERROR: all reads should have returned '" << result
                         << "'; got '" << next_result << "' instead" << endl;
                 break;
@@ -141,7 +141,7 @@ void RunTestReaderWriterThread(TxnManager *manager, uint64_t max_key, int num_re
     do {
         ops[0].type = INSERT;
         ops[0].key = key;
-        ops[0].value = std::to_string(txn_counter);
+        ops[0].value = std::to_string(key);
         
         for (int i = 1; i <= num_reads; ++i) {
             ops[i].type = GET;
@@ -157,7 +157,7 @@ void RunTestReaderWriterThread(TxnManager *manager, uint64_t max_key, int num_re
         const string &result = ops[0].value;
         for (; result_iter != get_results.end(); ++result_iter) {
             const string &next_result = *result_iter;
-            if (result.compare(next_result) == 0) {
+            if (result.compare(next_result) != 0) {
                 cerr << "ERROR: all reads should have returned '" << result
                     << "'; got '" << next_result << "' instead" << endl;
                 break;
@@ -287,7 +287,7 @@ int main(int argc, const char* argv[]) {
     // the transaction, so we should notice non-repeatable reads if concurrency
     // control is failing.
     threads.push_back(thread(RunTestReaderThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
-    //threads.push_back(thread(RunTestReaderWriterThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
+    threads.push_back(thread(RunTestReaderWriterThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
     /*
        for (int i = 0; i < num_threads; ++i) {
        threads.push_back(
