@@ -170,6 +170,62 @@ void RunTestReaderWriterThread(TxnManager *manager, uint64_t max_key, int num_re
     } while (time(NULL) <= end_time);
 
     global_cout_mutex.lock();
+    cout << "Read/write transactions:  " << txn_counter << endl;
+    global_cout_mutex.unlock();
+}
+
+void RunMultiKeyThread(TxnManager *manager, uint64_t max_key, int num_reads,
+        int seconds_to_run) {
+    time_t end_time = time(NULL) + seconds_to_run;
+    vector<OpDescription> ops(num_reads + 1);
+    ops[0].value.resize(VALUE_LENGTH);
+    string *value = new string("asdf");
+
+    if (num_reads <= 0) {
+        return;
+    }
+
+    vector<string> get_results;
+    get_results.reserve(num_reads);
+    vector<string> inputs;
+    inputs.reserve(num_reads);
+    uint64_t key = 0;
+    int txn_counter = 0;
+    do {
+        for (int i = 0; i < num_reads; i += 2) {
+	    ops[i].type = INSERT;
+	    ops[i].key = key;
+	    GenRandomString(&ops[i].value);
+	    inputs.push_back(ops[i].value);
+            ops[i+1].type = GET;
+            ops[i+1].key = key;
+	    key = (key + 1) % max_key;
+        }
+        if (!manager->RunTxn(ops, &get_results)) {
+            cerr << "ERROR: transaction failed.";
+            return;
+        }
+
+        // We know there must be at least one result, because num_reads > 0.
+        auto result_iter = get_results.begin();
+	auto inputs_iter = inputs.begin();
+        for (; result_iter != get_results.end(); ++result_iter, ++inputs_iter) {
+            const string &next_result = *result_iter;
+	    const string &next_input = *inputs_iter;
+            if (next_input.compare(next_result) != 0) {
+                cerr << "ERROR: all reads should have returned '" << next_input
+                    << "'; got '" << next_result << "' instead" << endl;
+                break;
+            }
+        }
+
+	inputs.clear();
+        get_results.clear();  // Doesn't actually change allocation
+        ++txn_counter;
+    } while (time(NULL) <= end_time);
+
+    global_cout_mutex.lock();
+    cout << "Multikey transactions:  " << txn_counter << endl;
     global_cout_mutex.unlock();
 }
 
@@ -280,13 +336,14 @@ int main(int argc, const char* argv[]) {
     table.display();
 
     vector<thread> threads;
-    threads.push_back(thread(RunTestWriterThread, manager, NUM_KEYS, num_seconds_to_run));
+    //threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, num_seconds_to_run));
     // Each transaction reads keys multiple times. Since the
     // writer thread is cycling through keys one per transaction, it's pretty
     // likely that it'll write to the value that's being read during the time of
     // the transaction, so we should notice non-repeatable reads if concurrency
-    // control is failing.
-    threads.push_back(thread(RunTestReaderThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
+    // Control is failing.
+    threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
+    threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
     //threads.push_back(thread(RunTestReaderWriterThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
     /*
        for (int i = 0; i < num_threads; ++i) {
