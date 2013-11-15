@@ -11,12 +11,12 @@ HLETxnManager::HLETxnManager(HashTable *table)
          
         int hle = cpu_has_hle();
 
-        if(hle == 0){
-            cout<<"HLE not found on machine "<<endl;
+        if(hle == 0) {
+            cerr << "HLE not found on machine " << endl;
             exit(-1);
         }
-        else{
-            cout<<"HLE AVAILABLE" <<endl;
+        else {
+            cout << "HLE AVAILABLE" << endl;
         }
  
     }

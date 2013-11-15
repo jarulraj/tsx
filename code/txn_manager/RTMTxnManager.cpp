@@ -12,11 +12,11 @@ RTMTxnManager::RTMTxnManager(HashTable *table)
         int rtm = cpu_has_rtm();
 
         if(rtm == 0){
-            cout<<"RTM not found on machine "<<endl;
+            cerr << "RTM not found on machine " << endl;
             exit(-1);
         }
         else{
-            cout<<"RTM AVAILABLE" <<endl;
+            cout << "RTM AVAILABLE" << endl;
         }
 
     }

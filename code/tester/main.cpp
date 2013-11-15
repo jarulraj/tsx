@@ -4,17 +4,18 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
-#include <random>
 #include <mutex>
+#include <random>
+#include <sstream>
 #include <thread>
 
+#include "optionparser.h"
 #include "hashtable.h"
-#include "TxnManager.h"
-
-#include "RTMTxnManager.h"
 #include "HLETxnManager.h"
-#include "SpinLockTxnManager.h"
 #include "LockTableTxnManager.h"
+#include "RTMTxnManager.h"
+#include "SpinLockTxnManager.h"
+#include "TxnManager.h"
 
 using namespace std;
 
@@ -229,15 +230,10 @@ void RunMultiKeyThread(TxnManager *manager, uint64_t max_key, int num_reads,
     global_cout_mutex.unlock();
 }
 
-void RunWorkloadThread(TxnManager *manager, int ops_per_txn, int txn_period_ms,
-        int key_max, int seconds_to_run, double p_insert, double p_get,
-        double p_delete) {
-    double p_sum = p_insert + p_get + p_delete;
-    double get_threshold = p_insert + p_get;
-
+void RunWorkloadThread(TxnManager *manager, int ops_per_txn,
+        int key_max, int seconds_to_run, double get_to_put_ratio) {
     default_random_engine generator;
-    // Use p_sum to effectively make sure probabilities are normalized.
-    uniform_real_distribution<double> operation_distribution(0.0, p_sum);
+    uniform_real_distribution<double> operation_distribution(0.0, 1.0);
     uniform_int_distribution<int> key_distribution(0, key_max);
 
     // Initializing all vector and string values here essentially eliminates
@@ -257,13 +253,11 @@ void RunWorkloadThread(TxnManager *manager, int ops_per_txn, int txn_period_ms,
             OpDescription &next_op = txn_ops[i];
             next_op.key = key_distribution(generator);
 
-            if (action_chooser < p_insert) {
-                next_op.type = INSERT;
-                GenRandomString(&next_op.value);
-            } else if (action_chooser < get_threshold) {
+            if (action_chooser < get_to_put_ratio) {
                 next_op.type = GET;
             } else {
-                next_op.type = DELETE;
+                next_op.type = INSERT;
+                GenRandomString(&next_op.value);
             }
         }
 
@@ -274,56 +268,111 @@ void RunWorkloadThread(TxnManager *manager, int ops_per_txn, int txn_period_ms,
     } while (time(NULL) <= end_time);
 }
 
+#define STR_VALUE(arg)      #arg
+#define STRINGIFY(arg)      STR_VALUE(arg) /* Weird macro magic */
+#define DEFAULT_SECONDS     10
+#define DEFAULT_OPS_PER_TXN 10
+#define HLE_NAME            "hle"
+#define RTM_NAME            "rtm"
+#define SPIN_NAME           "spin"
+#define LOCK_TABLE_NAME     "tbl"
+enum  optionIndex {UNKNOWN, HELP, NUM_THREADS, NUM_SECONDS, OPS_PER_TXN, RATIO};
+const option::Descriptor usage[] =
+{
+ {UNKNOWN,     0, "" , "",        option::Arg::None,     "Usage: htm-test [options] "
+                                                         HLE_NAME "|" RTM_NAME "|" LOCK_TABLE_NAME "|" SPIN_NAME "\n\n"
+                                                         "Options:" },
+ {HELP,        0, "" , "help",    option::Arg::None,     "  --help  \tPrint usage and exit." },
+ {NUM_THREADS, 0, "t", "threads", option::Arg::Integer,  "  --threads, -t  \tNumber of threads to run with."
+                                                         " Default: max supported by hardware." },
+ {NUM_SECONDS, 0, "s", "seconds", option::Arg::Integer,  "  --seconds, -s  \tNumber of seconds to run for."
+                                                         " Default: " STRINGIFY(DEFAULT_SECONDS) "." },
+ {OPS_PER_TXN, 0, "o", "txn_ops", option::Arg::Integer,  "  --txn_ops, -o  \tOperations per transaction."
+                                                         " Default: " STRINGIFY(DEFAULT_OPS_PER_TXN) "." },
+ {RATIO,      0,  "r", "ratio",   option::Arg::Required, "  --ratio,   -r  \tRatio of gets to puts in each transaction,"
+                                                         " in the format gets:puts. Default: 1:1." },
+ {0,0,0,0,0,0}
+};
 
-const int HLE_TYPE = 0;
-const int RTM_TYPE = 1;
-const int LOCK_TABLE_TYPE = 2;
-const int SPIN_LOCK_TYPE = 3;
-const string INVALID_MSG = string("Invalid arguments. Usage: htm-test <manager_type>[ ")
-+ std::to_string(HLE_TYPE)        + " (hle) | " 
-+ std::to_string(RTM_TYPE)        + " (rtm) | " 
-+ std::to_string(LOCK_TABLE_TYPE) + " (locktbl) | " 
-+ std::to_string(SPIN_LOCK_TYPE)  + " (spinlock) ] " 
-+" <num_threads> <num_seconds_to_run>\n";
-
-void checkArg(const char* arg){
-    string str = arg;
-    for (const char c : str) {
-        if (!isdigit(c)) {
-            cerr << INVALID_MSG;
-            exit(1);
-        }
+inline int getArgWithDefault(const option::Option *options, optionIndex index, int defaultVal) {
+    if (options[index]) {
+        return atoi(options[index].arg);
+    } else {
+        return defaultVal;
     }
 }
 
-int main(int argc, const char* argv[]) {
-    if (argc != 4) {
-        cerr << INVALID_MSG;
-        exit(1);
+double getRatio(const option::Option *options) {
+    if (!options[RATIO]) {
+        return 1.0;
     }
 
-    checkArg(argv[1]);
-    checkArg(argv[2]);
-    checkArg(argv[3]);
+    const char *arg = options[RATIO].arg;
+    istringstream argStream(arg);
+    int gets;
+    int inserts;
+    argStream >> gets;
+    if (argStream.bad()) {
+        return nan("");
+    }
+    if (argStream.get() != ':') {
+        return nan("");
+    }
+    argStream >> inserts;
+    if (argStream.bad()) {
+        return nan("");
+    }
+    return gets / static_cast<double>(inserts);
+}
 
-    int manager_type = atoi(argv[1]);
-    int num_threads = atoi(argv[2]);
-    int num_seconds_to_run = atoi(argv[3]);
+int main(int argc, const char* argv[]) {
+    argc-=(argc>0); argv+=(argc>0); // skip program name argv[0] if present
+    option::Stats stats(usage, argc, argv);
+    option::Option* options = new option::Option[stats.options_max];
+    option::Option* buffer  = new option::Option[stats.buffer_max];
+    option::Parser parse(usage, argc, argv, options, buffer);
+
+    if (parse.error())
+      return 1;
+
+    if (options[HELP] || argc == 0) {
+      option::printUsage(std::cout, usage);
+      return 0;
+    }
+
+    if (parse.nonOptionsCount() != 1) {
+        option::printUsage(std::cout, usage);
+        return 1;
+    }
+
+    string manager_type = parse.nonOption(0);
+    int num_threads = getArgWithDefault(options, NUM_THREADS, thread::hardware_concurrency());
+    int num_seconds_to_run = getArgWithDefault(options, NUM_SECONDS, DEFAULT_SECONDS);
+    int ops_per_txn = getArgWithDefault(options, OPS_PER_TXN, DEFAULT_OPS_PER_TXN);
+    double ratio = getRatio(options);
+    if (std::isnan(ratio)) {
+        cerr << "Ratio must be in the format <int>:<int>" << endl;
+        return 1;
+    }
+    
+    delete[] options;
+    delete[] buffer;
+
 
     // Initialize hashtable
     HashTable table(static_cast<ht_flags>(HT_KEY_CONST | HT_VALUE_CONST), 0.05);
     TxnManager *manager;
-    if (manager_type == HLE_TYPE) {
+    if (manager_type == HLE_NAME) {
         manager = new HLETxnManager(&table);
-    }else if (manager_type == RTM_TYPE) {
+    }else if (manager_type == RTM_NAME) {
         manager = new RTMTxnManager(&table);
-    } else if(manager_type == LOCK_TABLE_TYPE) {
+    } else if(manager_type == LOCK_TABLE_NAME) {
         manager = new LockTableTxnManager(&table);
-    } else if(manager_type == SPIN_LOCK_TYPE) {
+    } else if(manager_type == SPIN_NAME) {
         manager = new SpinLockTxnManager(&table);
     } else {
-        cerr << INVALID_MSG;
-        exit(1);
+        option::printUsage(std::cout, usage);
+        return 1;
     }
 
     table.display();
@@ -337,27 +386,31 @@ int main(int argc, const char* argv[]) {
 
     vector<thread> threads;
     //threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, num_seconds_to_run));
+
+    /*
+    // SANITY-CHECKING CODE
+    //
     // Each transaction reads keys multiple times. Since the
     // writer thread is cycling through keys one per transaction, it's pretty
     // likely that it'll write to the value that's being read during the time of
     // the transaction, so we should notice non-repeatable reads if concurrency
-    // Control is failing.
+    // control is failing.
     threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
     threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
     //threads.push_back(thread(RunTestReaderWriterThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
-    /*
-       for (int i = 0; i < num_threads; ++i) {
-       threads.push_back(
-       thread(RunWorkloadThread, manager, 10, 1, MAX_KEY, 10, 1 / 3.0,
-       1 / 3.0, 1 / 3.0));
-       }
-       */
+    */
+
+    for (int i = 0; i < num_threads; ++i) {
+        threads.push_back(
+                thread(RunWorkloadThread, manager, ops_per_txn, NUM_KEYS,
+                        num_seconds_to_run, ratio));
+    }
 
     for (thread &t : threads) {
         t.join();
     }
 
-    if(manager_type == HLE_TYPE){
+    if(manager_type == HLE_NAME){
         manager->getStats();
     }
 
