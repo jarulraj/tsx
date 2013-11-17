@@ -5,7 +5,7 @@
 #include <set>
 
 #include "TxnManager.h"       
-#include "rtm.h"
+#include "tsx.h"
 
 class RTMTxnManager : public TxnManager {
 public:

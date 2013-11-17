@@ -19,7 +19,5 @@
 MAINTAINERCLEANFILES = Makefile.in
 
 INCLUDES	= -I$(top_builddir)  
-
-noinst_HEADERS  = TxnManager.h
                     
 AM_LDFLAGS = $(AM_LDFLAGS) -fgnu-tm -mrtm -mhle

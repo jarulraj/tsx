@@ -15,8 +15,8 @@
 #include "SpinLockTxnManager.h"
 #include "TxnManager.h"
 
-#include "Util.h"
-#include "Workloads.h"
+#include "util.h"
+#include "workload.h"
 
 using namespace std;
 

@@ -2,7 +2,6 @@
 #include <set>
 
 #include "HLETxnManager.h"       
-#include "rtm.h"
 
 spinlock_t HLETxnManager::table_lock = { 0 } ;
 
