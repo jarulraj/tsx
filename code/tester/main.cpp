@@ -15,10 +15,15 @@
 #include "SpinLockTxnManager.h"
 #include "TxnManager.h"
 
-#include "util.h"
+#include "cmdline-utils.h"
 #include "workload.h"
 
 using namespace std;
+
+// Stupid dummy function to make threading library link properly
+void pause_thread(int n) {
+  this_thread::sleep_for(std::chrono::seconds(n));
+}
 
 int main(int argc, const char* argv[]) {
     argc-=(argc>0); argv+=(argc>0); // skip program name argv[0] if present
@@ -104,10 +109,10 @@ int main(int argc, const char* argv[]) {
     //threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
     //threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
 
-    cout << "Num threads : "<<num_threads << endl;
-    cout << "Time (s)    : "<<num_seconds_to_run << endl;
-    cout << "Ops per txn : "<<ops_per_txn << endl;
-    cout << "Ratio       : "<<ratio << endl;
+    cout << "Num threads : " << num_threads << endl;
+    cout << "Time (s)    : " << num_seconds_to_run << endl;
+    cout << "Ops per txn : " << ops_per_txn << endl;
+    cout << "Ratio       : " << ratio << endl;
 
     for (int i = 0; i < num_threads; ++i) {
         threads.push_back(

@@ -1,49 +1,18 @@
-#ifndef _UTIL_H_
-#define _UTIL_H_
-
-#include <cstdlib>
-#include <ctime>
-#include <iostream>
-#include <mutex>
-#include <random>
+#include <cmath>
 #include <sstream>
-#include <thread>
 
-#include "optionparser.h"
+#include "cmdline-utils.h"
 
 using namespace std;
 
-std::mutex global_cout_mutex;
+const int VALUE_LENGTH = 10;
+const int NUM_KEYS = 1024;
 
-// Replaces every character in the provided string with a random alphanumeric
-// character.
-inline void GenRandomString(string *result) {
-    static const char ALPHANUM_CHARS[] = "0123456789"
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            "abcdefghijklmnopqrstuvwxyz";
-    for (size_t i = 0; i < result->size(); ++i) {
-        (*result)[i] = ALPHANUM_CHARS[rand() % (sizeof(ALPHANUM_CHARS) - 1)];
-    }
-}
-
-constexpr int VALUE_LENGTH = 10;
-constexpr int NUM_KEYS = 1024;
-
-// Stupid dummy function to make threading library link properly
-void pause_thread(int n) {
-  std::this_thread::sleep_for(std::chrono::seconds(n));
-}
-
+mutex global_cout_mutex;
 
 #define STR_VALUE(arg)      #arg
 #define STRINGIFY(arg)      STR_VALUE(arg) /* Weird macro magic */
-#define DEFAULT_SECONDS     10
-#define DEFAULT_OPS_PER_TXN 10
-#define HLE_NAME            "hle"
-#define RTM_NAME            "rtm"
-#define SPIN_NAME           "spin"
-#define LOCK_TABLE_NAME     "tbl"
-enum  optionIndex {UNKNOWN, HELP, NUM_THREADS, NUM_SECONDS, OPS_PER_TXN, RATIO};
+
 const option::Descriptor usage[] =
 {
     {UNKNOWN,     0, "" , "",        option::Arg::None,     "Usage: htm-test [options] "
@@ -61,21 +30,13 @@ const option::Descriptor usage[] =
     {0,0,0,0,0,0}
 };
 
-inline int getArgWithDefault(const option::Option *options, optionIndex index, int defaultVal) {
-    if (options[index]) {
-        return atoi(options[index].arg);
-    } else {
-        return defaultVal;
-    }
-}
-
 double getRatio(const option::Option *options) {
     if (!options[RATIO]) {
         return 1.0;
     }
 
     const char *arg = options[RATIO].arg;
-    istringstream argStream(arg);
+    std::istringstream argStream(arg);
     int gets;
     int inserts;
     argStream >> gets;
@@ -91,5 +52,3 @@ double getRatio(const option::Option *options) {
     }
     return gets / static_cast<double>(inserts);
 }
-
-#endif /* _UTIL_H_ */

@@ -14,7 +14,7 @@
 
 using namespace std;
 
-bool conflict(LockMode mode1, LockMode mode2) {
+inline bool conflict(LockMode mode1, LockMode mode2) {
     if ((mode1 == WRITE && mode2 != FREE) ||
 	(mode2 == WRITE && mode1 != FREE)) {
 	return true;
