@@ -185,7 +185,7 @@ void RunTestReaderWriterThread(TxnManager *manager, uint64_t max_key, int num_re
     global_cout_mutex.unlock();
 }
 
-void RunTestMultiKeyThread(TxnManager *manager, uint64_t max_key, int num_ops,
+void RunMultiKeyThread(TxnManager *manager, uint64_t max_key, int num_ops,
         int seconds_to_run) {
     time_t end_time = time(NULL) + seconds_to_run;
     vector<OpDescription> ops(num_ops + 1);
@@ -419,10 +419,18 @@ int main(int argc, const char* argv[]) {
     // likely that it'll write to the value that's being read during the time of
     // the transaction, so we should notice non-repeatable reads if concurrency
     // control is failing.
-    threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
-    threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
-    //threads.push_back(thread(RunTestReaderWriterThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
+    // threads.push_back(thread(RunTestReaderWriterThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
     */
+
+    // ENABLE SANITY TESTS
+    threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
+    threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
+
+    cout << "Num threads : "<<num_threads << endl;
+    cout << "Time (s)    : "<<num_seconds_to_run << endl;
+    cout << "Ops per txn : "<<ops_per_txn << endl;
+    cout << "Ratio       : "<<ratio << endl;
+
 
     for (int i = 0; i < num_threads; ++i) {
         threads.push_back(
