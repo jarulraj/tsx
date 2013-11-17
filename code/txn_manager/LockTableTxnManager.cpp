@@ -23,7 +23,9 @@ inline bool conflict(LockMode mode1, LockMode mode2) {
     return false;
 }
 
-bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
+
+
+/*bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
         std::vector<string> *get_results) {
     bool finished = false;
     while (!finished) {
@@ -150,11 +152,11 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
     }
 
     return true;
-}
+    }*/
 
 
 // Reader/writer locks, static working sets.
-/*bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
+bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
         std::vector<string> *get_results) {
     // Construct an ordered set of keys to lock, mapped to the type of lock we
     // need to grab.
@@ -174,11 +176,11 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
     }
 
     // Lock keys in order.
+    tableMutex.lock();
     for (pair<long, LockMode> p : keys) {
 	long key = p.first;
 	LockMode requestMode = p.second;
 
-	tableMutex.lock();
 	if (lockTable.count(key) == 0) {
 	    Lock *l = new Lock();
             mutex *m = new mutex();
@@ -194,9 +196,7 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 
 	    unique_lock<mutex> lk(*m);
             lockTable[key] = l;
-            tableMutex.unlock();
         } else {
-            tableMutex.unlock();
 	    Lock *l = lockTable[key];
             unique_lock<mutex> lk(*l->mutex);
 	    thread::id id = this_thread::get_id();
@@ -216,12 +216,14 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 	    l->q.pop();
         }
     }
+    tableMutex.unlock();
 
     // Do transaction.
     ExecuteTxnOps(operations, get_results);
 
     // Unlock all keys in reverse order.
     std::map<long, LockMode>::reverse_iterator rit;
+    tableMutex.lock();
     for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
 	Lock *l = lockTable[(*rit).first];
 	{
@@ -237,11 +239,12 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 		l->mode = FREE;
 	    }
 	}
-	l->cv->notify_all();
+	l->cv->notify_all();\
     }
+    tableMutex.unlock();
 
     return true;
-    }*/
+}
 
 // Without reader/writer locks, keeping this for comparison.
 /*bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
