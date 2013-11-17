@@ -246,7 +246,14 @@ void RunMultiKeyThread(TxnManager *manager, uint64_t max_key, int num_ops,
 
 void RunWorkloadThread(TxnManager *manager, int ops_per_txn,
         int key_max, int seconds_to_run, double get_to_put_ratio) {
-    default_random_engine generator;
+
+    // Workload Generator
+
+    // Seeding
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    std::default_random_engine generator (seed);
+
+    // Distributions
     uniform_real_distribution<double> operation_distribution(0.0, 1.0);
     uniform_int_distribution<int> key_distribution(0, key_max);
 
@@ -288,7 +295,7 @@ void RunWorkloadThread(TxnManager *manager, int ops_per_txn,
 
     global_cout_mutex.lock();
     cout << "Thread " << this_thread::get_id() << ": " << txn_counter
-            << " transactions" << endl;
+        << " transactions" << endl;
     global_cout_mutex.unlock();
 }
 
@@ -303,19 +310,19 @@ void RunWorkloadThread(TxnManager *manager, int ops_per_txn,
 enum  optionIndex {UNKNOWN, HELP, NUM_THREADS, NUM_SECONDS, OPS_PER_TXN, RATIO};
 const option::Descriptor usage[] =
 {
- {UNKNOWN,     0, "" , "",        option::Arg::None,     "Usage: htm-test [options] "
-                                                         HLE_NAME "|" RTM_NAME "|" LOCK_TABLE_NAME "|" SPIN_NAME "\n\n"
-                                                         "Options:" },
- {HELP,        0, "" , "help",    option::Arg::None,     "  --help  \tPrint usage and exit." },
- {NUM_THREADS, 0, "t", "threads", option::Arg::Integer,  "  --threads, -t  \tNumber of threads to run with."
-                                                         " Default: max supported by hardware." },
- {NUM_SECONDS, 0, "s", "seconds", option::Arg::Integer,  "  --seconds, -s  \tNumber of seconds to run for."
-                                                         " Default: " STRINGIFY(DEFAULT_SECONDS) "." },
- {OPS_PER_TXN, 0, "o", "txn_ops", option::Arg::Integer,  "  --txn_ops, -o  \tOperations per transaction."
-                                                         " Default: " STRINGIFY(DEFAULT_OPS_PER_TXN) "." },
- {RATIO,      0,  "r", "ratio",   option::Arg::Required, "  --ratio,   -r  \tRatio of gets to puts in each transaction,"
-                                                         " in the format gets:puts. Default: 1:1." },
- {0,0,0,0,0,0}
+    {UNKNOWN,     0, "" , "",        option::Arg::None,     "Usage: htm-test [options] "
+        HLE_NAME "|" RTM_NAME "|" LOCK_TABLE_NAME "|" SPIN_NAME "\n\n"
+            "Options:" },
+    {HELP,        0, "" , "help",    option::Arg::None,     "  --help  \tPrint usage and exit." },
+    {NUM_THREADS, 0, "t", "threads", option::Arg::Integer,  "  --threads, -t  \tNumber of threads to run with."
+        " Default: max supported by hardware." },
+    {NUM_SECONDS, 0, "s", "seconds", option::Arg::Integer,  "  --seconds, -s  \tNumber of seconds to run for."
+        " Default: " STRINGIFY(DEFAULT_SECONDS) "." },
+    {OPS_PER_TXN, 0, "o", "txn_ops", option::Arg::Integer,  "  --txn_ops, -o  \tOperations per transaction."
+        " Default: " STRINGIFY(DEFAULT_OPS_PER_TXN) "." },
+    {RATIO,      0,  "r", "ratio",   option::Arg::Required, "  --ratio,   -r  \tRatio of gets to puts in each transaction,"
+        " in the format gets:puts. Default: 1:1." },
+    {0,0,0,0,0,0}
 };
 
 inline int getArgWithDefault(const option::Option *options, optionIndex index, int defaultVal) {
@@ -357,11 +364,11 @@ int main(int argc, const char* argv[]) {
     option::Parser parse(usage, argc, argv, options, buffer);
 
     if (parse.error())
-      return 1;
+        return 1;
 
     if (options[HELP] || argc == 0) {
-      option::printUsage(std::cout, usage);
-      return 0;
+        option::printUsage(std::cout, usage);
+        return 0;
     }
 
     if (parse.nonOptionsCount() != 1) {
@@ -378,7 +385,7 @@ int main(int argc, const char* argv[]) {
         cerr << "Ratio must be in the format <int>:<int>" << endl;
         return 1;
     }
-    
+
     delete[] options;
     delete[] buffer;
 
@@ -423,8 +430,8 @@ int main(int argc, const char* argv[]) {
     */
 
     // ENABLE SANITY TESTS
-    threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
-    threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
+    //threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
+    //threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
 
     cout << "Num threads : "<<num_threads << endl;
     cout << "Time (s)    : "<<num_seconds_to_run << endl;
@@ -435,7 +442,7 @@ int main(int argc, const char* argv[]) {
     for (int i = 0; i < num_threads; ++i) {
         threads.push_back(
                 thread(RunWorkloadThread, manager, ops_per_txn, NUM_KEYS,
-                        num_seconds_to_run, ratio));
+                    num_seconds_to_run, ratio));
     }
 
     for (thread &t : threads) {
