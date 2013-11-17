@@ -78,9 +78,6 @@ return true;
 */
 
 void RTMTxnManager::getStats(){
-    /** Stats **/
-    std::cout<<"Stats"<<std::endl;    
-
 }
 
 
