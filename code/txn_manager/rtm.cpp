@@ -92,9 +92,7 @@ tm_try:
             if (code == 0xff) goto tm_fail; /* Lock was taken; fallback */
         }
 
-#ifdef DEBUG
-        fprintf(stderr, "TSX RTM: failure; (code %d)\n", tm_status);
-#endif /* DEBUG */
+        //fprintf(stderr, "TSX RTM: failure; (code %d)\n", tm_status);
 tm_fail:
         __sync_add_and_fetch(&g_locks_failed, 1);
         hle_spinlock_acquire(lock);
