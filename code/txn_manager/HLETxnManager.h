@@ -9,7 +9,7 @@
 
 class HLETxnManager : public TxnManager {
 public:
-    HLETxnManager(HashTable *table);
+    HLETxnManager(std::unordered_map<long,std::string> *table);
 
     virtual bool RunTxn(const std::vector<OpDescription> &operations,
             std::vector<string> *get_results);
@@ -17,9 +17,6 @@ public:
     void getStats();
 
 private:
-    unordered_map<uint64_t, spinlock_t*> lockTable;
-    // Prevents concurrent insertions to the lock table.
-
     static spinlock_t table_lock;
 };
 

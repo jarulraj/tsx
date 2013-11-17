@@ -29,7 +29,7 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
     while (!finished) {
 	// Construct an ordered set of keys to lock, mapped to the type of lock we
 	// need to grab.
-	unordered_map<uint64_t, LockMode> keys;
+	unordered_map<long, LockMode> keys;
 	for (const OpDescription &op : operations) {
 	    if (keys.count(op.key) == 1) {
 		if (op.type == GET && keys[op.key] != READ) {
@@ -44,8 +44,8 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 	    }
 	}
 
-	list<pair<uint64_t, LockMode> > l;
-	for (pair<uint64_t, LockMode> p : keys) {
+	list<pair<long, LockMode> > l;
+	for (pair<long, LockMode> p : keys) {
 	    l.push_back(p);
 	}
 
@@ -56,10 +56,10 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 	}
 
 	bool abort = false;
-        unordered_map<uint64_t, LockMode> locked;
-	for (pair<uint64_t, LockMode> p : l) {
+        unordered_map<long, LockMode> locked;
+	for (pair<long, LockMode> p : l) {
 	    assert(!abort);
-	    uint64_t key = p.first;
+	    long key = p.first;
 	    LockMode requestMode = p.second;
 
 	    tableMutex.lock();
@@ -129,7 +129,7 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 	}
 
 	// Unlock the keys that were successfully locked.
-	std::unordered_map<uint64_t, LockMode>::iterator rit;
+	std::unordered_map<long, LockMode>::iterator rit;
 	for (rit = locked.begin(); rit != locked.end(); rit++) {
 	    Lock *l = lockTable[(*rit).first];
 	    {
@@ -158,7 +158,7 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
         std::vector<string> *get_results) {
     // Construct an ordered set of keys to lock, mapped to the type of lock we
     // need to grab.
-    map<uint64_t, LockMode> keys;
+    map<long, LockMode> keys;
     for (const OpDescription &op : operations) {
 	if (keys.count(op.key) == 1) {
 	    if (op.type == GET && keys[op.key] != READ) {
@@ -174,8 +174,8 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
     }
 
     // Lock keys in order.
-    for (pair<uint64_t, LockMode> p : keys) {
-	uint64_t key = p.first;
+    for (pair<long, LockMode> p : keys) {
+	long key = p.first;
 	LockMode requestMode = p.second;
 
 	tableMutex.lock();
@@ -221,7 +221,7 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
     ExecuteTxnOps(operations, get_results);
 
     // Unlock all keys in reverse order.
-    std::map<uint64_t, LockMode>::reverse_iterator rit;
+    std::map<long, LockMode>::reverse_iterator rit;
     for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
 	Lock *l = lockTable[(*rit).first];
 	{
@@ -247,13 +247,13 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 /*bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
         std::vector<string> *get_results) {
     // Construct an ordered set of keys to lock.
-    set<uint64_t> keys;
+    set<long> keys;
     for (const OpDescription &op : operations) {
         keys.insert(op.key);
     }
 
     // Lock keys in order.
-    for (uint64_t key : keys) {
+    for (long key : keys) {
         tableMutex.lock();
         if (lockTable.count(key) == 0) {
             mutex *m = new mutex();
@@ -270,7 +270,7 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
     ExecuteTxnOps(operations, get_results);
 
     // Unlock all keys in reverse order.
-    std::set<uint64_t>::reverse_iterator rit;
+    std::set<long>::reverse_iterator rit;
     for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
         lockTable[*rit]->unlock();
     }

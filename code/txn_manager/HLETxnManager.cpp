@@ -6,7 +6,7 @@
 
 spinlock_t HLETxnManager::table_lock = { 0 } ;
 
-HLETxnManager::HLETxnManager(HashTable *table)
+HLETxnManager::HLETxnManager(std::unordered_map<long,std::string> *table)
     : TxnManager(table) {
          
         int hle = cpu_has_hle();

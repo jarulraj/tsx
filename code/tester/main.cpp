@@ -5,6 +5,7 @@
 #include <random>
 #include <sstream>
 #include <thread>
+#include <utility>
 
 #include "optionparser.h"
 #include "hashtable.h"
@@ -54,7 +55,13 @@ int main(int argc, const char* argv[]) {
 
 
     // Initialize hashtable
-    HashTable table(static_cast<ht_flags>(HT_KEY_CONST | HT_VALUE_CONST), 0.05);
+    // HashTable table(static_cast<ht_flags>(HT_KEY_CONST | HT_VALUE_CONST), 0.05);
+
+    // Use std::unordered_map as hashtable 
+    // Making the underlying hashtable concurrency-safe is a different problem
+    std::unordered_map<long,std::string> table; 
+
+
     TxnManager *manager;
     if (manager_type == HLE_NAME) {
         manager = new HLETxnManager(&table);
@@ -71,12 +78,15 @@ int main(int argc, const char* argv[]) {
 
     //table.display();
     // Make sure all the keys we'll be using are there so GETs don't fail
-    for (uint64_t i = 0; i < NUM_KEYS; ++i) {
-        table.Insert(i, std::to_string(i));
+    for (long i = 0; i < NUM_KEYS; ++i) {
+        string istr = std::to_string(i) ;
+        std::pair<long,std::string> entry (i,istr);
+        table.insert(entry);
     }
 
-    cout << "Keys inserted: " << table.GetSize() << endl;
-    //table.display();
+    cout << "Keys inserted: " << table.size() << endl;
+    //for (auto& x: table)
+    //    std::cout << x.first << ": " << x.second << std::endl;
 
     vector<thread> threads;
     //threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, num_seconds_to_run));
@@ -91,8 +101,6 @@ int main(int argc, const char* argv[]) {
     // control is failing.
     // threads.push_back(thread(RunTestReaderWriterThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
     */
-
-    // ENABLE SANITY TESTS
     //threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
     //threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
 
@@ -103,7 +111,7 @@ int main(int argc, const char* argv[]) {
 
     for (int i = 0; i < num_threads; ++i) {
         threads.push_back(
-                thread(RunWorkloadThread, manager, ops_per_txn, NUM_KEYS,
+                thread(RunWorkloadThread, manager, ops_per_txn, NUM_KEYS-1,
                     num_seconds_to_run, ratio));
     }
 

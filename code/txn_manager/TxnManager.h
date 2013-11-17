@@ -19,14 +19,14 @@ typedef enum OpType {
 
 typedef struct OpDescription {
     OpType type;
-    uint64_t key;
+    long key;
     std::string value;
 } OpDescription;
 
 
 class TxnManager {
 public:
-    TxnManager(HashTable *table) : table_(table) {}
+    TxnManager(std::unordered_map<long,std::string> *table) : table_(table) {}
 
     virtual ~TxnManager() {
         delete table_;
@@ -49,7 +49,7 @@ protected:
             std::vector<string> *get_results);
 
 private:
-    HashTable *table_;
+    std::unordered_map<long,std::string> *table_;
 };
 
 #endif /* _TXN_MANAGER_H_ */

@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <set>
+#include <unordered_map>
+#include <utility> 
 
 #include "TxnManager.h"
 
@@ -12,20 +14,19 @@ bool TxnManager::ExecuteTxnOps(const vector<OpDescription> &operations,
         std::vector<string> *get_results) {
     for (const OpDescription &op : operations) {
         if (op.type == INSERT) {
-            table_->Insert(op.key, op.value);
+            table_->insert(std::make_pair<const long&, const std::string&>(op.key, op.value));
         } 
         else if (op.type == GET) {
             string result;
-            if (!table_->Get(op.key, &result)) {
-                return false;
-            }
-      
+            //at function throws an out_of_range exception if key not found
+            result = table_->at(op.key);
+
             if (get_results != NULL) {
                 get_results->push_back(result);
             }
         } 
-        else { // op.type == DELETE
-            table_->Delete(op.key);
+        else { 
+            table_->erase(op.key);
         }
     }
 
@@ -33,7 +34,7 @@ bool TxnManager::ExecuteTxnOps(const vector<OpDescription> &operations,
 }
 
 void TxnManager::getStats(){
-    std:cout<<"Print Stats"<<std::endl;
+std:cout<<"Print Stats"<<std::endl;
 }
 
 #endif /* _TXN_MANAGER_CPP */

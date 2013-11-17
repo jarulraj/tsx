@@ -26,7 +26,6 @@ inline void GenRandomString(string *result) {
     }
 }
 
-// It probably doesn't really matter how long the value strings are...
 constexpr int VALUE_LENGTH = 10;
 constexpr int NUM_KEYS = 1024;
 

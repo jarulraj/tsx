@@ -24,13 +24,13 @@ using namespace std;
 // This thread performs a large number of single-operation transactions. It
 // cycles through all possible keys, with each transaction writing to the next
 // key.
-void RunTestWriterThread(TxnManager *manager, uint64_t max_key,
+void RunTestWriterThread(TxnManager *manager, long max_key,
         int seconds_to_run) {
     time_t end_time = time(NULL) + seconds_to_run;
     vector<OpDescription> ops(1);
     ops[0].value.resize(VALUE_LENGTH);
 
-    uint64_t key = 0;
+    long key = 0;
     int txn_counter = 0;
     do {
         ops[0].type = INSERT;
@@ -52,7 +52,7 @@ void RunTestWriterThread(TxnManager *manager, uint64_t max_key,
 // This thread performs a series of transactions in which the same key is read
 // num_reads times. It complains if the reads are not repeatable. Like
 // RunTestWriterThread, it cycles through all possible keys.
-void RunTestReaderThread(TxnManager *manager, uint64_t max_key, int num_reads,
+void RunTestReaderThread(TxnManager *manager, long max_key, int num_reads,
         int seconds_to_run) {
     time_t end_time = time(NULL) + seconds_to_run;
     vector<OpDescription> ops(num_reads);
@@ -63,7 +63,7 @@ void RunTestReaderThread(TxnManager *manager, uint64_t max_key, int num_reads,
 
     vector<string> get_results;
     get_results.reserve(num_reads);
-    uint64_t key = 0;
+    long key = 0;
     int txn_counter = 0;
     do {
         for (int i = 0; i < num_reads; ++i) {
@@ -109,7 +109,7 @@ void RunTestReaderThread(TxnManager *manager, uint64_t max_key, int num_reads,
 // written and then read num_reads times. It complains if the reads do not
 // return the written value. Like the other threads, it cycles through keys.
 // This is to test writer/writer conflicts for the read/write lock manager.
-void RunTestReaderWriterThread(TxnManager *manager, uint64_t max_key, int num_reads,
+void RunTestReaderWriterThread(TxnManager *manager, long max_key, int num_reads,
         int seconds_to_run) {
     time_t end_time = time(NULL) + seconds_to_run;
     vector<OpDescription> ops(num_reads + 1);
@@ -123,7 +123,7 @@ void RunTestReaderWriterThread(TxnManager *manager, uint64_t max_key, int num_re
 
     vector<string> get_results;
     get_results.reserve(num_reads);
-    uint64_t key = 0;
+    long key = 0;
     int txn_counter = 0;
     do {
         ops[0].type = INSERT;
@@ -165,7 +165,7 @@ void RunTestReaderWriterThread(TxnManager *manager, uint64_t max_key, int num_re
     global_cout_mutex.unlock();
 }
 
-void RunMultiKeyThread(TxnManager *manager, uint64_t max_key, int num_ops,
+void RunMultiKeyThread(TxnManager *manager, long max_key, int num_ops,
         int seconds_to_run) {
     time_t end_time = time(NULL) + seconds_to_run;
     vector<OpDescription> ops(num_ops + 1);
@@ -181,7 +181,7 @@ void RunMultiKeyThread(TxnManager *manager, uint64_t max_key, int num_ops,
     get_results.reserve(num_ops);
     vector<string> inputs;
     inputs.reserve(num_ops);
-    uint64_t key = 0;
+    long key = 0;
     int txn_counter = 0;
     do {
         for (int i = 0; i < num_ops; i += 2) {
