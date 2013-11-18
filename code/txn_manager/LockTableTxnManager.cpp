@@ -175,29 +175,33 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 	}
     }
 
+
     // Lock keys in order.
-    tableMutex.lock();
     for (pair<long, LockMode> p : keys) {
 	long key = p.first;
 	LockMode requestMode = p.second;
 
+	tableMutex.lock();
 	if (lockTable.count(key) == 0) {
 	    Lock *l = new Lock();
+            lockTable[key] = l;
             mutex *m = new mutex();
 	    l->mutex = m;
 	    condition_variable *cv = new condition_variable();
 	    l->cv = cv;
 	    l->mode = requestMode;
+
 	    if (requestMode == READ) {
 		l->num_readers = 1;
 	    } else {
 		l->num_readers = 0;
 	    }
 
+	    tableMutex.unlock();
 	    unique_lock<mutex> lk(*m);
-            lockTable[key] = l;
         } else {
 	    Lock *l = lockTable[key];
+	    tableMutex.unlock();
             unique_lock<mutex> lk(*l->mutex);
 	    thread::id id = this_thread::get_id();
 	    l->q.push(id);
@@ -216,16 +220,16 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 	    l->q.pop();
         }
     }
-    tableMutex.unlock();
 
     // Do transaction.
     ExecuteTxnOps(operations, get_results);
 
     // Unlock all keys in reverse order.
     std::map<long, LockMode>::reverse_iterator rit;
-    tableMutex.lock();
     for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
+	tableMutex.lock();
 	Lock *l = lockTable[(*rit).first];
+	tableMutex.unlock();
 	{
 	    lock_guard<mutex> lk(*l->mutex);
 	    if (l->mode == READ) {
@@ -236,12 +240,12 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 		}
 	    } else {
 		assert(l->num_readers == 0);
+		assert((*rit).second == WRITE);
 		l->mode = FREE;
 	    }
 	}
-	l->cv->notify_all();\
+	l->cv->notify_all();
     }
-    tableMutex.unlock();
 
     return true;
 }
