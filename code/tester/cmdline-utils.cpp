@@ -9,6 +9,7 @@ const int VALUE_LENGTH = 10;
 const int NUM_KEYS = 1024;
 
 mutex global_cout_mutex;
+int total_txns = 0;
 
 #define STR_VALUE(arg)      #arg
 #define STRINGIFY(arg)      STR_VALUE(arg) /* Weird macro magic */

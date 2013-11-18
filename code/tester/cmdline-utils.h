@@ -15,6 +15,7 @@ extern const int NUM_KEYS;
 #define LOCK_TABLE_NAME     "tbl"
 
 extern std::mutex global_cout_mutex;
+extern int total_txns;
 
 enum  optionIndex {UNKNOWN, HELP, NUM_THREADS, NUM_SECONDS, OPS_PER_TXN, RATIO};
 extern const option::Descriptor usage[];

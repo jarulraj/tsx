@@ -249,5 +249,6 @@ void RunWorkloadThread(TxnManager *manager, int ops_per_txn,
     global_cout_mutex.lock();
     cout << "Thread " << this_thread::get_id() << ": " << txn_counter
         << " transactions" << endl;
+    total_txns += txn_counter;
     global_cout_mutex.unlock();
 }

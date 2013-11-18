@@ -124,5 +124,7 @@ int main(int argc, const char* argv[]) {
         t.join();
     }
 
+    cout << "Total transactions: " << total_txns << endl;
+
     return 0;
 }
