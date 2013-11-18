@@ -13,15 +13,16 @@ bool SpinLockTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 
     // Lock keys in order.
     for (uint64_t key : keys) {
-        tableMutex.lock();
+	tableMutex.lock();
         if (lockTable.count(key) == 0) {
-            atomic_flag *a = new atomic_flag();
+	    atomic_flag *a = new atomic_flag();
+	    lockTable[key] = a;
+	    tableMutex.unlock();
             a->test_and_set(memory_order_acquire);
-            lockTable[key] = a;
-            tableMutex.unlock();
         } else {
+	    atomic_flag *a = lockTable[key];
             tableMutex.unlock();
-            while (lockTable[key]->test_and_set(memory_order_acquire));
+            while (a->test_and_set(memory_order_acquire));
         }
     }
 
@@ -31,9 +32,11 @@ bool SpinLockTxnManager::RunTxn(const std::vector<OpDescription> &operations,
     // Unlock all keys in reverse order.
     std::set<uint64_t>::reverse_iterator rit;
     for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
+	tableMutex.lock();
         lockTable[*rit]->clear(memory_order_release);
+	tableMutex.unlock();
     }
-    
+
     return true;
 }
  
