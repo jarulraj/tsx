@@ -106,7 +106,7 @@ int main(int argc, const char* argv[]) {
         // will write to the value that's being read during the time of the transaction,
         // so we should notice non-repeatable reads if concurrency control is failing.
         cout << "Running sanity check with 1 reader/writer thread"
-                " and 1 multi-key reader/writer thread"
+                " and 2 multi-key reader/writer threads"
              << endl;
         thread_stats.resize(3);
         threads.push_back(

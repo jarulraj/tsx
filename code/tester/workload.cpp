@@ -19,17 +19,15 @@ void RunTestWriterThread(TxnManager *manager, ThreadStats *stats, long num_keys,
         ops[0].value = std::to_string(key);
         ++stats->inserts;
 
-        //cout << "Write Txn Run : " << txn_counter << endl;
         manager->RunTxn(ops, NULL);
         key = (key + 1) % num_keys;
         ++stats->transactions;
-        //cout << "Write Txn End : " << txn_counter << endl;
     } while (time(NULL) <= end_time);
 
 }
 
-void RunTestReaderThread(TxnManager *manager, ThreadStats *stats, long num_keys, int num_reads,
-        int seconds_to_run) {
+void RunTestReaderThread(TxnManager *manager, ThreadStats *stats, long num_keys,
+        int num_reads, int seconds_to_run) {
     stats->thread_id = this_thread::get_id();
 
     time_t end_time = time(NULL) + seconds_to_run;
@@ -75,15 +73,14 @@ void RunTestReaderThread(TxnManager *manager, ThreadStats *stats, long num_keys,
             }
         }
 
-        get_results.clear();  // Doesn't actually change memory allocation
+        get_results.clear();
         key = (key + 1) % num_keys;
         ++stats->transactions;
-        //cout << "Read Txn End : " << txn_counter << endl;
     } while (time(NULL) <= end_time);
 }
 
-void RunTestReaderWriterThread(TxnManager *manager, ThreadStats *stats, long num_keys, int num_reads,
-        int seconds_to_run, size_t value_length) {
+void RunTestReaderWriterThread(TxnManager *manager, ThreadStats *stats,
+        long num_keys, int num_reads, int seconds_to_run, size_t value_length) {
     stats->thread_id = this_thread::get_id();
 
     time_t end_time = time(NULL) + seconds_to_run;
@@ -113,7 +110,7 @@ void RunTestReaderWriterThread(TxnManager *manager, ThreadStats *stats, long num
 
         if (!manager->RunTxn(ops, &get_results)) {
             global_cout_mutex.lock();
-            cerr << "ERROR: transaction failed in thread "
+            cerr << "ERROR: transaction failed in reader/writer thread "
                     << this_thread::get_id();
             global_cout_mutex.unlock();
             return;
@@ -135,43 +132,44 @@ void RunTestReaderWriterThread(TxnManager *manager, ThreadStats *stats, long num
             }
         }
 
-        get_results.clear();  // Doesn't actually change memory allocation
+        get_results.clear();
         key = (key + 1) % num_keys;
         ++stats->transactions;
     } while (time(NULL) <= end_time);
 }
 
-void RunMultiKeyThread(TxnManager *manager, ThreadStats *stats, long num_keys, int num_ops,
-        int seconds_to_run, size_t value_length) {
+void RunMultiKeyThread(TxnManager *manager, ThreadStats *stats, long num_keys,
+        int num_ops, int seconds_to_run, size_t value_length) {
     stats->thread_id = this_thread::get_id();
 
     time_t end_time = time(NULL) + seconds_to_run;
-    vector<OpDescription> ops(num_ops + 1);
-    for (OpDescription &op : ops) {
-        op.value.resize(value_length);
+    vector<OpDescription> ops(num_ops);
+    // Only allocate memory for the ones that will be inserts containing values.
+    for (int i = 0; i < num_ops; i += 2) {
+        ops[i].value.resize(value_length);
     }
 
     if (num_ops <= 0) {
         return;
+    } else if (num_ops % 2 == 1) {
+        // Make sure we have an even number of operations.
+        num_ops += 1;
     }
 
     vector<string> get_results;
-    get_results.reserve(num_ops);
-    vector<string> inputs;
-    inputs.reserve(num_ops);
+    get_results.reserve(num_ops / 2);
     long key = 0;
     do {
         for (int i = 0; i < num_ops; i += 2) {
             ops[i].type = INSERT;
             ops[i].key = key;
             GenRandomString(&ops[i].value);
-            inputs.push_back(ops[i].value);
             ops[i + 1].type = GET;
             ops[i + 1].key = key;
             key = (key + 1) % num_keys;
         }
-        stats->gets += num_ops;
-        stats->inserts += num_ops;
+        stats->gets += num_ops / 2;
+        stats->inserts += num_ops / 2;
 
         if (!manager->RunTxn(ops, &get_results)) {
             global_cout_mutex.lock();
@@ -181,11 +179,9 @@ void RunMultiKeyThread(TxnManager *manager, ThreadStats *stats, long num_keys, i
             return;
         }
 
-        for (auto result_iter = get_results.begin(), inputs_iter =
-                inputs.begin(); result_iter != get_results.end();
-                ++result_iter, ++inputs_iter) {
-            const string &next_result = *result_iter;
-            const string &next_input = *inputs_iter;
+        for (int i = 0; i < get_results.size(); ++i) {
+            const string &next_result = get_results[i];
+            const string &next_input = ops[2 * i].value;
             if (next_input.compare(next_result) != 0) {
                 global_cout_mutex.lock();
                 cerr << "ERROR: next read should have returned '" << next_input
@@ -196,8 +192,7 @@ void RunMultiKeyThread(TxnManager *manager, ThreadStats *stats, long num_keys, i
             }
         }
 
-        inputs.clear();
-        get_results.clear(); // Doesn't actually change memory allocation
+        get_results.clear();
         ++stats->transactions;
     } while (time(NULL) <= end_time);
 }
