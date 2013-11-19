@@ -14,7 +14,7 @@ bool TxnManager::ExecuteTxnOps(const vector<OpDescription> &operations,
         std::vector<string> *get_results) {
     for (const OpDescription &op : operations) {
         if (op.type == INSERT) {
-            table_->insert(std::make_pair<const long&, const std::string&>(op.key, op.value));
+            (*table_)[op.key] = op.value;
         } 
         else if (op.type == GET) {
             string result;
