@@ -32,7 +32,7 @@ int main(int argc, const char* argv[]) {
     option::Option* buffer  = new option::Option[stats.buffer_max];
     option::Parser parse(usage, argc, argv, options, buffer);
 
-    cout<<"Argc "<<argc<<endl;
+    //cout<<"Argc "<<argc<<endl;
 
     if (parse.error())
         return 1;
@@ -51,9 +51,10 @@ int main(int argc, const char* argv[]) {
     int num_threads = getArgWithDefault(options, NUM_THREADS, thread::hardware_concurrency());
     int num_seconds_to_run = getArgWithDefault(options, NUM_SECONDS, DEFAULT_SECONDS);
     int ops_per_txn = getArgWithDefault(options, OPS_PER_TXN, DEFAULT_OPS_PER_TXN);
+    int num_keys = getArgWithDefault(options, NUM_KEYS, DEFAULT_KEYS);
+    int value_length = getArgWithDefault(options, VALUE_LENGTH, DEFAULT_VALUE_LENGTH);
     double ratio = getRatio(options);
     if (std::isnan(ratio)) {
-        cerr << "Ratio must be in the format <int>:<int>" << endl;
         return 1;
     }
 
@@ -74,9 +75,9 @@ int main(int argc, const char* argv[]) {
         manager = new HLETxnManager(&table);
     }else if (manager_type == RTM_NAME) {
         manager = new RTMTxnManager(&table);
-    } else if(manager_type == LOCK_TABLE_NAME) {
+    } else if (manager_type == LOCK_TABLE_NAME) {
         manager = new LockTableTxnManager(&table);
-    } else if(manager_type == SPIN_NAME) {
+    } else if (manager_type == SPIN_NAME) {
         manager = new SpinLockTxnManager(&table);
     } else {
         option::printUsage(std::cout, usage);
@@ -85,13 +86,12 @@ int main(int argc, const char* argv[]) {
 
     //table.display();
     // Make sure all the keys we'll be using are there so GETs don't fail
-    for (long i = 0; i < NUM_KEYS; ++i) {
+    for (long i = 0; i < num_keys; ++i) {
         string istr = std::to_string(i) ;
         std::pair<long,std::string> entry (i,istr);
         table.insert(entry);
     }
 
-    cout << "Keys inserted: " << table.size() << endl;
     //for (auto& x: table)
     //    std::cout << x.first << ": " << x.second << std::endl;
 
@@ -111,14 +111,16 @@ int main(int argc, const char* argv[]) {
     //threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
     //threads.push_back(thread(RunMultiKeyThread, manager, NUM_KEYS, 10 * NUM_KEYS, num_seconds_to_run));
 
-    cout << "Num threads : " << num_threads << endl;
-    cout << "Time (s)    : " << num_seconds_to_run << endl;
-    cout << "Ops per txn : " << ops_per_txn << endl;
-    cout << "Ratio       : " << ratio << endl;
+    cout << "Num threads:  " << num_threads << endl;
+    cout << "Time (s):     " << num_seconds_to_run << endl;
+    cout << "Ops per txn:  " << ops_per_txn << endl;
+    cout << "Ratio:        " << ratio << endl;
+    cout << "Num keys:     " << num_keys << endl;
+    cout << "Value length: " << value_length << endl;
 
     for (int i = 0; i < num_threads; ++i) {
         threads.push_back(
-                thread(RunWorkloadThread, manager, ops_per_txn, NUM_KEYS-1,
+                thread(RunWorkloadThread, manager, ops_per_txn, num_keys-1,
                     num_seconds_to_run, ratio));
     }
 

@@ -6,9 +6,6 @@
 
 using namespace std;
 
-const int VALUE_LENGTH = 10;
-const int NUM_KEYS = 1024;
-
 mutex global_cout_mutex;
 int total_txns = 0;
 
@@ -27,8 +24,12 @@ const option::Descriptor usage[] =
         " Default: " STRINGIFY(DEFAULT_SECONDS) "." },
     {OPS_PER_TXN, 0, "o", "txn_ops", option::Arg::Integer,  "  --txn_ops, -o  \tOperations per transaction."
         " Default: " STRINGIFY(DEFAULT_OPS_PER_TXN) "." },
-    {RATIO,      0,  "r", "ratio",   option::Arg::Required, "  --ratio,   -r  \tRatio of gets to puts in each transaction,"
-        " in the format gets:puts. Default: 1:1." },
+    {RATIO,       0, "r", "ratio",   option::Arg::Required, "  --ratio,   -r  \tRatio of gets to puts in each"
+        " transaction, in the format gets:puts. Default: 1:1." },
+    {NUM_KEYS,    0, "n", "keys",    option::Arg::Integer,  "  --keys,    -n  \tNumber of keys in the database."
+        " Default: " STRINGIFY(DEFAULT_KEYS) "." },
+    {VALUE_LENGTH,0, "v", "val_len", option::Arg::Integer,  "  --val_len, -v  \tLength of each value string."
+        " Default: " STRINGIFY(DEFAULT_VALUE_LENGTH) "." },
     {0,0,0,0,0,0}
 };
 
@@ -41,16 +42,22 @@ double getRatio(const option::Option *options) {
     std::istringstream argStream(arg);
     int gets;
     int inserts;
+    const char *errMsg = "Ratio must be in the format <int>:<int>";
+
     argStream >> gets;
     if (argStream.bad()) {
+        cerr << errMsg << endl;
         return nan("");
     }
     if (argStream.get() != ':') {
+        cerr << errMsg << endl;
         return nan("");
     }
     argStream >> inserts;
     if (argStream.bad()) {
+        cerr << errMsg << endl;
         return nan("");
     }
+
     return gets / static_cast<double>(inserts);
 }

@@ -5,19 +5,28 @@
 
 #include "optionparser.h"
 
-extern const int VALUE_LENGTH;
-extern const int NUM_KEYS;
-#define DEFAULT_SECONDS     10
-#define DEFAULT_OPS_PER_TXN 10
-#define HLE_NAME            "hle"
-#define RTM_NAME            "rtm"
-#define SPIN_NAME           "spin"
-#define LOCK_TABLE_NAME     "tbl"
+#define DEFAULT_SECONDS      10
+#define DEFAULT_OPS_PER_TXN  10
+#define DEFAULT_KEYS         1024
+#define DEFAULT_VALUE_LENGTH 10
+#define HLE_NAME             "hle"
+#define RTM_NAME             "rtm"
+#define SPIN_NAME            "spin"
+#define LOCK_TABLE_NAME      "tbl"
 
 extern std::mutex global_cout_mutex;
 extern int total_txns;
 
-enum  optionIndex {UNKNOWN, HELP, NUM_THREADS, NUM_SECONDS, OPS_PER_TXN, RATIO};
+enum optionIndex {
+    UNKNOWN,
+    HELP,
+    NUM_THREADS,
+    NUM_SECONDS,
+    OPS_PER_TXN,
+    RATIO,
+    NUM_KEYS,
+    VALUE_LENGTH
+};
 extern const option::Descriptor usage[];
 
 inline int getArgWithDefault(const option::Option *options, optionIndex index, int defaultVal) {
