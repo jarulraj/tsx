@@ -101,6 +101,10 @@ int main(int argc, const char* argv[]) {
     vector<thread> threads;
     vector<ThreadStats> thread_stats;
 
+    cout << "Time (s):     " << num_seconds_to_run << endl;
+    cout << "Num keys:     " << num_keys << endl;
+    cout << "Value length: " << value_length << endl;
+    cout << "CC type:      " << manager_type << endl;
     if (sanity_test) {
         // Each transaction reads keys multiple times. It's pretty likely that a writer
         // will write to the value that's being read during the time of the transaction,
@@ -120,11 +124,8 @@ int main(int argc, const char* argv[]) {
                         10 * num_keys, num_seconds_to_run, value_length));
     } else {
         cout << "Num threads:  " << num_threads << endl;
-        cout << "Time (s):     " << num_seconds_to_run << endl;
         cout << "Ops per txn:  " << ops_per_txn << endl;
         cout << "Ratio:        " << ratio << endl;
-        cout << "Num keys:     " << num_keys << endl;
-        cout << "Value length: " << value_length << endl;
 
         thread_stats.resize(num_threads);
         for (int i = 0; i < num_threads; ++i) {

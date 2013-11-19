@@ -14,6 +14,7 @@ bool TxnManager::ExecuteTxnOps(const vector<OpDescription> &operations,
         std::vector<string> *get_results) {
     for (const OpDescription &op : operations) {
         if (op.type == INSERT) {
+            // Overwrite value if already present.
             (*table_)[op.key] = op.value;
         } 
         else if (op.type == GET) {
