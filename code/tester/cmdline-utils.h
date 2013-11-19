@@ -15,7 +15,6 @@
 #define LOCK_TABLE_NAME      "tbl"
 
 extern std::mutex global_cout_mutex;
-extern int total_txns;
 
 enum optionIndex {
     UNKNOWN,
@@ -25,7 +24,8 @@ enum optionIndex {
     OPS_PER_TXN,
     RATIO,
     NUM_KEYS,
-    VALUE_LENGTH
+    VALUE_LENGTH,
+    SANITY_TEST
 };
 extern const option::Descriptor usage[];
 

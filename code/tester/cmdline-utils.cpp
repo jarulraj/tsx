@@ -7,7 +7,6 @@
 using namespace std;
 
 mutex global_cout_mutex;
-int total_txns = 0;
 
 #define STR_VALUE(arg)      #arg
 #define STRINGIFY(arg)      STR_VALUE(arg) /* Weird macro magic */
@@ -30,12 +29,14 @@ const option::Descriptor usage[] =
         " Default: " STRINGIFY(DEFAULT_KEYS) "." },
     {VALUE_LENGTH,0, "v", "val_len", option::Arg::Integer,  "  --val_len, -v  \tLength of each value string."
         " Default: " STRINGIFY(DEFAULT_VALUE_LENGTH) "." },
+    {SANITY_TEST, 0, "a", "sanity_test", option::Arg::None, "  --sanity_test, -a  \tRun a sanity test to check"
+        " validity of CC schemes, instead of real workloads. Disables -t, -o, and -r flags."},
     {0,0,0,0,0,0}
 };
 
 double getRatio(const option::Option *options) {
     if (!options[RATIO]) {
-        return 1.0;
+        return 0.5;
     }
         
     const char *arg = options[RATIO].arg;
@@ -59,5 +60,5 @@ double getRatio(const option::Option *options) {
         return nan("");
     }
 
-    return gets / static_cast<double>(inserts);
+    return gets / static_cast<double>(inserts + gets);
 }

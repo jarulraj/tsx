@@ -4,33 +4,34 @@
 #include "cmdline-utils.h"
 #include "workload.h"
 
-void RunTestWriterThread(TxnManager *manager, long max_key,
-        int seconds_to_run) {
+void RunTestWriterThread(TxnManager *manager, ThreadStats *stats, long num_keys,
+        int seconds_to_run, size_t value_length) {
+    stats->thread_id = this_thread::get_id();
+
     time_t end_time = time(NULL) + seconds_to_run;
     vector<OpDescription> ops(1);
-    ops[0].value.resize(VALUE_LENGTH);
+    ops[0].value.resize(value_length);
 
     long key = 0;
-    int txn_counter = 0;
     do {
         ops[0].type = INSERT;
         ops[0].key = key;
         ops[0].value = std::to_string(key);
+        ++stats->inserts;
 
         //cout << "Write Txn Run : " << txn_counter << endl;
         manager->RunTxn(ops, NULL);
-        key = (key + 1) % max_key;
-        ++txn_counter;
+        key = (key + 1) % num_keys;
+        ++stats->transactions;
         //cout << "Write Txn End : " << txn_counter << endl;
     } while (time(NULL) <= end_time);
 
-    global_cout_mutex.lock();
-    cout << "Write transactions: " << txn_counter << endl;
-    global_cout_mutex.unlock();
 }
 
-void RunTestReaderThread(TxnManager *manager, long max_key, int num_reads,
+void RunTestReaderThread(TxnManager *manager, ThreadStats *stats, long num_keys, int num_reads,
         int seconds_to_run) {
+    stats->thread_id = this_thread::get_id();
+
     time_t end_time = time(NULL) + seconds_to_run;
     vector<OpDescription> ops(num_reads);
 
@@ -41,15 +42,17 @@ void RunTestReaderThread(TxnManager *manager, long max_key, int num_reads,
     vector<string> get_results;
     get_results.reserve(num_reads);
     long key = 0;
-    int txn_counter = 0;
     do {
         for (int i = 0; i < num_reads; ++i) {
             ops[i].type = GET;
             ops[i].key = key;
         }
+        stats->gets += num_reads;
+
         if (!manager->RunTxn(ops, &get_results)) {
             global_cout_mutex.lock();
-            cerr << "ERROR: transaction failed.";
+            cerr << "ERROR: transaction failed in thread "
+                    << this_thread::get_id();
             global_cout_mutex.unlock();
             return;
         }
@@ -65,29 +68,28 @@ void RunTestReaderThread(TxnManager *manager, long max_key, int num_reads,
             if (result.compare(next_result) != 0) {
                 global_cout_mutex.lock();
                 cerr << "ERROR: all reads should have returned '" << result
-                        << "'; got '" << next_result << "' instead" << endl;
+                        << "'; got '" << next_result << "' instead (thread "
+                        << this_thread::get_id() << ')' << endl;
                 global_cout_mutex.unlock();
                 break;
             }
         }
 
         get_results.clear();  // Doesn't actually change memory allocation
-        key = (key + 1) % max_key;
-        ++txn_counter;
+        key = (key + 1) % num_keys;
+        ++stats->transactions;
         //cout << "Read Txn End : " << txn_counter << endl;
     } while (time(NULL) <= end_time);
-
-    global_cout_mutex.lock();
-    cout << "Read transactions: " << txn_counter << endl;
-    global_cout_mutex.unlock();
 }
 
-void RunTestReaderWriterThread(TxnManager *manager, long max_key, int num_reads,
-        int seconds_to_run) {
+void RunTestReaderWriterThread(TxnManager *manager, ThreadStats *stats, long num_keys, int num_reads,
+        int seconds_to_run, size_t value_length) {
+    stats->thread_id = this_thread::get_id();
+
     time_t end_time = time(NULL) + seconds_to_run;
     vector<OpDescription> ops(num_reads + 1);
     for (OpDescription &op : ops) {
-        op.value.resize(VALUE_LENGTH);
+        op.value.resize(value_length);
     }
 
     if (num_reads <= 0) {
@@ -97,19 +99,22 @@ void RunTestReaderWriterThread(TxnManager *manager, long max_key, int num_reads,
     vector<string> get_results;
     get_results.reserve(num_reads);
     long key = 0;
-    int txn_counter = 0;
     do {
         ops[0].type = INSERT;
         ops[0].key = key;
         ops[0].value = std::to_string(key);
+        ++stats->inserts;
 
         for (int i = 1; i <= num_reads; ++i) {
             ops[i].type = GET;
             ops[i].key = key;
         }
+        stats->gets += num_reads;
+
         if (!manager->RunTxn(ops, &get_results)) {
             global_cout_mutex.lock();
-            cerr << "ERROR: transaction failed.";
+            cerr << "ERROR: transaction failed in thread "
+                    << this_thread::get_id();
             global_cout_mutex.unlock();
             return;
         }
@@ -122,28 +127,27 @@ void RunTestReaderWriterThread(TxnManager *manager, long max_key, int num_reads,
             if (result.compare(next_result) != 0) {
                 global_cout_mutex.lock();
                 cerr << "ERROR: next read should have returned '" << result
-                    << "'; got '" << next_result << "' instead" << endl;
+                        << "'; got '" << next_result << "' instead (thread "
+                        << this_thread::get_id() << ')' << endl;
                 global_cout_mutex.unlock();
                 break;
             }
         }
 
         get_results.clear();  // Doesn't actually change memory allocation
-        key = (key + 1) % max_key;
-        ++txn_counter;
+        key = (key + 1) % num_keys;
+        ++stats->transactions;
     } while (time(NULL) <= end_time);
-
-    global_cout_mutex.lock();
-    cout << "Read/write transactions:  " << txn_counter << endl;
-    global_cout_mutex.unlock();
 }
 
-void RunMultiKeyThread(TxnManager *manager, long max_key, int num_ops,
-        int seconds_to_run) {
+void RunMultiKeyThread(TxnManager *manager, ThreadStats *stats, long num_keys, int num_ops,
+        int seconds_to_run, size_t value_length) {
+    stats->thread_id = this_thread::get_id();
+
     time_t end_time = time(NULL) + seconds_to_run;
     vector<OpDescription> ops(num_ops + 1);
     for (OpDescription &op : ops) {
-        op.value.resize(VALUE_LENGTH);
+        op.value.resize(value_length);
     }
 
     if (num_ops <= 0) {
@@ -155,7 +159,6 @@ void RunMultiKeyThread(TxnManager *manager, long max_key, int num_ops,
     vector<string> inputs;
     inputs.reserve(num_ops);
     long key = 0;
-    int txn_counter = 0;
     do {
         for (int i = 0; i < num_ops; i += 2) {
             ops[i].type = INSERT;
@@ -164,11 +167,15 @@ void RunMultiKeyThread(TxnManager *manager, long max_key, int num_ops,
             inputs.push_back(ops[i].value);
             ops[i + 1].type = GET;
             ops[i + 1].key = key;
-            key = (key + 1) % max_key;
+            key = (key + 1) % num_keys;
         }
+        stats->gets += num_ops;
+        stats->inserts += num_ops;
+
         if (!manager->RunTxn(ops, &get_results)) {
             global_cout_mutex.lock();
-            cerr << "ERROR: transaction failed.";
+            cerr << "ERROR: transaction failed in thread "
+                    << this_thread::get_id();
             global_cout_mutex.unlock();
             return;
         }
@@ -180,8 +187,9 @@ void RunMultiKeyThread(TxnManager *manager, long max_key, int num_ops,
             const string &next_input = *inputs_iter;
             if (next_input.compare(next_result) != 0) {
                 global_cout_mutex.lock();
-                cerr << "ERROR: read should have returned '" << next_input
-                        << "'; got '" << next_result << "' instead" << endl;
+                cerr << "ERROR: next read should have returned '" << next_input
+                        << "'; got '" << next_result << "' instead (thread "
+                        << this_thread::get_id() << ')' << endl;
                 global_cout_mutex.unlock();
                 break;
             }
@@ -189,24 +197,19 @@ void RunMultiKeyThread(TxnManager *manager, long max_key, int num_ops,
 
         inputs.clear();
         get_results.clear(); // Doesn't actually change memory allocation
-        ++txn_counter;
+        ++stats->transactions;
     } while (time(NULL) <= end_time);
-
-    global_cout_mutex.lock();
-    cout << "Multikey transactions:  " << txn_counter << endl;
-    global_cout_mutex.unlock();
 }
 
-void RunWorkloadThread(TxnManager *manager, int ops_per_txn,
-        int key_max, int seconds_to_run, double get_to_put_ratio) {
+// Main workload Generator
+void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
+        int key_max, int seconds_to_run, double get_to_put_ratio,
+        size_t value_length) {
+    stats->thread_id = this_thread::get_id();
 
-    // Workload Generator
-
-    // Seeding
+    // Set up distributions
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator (seed);
-
-    // Distributions
     uniform_real_distribution<double> operation_distribution(0.0, 1.0);
     uniform_int_distribution<int> key_distribution(0, key_max);
 
@@ -215,11 +218,10 @@ void RunWorkloadThread(TxnManager *manager, int ops_per_txn,
     // management happening inside the main loop of the thread.
     vector<OpDescription> txn_ops(ops_per_txn);
     for (OpDescription &op : txn_ops) {
-        op.value.resize(VALUE_LENGTH);
+        op.value.resize(value_length);
     }
 
     time_t end_time = time(NULL) + seconds_to_run;
-    int txn_counter = 0;
     do {
         for (int i = 0; i < ops_per_txn; ++i) {
             double action_chooser = operation_distribution(generator);
@@ -230,8 +232,10 @@ void RunWorkloadThread(TxnManager *manager, int ops_per_txn,
 
             if (action_chooser < get_to_put_ratio) {
                 next_op.type = GET;
+                ++stats->gets;
             } else {
                 next_op.type = INSERT;
+                ++stats->inserts;
                 GenRandomString(&next_op.value);
             }
         }
@@ -243,12 +247,6 @@ void RunWorkloadThread(TxnManager *manager, int ops_per_txn,
             return;
         }
 
-        ++txn_counter;
+        ++stats->transactions;
     } while (time(NULL) <= end_time);
-
-    global_cout_mutex.lock();
-    cout << "Thread " << this_thread::get_id() << ": " << txn_counter
-        << " transactions" << endl;
-    total_txns += txn_counter;
-    global_cout_mutex.unlock();
 }
