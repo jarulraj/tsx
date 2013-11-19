@@ -14,8 +14,6 @@ public:
     virtual bool RunTxn(const std::vector<OpDescription> &operations,
             std::vector<string> *get_results);
 
-    void getStats();
-
 private:
     static spinlock_t table_lock;
 };

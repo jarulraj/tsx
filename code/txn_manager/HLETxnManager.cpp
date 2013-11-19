@@ -34,10 +34,4 @@ bool HLETxnManager::RunTxn(const std::vector<OpDescription> &operations,
     return true;
 }
 
-void HLETxnManager::getStats(){
-    /** Stats **/
-    std::cout<<"Stats"<<std::endl;    
-
-}
-
 

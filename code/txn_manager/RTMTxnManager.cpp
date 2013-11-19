@@ -76,7 +76,4 @@ return true;
 }
 */
 
-void RTMTxnManager::getStats(){
-}
-
 

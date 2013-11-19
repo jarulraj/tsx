@@ -15,6 +15,7 @@ struct ThreadStats {
     int transactions;
     int gets;
     int inserts;
+    ThreadStats() : gets(0), transactions(0), inserts(0) {}
 };
 
 // Replaces every character in the provided string with a random alphanumeric

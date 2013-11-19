@@ -32,8 +32,6 @@ int main(int argc, const char* argv[]) {
     option::Option* buffer  = new option::Option[stats.buffer_max];
     option::Parser parse(usage, argc, argv, options, buffer);
 
-    //cout<<"Argc "<<argc<<endl;
-
     if (parse.error())
         return 1;
 
@@ -90,7 +88,6 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
-    //table.display();
     // Make sure all the keys we'll be using are there so GETs don't fail
     for (long i = 0; i < num_keys; ++i) {
         string istr = std::to_string(i) ;

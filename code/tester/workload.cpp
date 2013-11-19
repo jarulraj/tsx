@@ -68,7 +68,7 @@ void RunTestReaderThread(TxnManager *manager, ThreadStats *stats, long num_keys,
             if (result.compare(next_result) != 0) {
                 global_cout_mutex.lock();
                 cerr << "ERROR: all reads should have returned '" << result
-                        << "'; got '" << next_result << "' instead (thread "
+                        << "'; got '" << next_result << "' instead (reader thread "
                         << this_thread::get_id() << ')' << endl;
                 global_cout_mutex.unlock();
                 break;
@@ -127,7 +127,8 @@ void RunTestReaderWriterThread(TxnManager *manager, ThreadStats *stats, long num
             if (result.compare(next_result) != 0) {
                 global_cout_mutex.lock();
                 cerr << "ERROR: next read should have returned '" << result
-                        << "'; got '" << next_result << "' instead (thread "
+                        << "'; got '" << next_result
+                        << "' instead (reader/writer thread "
                         << this_thread::get_id() << ')' << endl;
                 global_cout_mutex.unlock();
                 break;
@@ -174,7 +175,7 @@ void RunMultiKeyThread(TxnManager *manager, ThreadStats *stats, long num_keys, i
 
         if (!manager->RunTxn(ops, &get_results)) {
             global_cout_mutex.lock();
-            cerr << "ERROR: transaction failed in thread "
+            cerr << "ERROR: transaction failed in multi-key thread "
                     << this_thread::get_id();
             global_cout_mutex.unlock();
             return;
@@ -188,7 +189,7 @@ void RunMultiKeyThread(TxnManager *manager, ThreadStats *stats, long num_keys, i
             if (next_input.compare(next_result) != 0) {
                 global_cout_mutex.lock();
                 cerr << "ERROR: next read should have returned '" << next_input
-                        << "'; got '" << next_result << "' instead (thread "
+                        << "'; got '" << next_result << "' instead (multi-key thread "
                         << this_thread::get_id() << ')' << endl;
                 global_cout_mutex.unlock();
                 break;

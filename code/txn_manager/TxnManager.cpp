@@ -25,16 +25,12 @@ bool TxnManager::ExecuteTxnOps(const vector<OpDescription> &operations,
                 get_results->push_back(result);
             }
         } 
-        else { 
+        else { // op.type == DELETE
             table_->erase(op.key);
         }
     }
 
     return true;
-}
-
-void TxnManager::getStats(){
-std:cout<<"Print Stats"<<std::endl;
 }
 
 #endif /* _TXN_MANAGER_CPP */
