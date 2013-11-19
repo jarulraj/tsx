@@ -1,6 +1,7 @@
 #include <cmath>
 #include <sstream>
 
+#include <iostream>
 #include "cmdline-utils.h"
 
 using namespace std;
@@ -35,7 +36,7 @@ double getRatio(const option::Option *options) {
     if (!options[RATIO]) {
         return 1.0;
     }
-
+        
     const char *arg = options[RATIO].arg;
     std::istringstream argStream(arg);
     int gets;

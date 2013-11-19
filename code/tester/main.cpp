@@ -32,6 +32,8 @@ int main(int argc, const char* argv[]) {
     option::Option* buffer  = new option::Option[stats.buffer_max];
     option::Parser parse(usage, argc, argv, options, buffer);
 
+    cout<<"Argc "<<argc<<endl;
+
     if (parse.error())
         return 1;
 
