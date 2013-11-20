@@ -7,7 +7,7 @@
 
 #define DEFAULT_SECONDS      10
 #define DEFAULT_OPS_PER_TXN  10
-#define DEFAULT_KEYS         1024
+#define DEFAULT_KEYS         1048576
 #define DEFAULT_VALUE_LENGTH 10
 #define HLE_NAME             "hle"
 #define RTM_NAME             "rtm"
