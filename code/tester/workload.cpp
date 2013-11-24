@@ -3,6 +3,9 @@
 
 #include "cmdline-utils.h"
 #include "workload.h"
+#include <chrono>
+
+using namespace std::chrono;
 
 void RunTestWriterThread(TxnManager *manager, ThreadStats *stats, long num_keys,
         int seconds_to_run, size_t value_length) {
@@ -216,8 +219,10 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
     for (OpDescription &op : txn_ops) {
         op.value.resize(value_length);
     }
+        
+    microseconds duration(seconds_to_run*1000*1000);
+    microseconds total(0);
 
-    time_t end_time = time(NULL) + seconds_to_run;
     do {
         for (int i = 0; i < ops_per_txn; ++i) {
             double action_chooser = operation_distribution(generator);
@@ -236,6 +241,9 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
             }
         }
 
+        high_resolution_clock::time_point t1 = high_resolution_clock::now();
+        
+        // Timed code
         if (!manager->RunTxn(txn_ops, NULL)) {
             global_cout_mutex.lock();
             cerr << "ERROR: transaction failed.";
@@ -243,6 +251,11 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
             return;
         }
 
+        high_resolution_clock::time_point t2 = high_resolution_clock::now();
+
+        microseconds gap = duration_cast<microseconds>(t2 - t1);
+        total += gap;
+
         ++stats->transactions;
-    } while (time(NULL) <= end_time);
+    } while (total <= duration);
 }
