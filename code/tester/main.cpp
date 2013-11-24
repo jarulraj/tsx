@@ -32,8 +32,11 @@ int main(int argc, const char* argv[]) {
     option::Option* buffer  = new option::Option[stats.buffer_max];
     option::Parser parse(usage, argc, argv, options, buffer);
 
-    if (parse.error())
+    if (parse.error()) {
+        cerr << "Could not parse command line arguments." << endl;
+        option::printUsage(std::cout, usage);
         return 1;
+    }
 
     if (options[HELP] || argc == 0) {
         option::printUsage(std::cout, usage);
@@ -41,11 +44,13 @@ int main(int argc, const char* argv[]) {
     }
 
     if (parse.nonOptionsCount() != 1) {
+        cerr << "Too many non-option command line arguments." << endl;
         option::printUsage(std::cout, usage);
         return 1;
     }
 
     string manager_type = parse.nonOption(0);
+    string key_dist_type = getArgWithDefault(options, KEY_DIST, DEFAULT_DIST_NAME);
     int num_seconds_to_run = getArgWithDefault(options, NUM_SECONDS, DEFAULT_SECONDS);
     int num_keys = getArgWithDefault(options, NUM_KEYS, DEFAULT_KEYS);
     int value_length = getArgWithDefault(options, VALUE_LENGTH, DEFAULT_VALUE_LENGTH);
@@ -56,8 +61,10 @@ int main(int argc, const char* argv[]) {
     if (!sanity_test) {
         num_threads = getArgWithDefault(options, NUM_THREADS, thread::hardware_concurrency());
         ops_per_txn = getArgWithDefault(options, OPS_PER_TXN, DEFAULT_OPS_PER_TXN);
-        ratio = getRatio(options);
+        ratio = getRatio(options[RATIO]);
         if (std::isnan(ratio)) {
+            // The ratio should have already been checked by the option parser.
+            cerr << "WARNING: We should never have gotten here!" << endl;
             return 1;
         }
     }
@@ -84,6 +91,13 @@ int main(int argc, const char* argv[]) {
     } else if (manager_type == SPIN_NAME) {
         manager = new SpinLockTxnManager(&table);
     } else {
+        cerr << "Invalid concurrency control mechanism: " << manager_type << endl;
+        option::printUsage(std::cout, usage);
+        return 1;
+    }
+
+    if (key_dist_type != UNIFORM_NAME && key_dist_type != ZIPF_NAME) {
+        cerr << "Invalid key distribution type: " << key_dist_type << endl;
         option::printUsage(std::cout, usage);
         return 1;
     }
@@ -126,12 +140,20 @@ int main(int argc, const char* argv[]) {
         cout << "Num threads:  " << num_threads << endl;
         cout << "Ops per txn:  " << ops_per_txn << endl;
         cout << "Ratio:        " << ratio << endl;
+        cout << "Key distrib:  " << key_dist_type << endl;
 
         thread_stats.resize(num_threads);
         for (int i = 0; i < num_threads; ++i) {
+            // Each thread gets its own key generator.
+            Generator<int> *key_generator;
+            if (key_dist_type == ZIPF_NAME) {
+                key_generator = new ZipfianGenerator(0, num_keys - 1);
+            } else { // UNIFORM_NAME
+                key_generator = new UniformGenerator(0, num_keys - 1);
+            }
             threads.push_back(
                     thread(RunWorkloadThread, manager, &thread_stats[i], ops_per_txn, num_keys-1,
-                        num_seconds_to_run, ratio, value_length));
+                        num_seconds_to_run, ratio, value_length, key_generator));
         }
     }
 
@@ -154,7 +176,7 @@ int main(int argc, const char* argv[]) {
     }
 
     cout << "--------------------------------------------"<<endl;
-    cout << "Overall stats  :\n"
+    cout << "Overall stats:\n"
         << "  Total transactions: " << overall.transactions << "\n"
         << "  GETs: " << overall.gets << "\n"
         << "  INSERTs: " << overall.inserts << endl;

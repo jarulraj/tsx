@@ -32,7 +32,8 @@ main_SOURCES	= $(top_builddir)/txn_manager/TxnManager.cpp \
 				  $(top_builddir)/txn_manager/RTMTxnManager.cpp \
 				  main.cpp \
 				  workload.cpp \
-				  cmdline-utils.cpp
+				  cmdline-utils.cpp \
+				  generators.cpp
 main_CXXFLAGS   = -pthread 
 
 main_LDFLAGS	= -fgnu-tm

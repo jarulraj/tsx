@@ -934,7 +934,7 @@ struct Arg
 
   static ArgStatus Required(const Option& option, bool)
   {
-    if (option.arg && option.name[option.namelen] != 0)
+    if (option.arg)
       return ARG_OK;
     else
       return ARG_ILLEGAL;

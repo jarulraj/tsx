@@ -203,24 +203,24 @@ void RunMultiKeyThread(TxnManager *manager, ThreadStats *stats, long num_keys,
 // Main workload Generator
 void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
         int key_max, int seconds_to_run, double get_to_put_ratio,
-        size_t value_length) {
+        size_t value_length, Generator<int> *key_generator) {
     stats->thread_id = this_thread::get_id();
 
-    // Set up distributions
+    // Set up operation distribution
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator (seed);
+    std::default_random_engine generator(seed);
     uniform_real_distribution<double> operation_distribution(0.0, 1.0);
-    uniform_int_distribution<int> key_distribution(0, key_max);
 
-    // Initializing all vector and string values here essentially eliminates
-    // contention for the STL allocator locks. We want there to be no memory
-    // management happening inside the main loop of the thread.
+    // Initializing all vector and string values here does all the memory allocation
+    // ahead of time. We want there to be no memory management happening inside the
+    // main loop of the thread.
     vector<OpDescription> txn_ops(ops_per_txn);
     for (OpDescription &op : txn_ops) {
         op.value.resize(value_length);
     }
         
-    nanoseconds duration(seconds_to_run*1000*1000*1000);
+    seconds s(seconds_to_run);
+    nanoseconds duration = duration_cast<nanoseconds>(s);
     nanoseconds total(0);
 
     do {
@@ -229,7 +229,7 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
             // Modify operation description in place. (Values left around from
             // old insert actions will just be ignored.)
             OpDescription &next_op = txn_ops[i];
-            next_op.key = key_distribution(generator);
+            next_op.key = key_generator->nextElement();
 
             if (action_chooser < get_to_put_ratio) {
                 next_op.type = GET;
@@ -242,7 +242,7 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
         }
 
         high_resolution_clock::time_point t1 = high_resolution_clock::now();
-        
+
         // Timed code
         if (!manager->RunTxn(txn_ops, NULL)) {
             global_cout_mutex.lock();
@@ -252,10 +252,12 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
         }
 
         high_resolution_clock::time_point t2 = high_resolution_clock::now();
-
         nanoseconds gap = duration_cast<nanoseconds>(t2 - t1);
         total += gap;
-
         ++stats->transactions;
     } while (total <= duration);
+
+
+
+    delete key_generator;
 }

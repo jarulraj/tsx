@@ -23,7 +23,7 @@ const option::Descriptor usage[] =
         " Default: " STRINGIFY(DEFAULT_SECONDS) "." },
     {OPS_PER_TXN, 0, "o", "txn_ops", option::Arg::Integer,  "  --txn_ops, -o  \tOperations per transaction."
         " Default: " STRINGIFY(DEFAULT_OPS_PER_TXN) "." },
-    {RATIO,       0, "r", "ratio",   option::Arg::Required, "  --ratio,   -r  \tRatio of gets to puts in each"
+    {RATIO,       0, "r", "ratio",   CheckRatio, "  --ratio,   -r  \tRatio of gets to puts in each"
         " transaction, in the format gets:puts. Default: 1:1." },
     {NUM_KEYS,    0, "n", "keys",    option::Arg::Integer,  "  --keys,    -n  \tNumber of keys in the database."
         " Default: " STRINGIFY(DEFAULT_KEYS) "." },
@@ -31,34 +31,51 @@ const option::Descriptor usage[] =
         " Default: " STRINGIFY(DEFAULT_VALUE_LENGTH) "." },
     {SANITY_TEST, 0, "a", "sanity",  option::Arg::None,     "  --sanity,  -a  \tRun a sanity test to check"
         " validity of CC schemes, instead of real workloads. Disables -t, -o, and -r flags."},
+    {KEY_DIST,    0, "k", "keydist", option::Arg::Required, "  --keydist, -k  \tDistribution of keys to use."
+        " Permitted values: " UNIFORM_NAME ", " ZIPF_NAME ". Default: " DEFAULT_DIST_NAME "."},
     {0,0,0,0,0,0}
 };
 
-double getRatio(const option::Option *options) {
-    if (!options[RATIO]) {
+double getRatio(const option::Option &option) {
+    // Using static variables to memoize the result of this computation so that the ratio
+    // need not be re-parsed for the same option both for error checking and for parsing.
+    // (This is a bit of an ugly hack.)
+    static const option::Option *last_option(NULL);
+    static double last_ratio(nan(""));
+    if (last_option == &option) {
+        return last_ratio;
+    }
+    last_option = &option;
+
+    if (!option) {
         return 0.5;
     }
         
-    const char *arg = options[RATIO].arg;
+    const char *arg = option.arg;
     std::istringstream argStream(arg);
     int gets;
     int inserts;
-    const char *errMsg = "Ratio must be in the format <int>:<int>";
 
     argStream >> gets;
     if (argStream.bad()) {
-        cerr << errMsg << endl;
         return nan("");
     }
     if (argStream.get() != ':') {
-        cerr << errMsg << endl;
         return nan("");
     }
     argStream >> inserts;
     if (argStream.bad()) {
-        cerr << errMsg << endl;
         return nan("");
     }
 
-    return gets / static_cast<double>(inserts + gets);
+    last_ratio = gets / static_cast<double>(inserts + gets);
+    return last_ratio;
+}
+
+option::ArgStatus CheckRatio(const option::Option& option, bool msg) {
+    if (std::isnan(getRatio(option))) {
+        return option::ARG_ILLEGAL;
+    } else {
+        return option::ARG_OK;
+    }
 }
