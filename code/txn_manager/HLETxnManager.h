@@ -16,6 +16,8 @@ public:
 
 private:
     static spinlock_t table_lock;
+    
+    unordered_map<long, spinlock_t*> lockTable;
 };
 
 
