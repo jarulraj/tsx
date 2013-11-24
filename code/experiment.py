@@ -8,14 +8,14 @@ EXEC = "./tester/main"
 
 # LOOP THROUGH PARAMETERS
 
-t = 1 # number of threads
+t = 2 # number of threads
 s = 1 # time for each run
 o = 1 # number of ops per txn
 r = 1 # ratio of gets:puts (not used currently)
 
 itr = 0
 
-while t<=16:
+while t<=32:
     
     o = 1
     while o<=16:
@@ -35,5 +35,5 @@ while t<=16:
             (out, err) = task.communicate()
             print out
 
-        o *= 2        
-    t *= 2
+        o *= 4
+    t *= 4

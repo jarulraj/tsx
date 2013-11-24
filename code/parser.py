@@ -7,31 +7,35 @@ FILE = "data.log"
 
 # LOOP THROUGH PARAMETERS
 
-t = 1 # number of threads
-o = 1 # number of ops per txn
+t = 2 # number of threads
 r = 1 # ratio of gets:puts (not used currently)
 
 itr = 0
 
-while t<=4:
-    
-    o = 1
-    while o<=2:
+while t<=32:
 
-        for cc in [ 'hle', 'rtm', 'tbl', 'spin' ]:
-            # PARSE        
-            #LIKE :: egrep "tester|Total" data.log | grep -A 1 "t1'" | grep -A 1 "hle" | grep "Total" | awk '{print $3;}'
-            #cmd = [ "egrep", "tester|Total", FILE, " | grep -A 1 \"t"+str(t)+"'\" | grep -A 1 \""+str(cc)+"\" | grep \"Total\" | awk '{print $3;}'" ] 
-            #cmd =  "egrep " + "tester|Total " + FILE + " | grep -A 1 \"t"+str(t)+"'\" | grep -A 1 \""+str(cc)+"\" | grep \"Total\" | awk '{print $3;}'" 
-            cmd =  "egrep " + " \"tester|Total\" " + FILE + " | grep t"+str(t)+" "  
-            args = shlex.split(cmd);
-            print args
+    for cc in [ 'hle', 'rtm', 'tbl', 'spin' ]:
 
-            task =  subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE )   
-            (out, err) = task.communicate()
-            print out 
+        print "Threads : "+str(t)+" CC : "+str(cc)
 
+        #CMD :: egrep "tester|Total" data.log | grep -A 1 "t1'" | grep -A 1 "hle" | grep "Total" | awk '{print $3;}'
+        cmd =  [ "egrep", "tester|Total", FILE ]; 
+        task1 =  subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+        cmd = [ "grep", "-A 1", "t"+str(t) ];
+        task2 =  subprocess.Popen(cmd, stdin=task1.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
 
-        o *= 2        
-    t *= 2 
+        cmd = [ "grep", "-A 1", str(cc) ];
+        task3 =  subprocess.Popen(cmd, stdin=task2.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+
+        cmd = [ "grep", "Total" ];
+        task4 =  subprocess.Popen(cmd, stdin=task3.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+
+        cmd = [ "awk", "{ print $3; }" ];
+        task5 =  subprocess.Popen(cmd, stdin=task4.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+        
+        (out, err) = task5.communicate()
+        print out
+        
+
+    t *= 4 

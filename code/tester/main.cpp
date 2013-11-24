@@ -144,7 +144,7 @@ int main(int argc, const char* argv[]) {
 	// Shouldn't need cout mutex anymore here -- all threads are done.
     for (const ThreadStats &stats : thread_stats) {
         cout << "Thread " << stats.thread_id << ":\n"
-                << "  Total transactions: " << stats.transactions << "\n"
+                << "  Transactions: " << stats.transactions << "\n"
                 << "  GETs: " << stats.gets << "\n"
                 << "  INSERTs: " << stats.inserts << endl;
 
