@@ -220,8 +220,8 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
         op.value.resize(value_length);
     }
         
-    microseconds duration(seconds_to_run*1000*1000);
-    microseconds total(0);
+    nanoseconds duration(seconds_to_run*1000*1000*1000);
+    nanoseconds total(0);
 
     do {
         for (int i = 0; i < ops_per_txn; ++i) {
@@ -253,7 +253,7 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
 
         high_resolution_clock::time_point t2 = high_resolution_clock::now();
 
-        microseconds gap = duration_cast<microseconds>(t2 - t1);
+        nanoseconds gap = duration_cast<nanoseconds>(t2 - t1);
         total += gap;
 
         ++stats->transactions;
