@@ -56,7 +56,16 @@ inline std::string getArgWithDefault(const option::Option *options,
     }
 }
 
+namespace option {
+
 double getRatio(const option::Option &options);
+
+option::ArgStatus Unknown(const option::Option& option, bool msg);
+option::ArgStatus Integer(const option::Option& option, bool msg);
+option::ArgStatus Double(const option::Option& option, bool msg);
+option::ArgStatus Required(const option::Option& option, bool);
 option::ArgStatus CheckRatio(const option::Option& option, bool msg);
+
+}  // namespace option
 
 #endif /* _CMD_LINE_UTILS_H_ */

@@ -17,24 +17,26 @@ const option::Descriptor usage[] =
         HLE_NAME "|" RTM_NAME "|" LOCK_TABLE_NAME "|" SPIN_NAME "\n\n"
             "Options:" },
     {HELP,        0, "" , "help",    option::Arg::None,     "  --help  \tPrint usage and exit." },
-    {NUM_THREADS, 0, "t", "threads", option::Arg::Integer,  "  --threads, -t  \tNumber of threads to run with."
+    {NUM_THREADS, 0, "t", "threads", option::Integer,  "  --threads, -t  \tNumber of threads to run with."
         " Default: max supported by hardware." },
-    {NUM_SECONDS, 0, "s", "seconds", option::Arg::Integer,  "  --seconds, -s  \tNumber of seconds to run for."
+    {NUM_SECONDS, 0, "s", "seconds", option::Integer,  "  --seconds, -s  \tNumber of seconds to run for."
         " Default: " STRINGIFY(DEFAULT_SECONDS) "." },
-    {OPS_PER_TXN, 0, "o", "txn_ops", option::Arg::Integer,  "  --txn_ops, -o  \tOperations per transaction."
+    {OPS_PER_TXN, 0, "o", "txn_ops", option::Integer,  "  --txn_ops, -o  \tOperations per transaction."
         " Default: " STRINGIFY(DEFAULT_OPS_PER_TXN) "." },
-    {RATIO,       0, "r", "ratio",   CheckRatio, "  --ratio,   -r  \tRatio of gets to puts in each"
+    {RATIO,       0, "r", "ratio",   option::CheckRatio, "  --ratio,   -r  \tRatio of gets to puts in each"
         " transaction, in the format gets:puts. Default: 1:1." },
-    {NUM_KEYS,    0, "n", "keys",    option::Arg::Integer,  "  --keys,    -n  \tNumber of keys in the database."
+    {NUM_KEYS,    0, "n", "keys",    option::Integer,  "  --keys,    -n  \tNumber of keys in the database."
         " Default: " STRINGIFY(DEFAULT_KEYS) "." },
-    {VALUE_LENGTH,0, "v", "val_len", option::Arg::Integer,  "  --val_len, -v  \tLength of each value string."
+    {VALUE_LENGTH,0, "v", "val_len", option::Integer,  "  --val_len, -v  \tLength of each value string."
         " Default: " STRINGIFY(DEFAULT_VALUE_LENGTH) "." },
     {SANITY_TEST, 0, "a", "sanity",  option::Arg::None,     "  --sanity,  -a  \tRun a sanity test to check"
         " validity of CC schemes, instead of real workloads. Disables -t, -o, and -r flags."},
-    {KEY_DIST,    0, "k", "keydist", option::Arg::Required, "  --keydist, -k  \tDistribution of keys to use."
+    {KEY_DIST,    0, "k", "keydist", option::Required, "  --keydist, -k  \tDistribution of keys to use."
         " Permitted values: " UNIFORM_NAME ", " ZIPF_NAME ". Default: " DEFAULT_DIST_NAME "."},
     {0,0,0,0,0,0}
 };
+
+namespace option {
 
 double getRatio(const option::Option &option) {
     // Using static variables to memoize the result of this computation so that the ratio
@@ -74,8 +76,62 @@ double getRatio(const option::Option &option) {
 
 option::ArgStatus CheckRatio(const option::Option& option, bool msg) {
     if (std::isnan(getRatio(option))) {
+        if (msg) {
+            cerr << "ERROR: Ratio option must be in the format <int>:<int>" << endl;
+        }
         return option::ARG_ILLEGAL;
     } else {
         return option::ARG_OK;
     }
 }
+
+inline string option_name(const option::Option& option) {
+    return string(option.name, option.namelen);
+}
+
+option::ArgStatus Unknown(const option::Option& option, bool msg) {
+    if (msg) {
+        cerr << "ERROR: Unknown option " << option_name(option)
+                << endl;
+    }
+    return option::ARG_ILLEGAL;
+}
+
+option::ArgStatus Integer(const option::Option& option, bool msg) {
+    char* endptr = 0;
+    if (option.arg != 0 && strtol(option.arg, &endptr, 10)) {};
+    if (endptr != option.arg && *endptr == 0)
+        return option::ARG_OK;
+
+    if (msg) {
+        cerr << "ERROR: Option " << option_name(option)
+                << " requires an integer argument" << endl;
+    }
+    return option::ARG_ILLEGAL;
+}
+
+option::ArgStatus Double(const option::Option& option, bool msg) {
+    char* endptr = 0;
+    if (option.arg != 0 && strtod(option.arg, &endptr)) {};
+    if (endptr != option.arg && *endptr == 0)
+        return option::ARG_OK;
+
+    if (msg)
+        cerr << "ERROR: Option " << option_name(option)
+                << " requires a floating-point argument" << endl;
+    return option::ARG_ILLEGAL;
+}
+
+option::ArgStatus Required(const option::Option& option, bool msg) {
+    if (option.arg)
+        return option::ARG_OK;
+    else {
+        if (msg) {
+            cerr << "ERROR: Option " << option_name(option) << " missing required argument" << endl;
+        }
+        return option::ARG_ILLEGAL;
+    }
+}
+
+}  // namespace option
+

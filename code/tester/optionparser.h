@@ -883,40 +883,6 @@ private:
  */
 struct Arg
 {
-  static void printError(const char* msg1, const option::Option& opt,
-            const char* msg2) {
-        fprintf(stderr, "ERROR: %s", msg1);
-        fwrite(opt.name, opt.namelen, 1, stderr);
-        fprintf(stderr, "%s", msg2);
-  }
-
-  static ArgStatus Unknown(const option::Option& option, bool msg) {
-        if (msg) printError("Unknown option '", option, "'\n");
-        return option::ARG_ILLEGAL;
-  }
-
-  static ArgStatus Integer(const option::Option& option, bool msg) {
-        char* endptr = 0;
-        if (option.arg != 0 && strtol(option.arg, &endptr, 10)) {};
-        if (endptr != option.arg && *endptr == 0)
-            return option::ARG_OK;
-
-        if (msg)
-            printError("Option '", option, "' requires an integer argument\n");
-        return option::ARG_ILLEGAL;
-  }
-
-  static ArgStatus Double(const option::Option& option, bool msg) {
-        char* endptr = 0;
-        if (option.arg != 0 && strtod(option.arg, &endptr)) {};
-        if (endptr != option.arg && *endptr == 0)
-            return option::ARG_OK;
-
-        if (msg)
-            printError("Option '", option, "' requires a floating-point argument\n");
-        return option::ARG_ILLEGAL;
-  }
-
   //! @brief For options that don't take an argument: Returns ARG_NONE.
   static ArgStatus None(const Option&, bool)
   {
@@ -930,14 +896,6 @@ struct Arg
       return ARG_OK;
     else
       return ARG_IGNORE;
-  }
-
-  static ArgStatus Required(const Option& option, bool)
-  {
-    if (option.arg)
-      return ARG_OK;
-    else
-      return ARG_ILLEGAL;
   }
 };
 

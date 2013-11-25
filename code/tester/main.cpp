@@ -33,7 +33,8 @@ int main(int argc, const char* argv[]) {
     option::Parser parse(usage, argc, argv, options, buffer);
 
     if (parse.error()) {
-        cerr << "Could not parse command line arguments." << endl;
+        // Error message has been output by the checker functions during
+        // command line parsing.
         option::printUsage(std::cout, usage);
         return 1;
     }
@@ -44,7 +45,11 @@ int main(int argc, const char* argv[]) {
     }
 
     if (parse.nonOptionsCount() != 1) {
-        cerr << "Too many non-option command line arguments." << endl;
+        if (parse.nonOptionsCount() > 1) {
+            cerr << "Too many non-option command line arguments" << endl;
+        } else {
+            cerr << "Missing concurrency control type argument" << endl;
+        }
         option::printUsage(std::cout, usage);
         return 1;
     }
@@ -61,7 +66,7 @@ int main(int argc, const char* argv[]) {
     if (!sanity_test) {
         num_threads = getArgWithDefault(options, NUM_THREADS, thread::hardware_concurrency());
         ops_per_txn = getArgWithDefault(options, OPS_PER_TXN, DEFAULT_OPS_PER_TXN);
-        ratio = getRatio(options[RATIO]);
+        ratio = option::getRatio(options[RATIO]);
         if (std::isnan(ratio)) {
             // The ratio should have already been checked by the option parser.
             cerr << "WARNING: We should never have gotten here!" << endl;
@@ -84,7 +89,7 @@ int main(int argc, const char* argv[]) {
     TxnManager *manager;
     if (manager_type == HLE_NAME) {
         manager = new HLETxnManager(&table);
-    }else if (manager_type == RTM_NAME) {
+    } else if (manager_type == RTM_NAME) {
         manager = new RTMTxnManager(&table);
     } else if (manager_type == LOCK_TABLE_NAME) {
         manager = new LockTableTxnManager(&table);
