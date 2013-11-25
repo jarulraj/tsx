@@ -163,7 +163,7 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
     map<long, LockMode> keys;
     for (const OpDescription &op : operations) {
 	if (keys.count(op.key) == 1) {
-	    if (op.type == GET && keys[op.key] != READ) {
+	    if (op.type != GET) {
 		keys[op.key] = WRITE;
 	    }
 	} else {
