@@ -61,6 +61,7 @@ int main(int argc, const char* argv[]) {
     int value_length = getArgWithDefault(options, VALUE_LENGTH, DEFAULT_VALUE_LENGTH);
     int verbosity = getArgWithDefault(options, VERBOSITY, DEFAULT_VERBOSITY);
     bool sanity_test = options[SANITY_TEST];
+    bool dynamic = options[DYNAMIC];
     int num_threads;
     int ops_per_txn;
     double ratio;
@@ -93,9 +94,9 @@ int main(int argc, const char* argv[]) {
     } else if (manager_type == RTM_NAME) {
         manager = new RTMTxnManager(&table);
     } else if (manager_type == LOCK_TABLE_NAME) {
-        manager = new LockTableTxnManager(&table);
+        manager = new LockTableTxnManager(&table, dynamic);
     } else if (manager_type == SPIN_NAME) {
-        manager = new SpinLockTxnManager(&table);
+        manager = new SpinLockTxnManager(&table, dynamic);
     } else {
         cerr << "Invalid concurrency control mechanism: " << manager_type << endl;
         option::printUsage(std::cout, usage);

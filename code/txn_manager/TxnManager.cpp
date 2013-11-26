@@ -12,26 +12,37 @@ using namespace std;
 
 bool TxnManager::ExecuteTxnOps(const vector<OpDescription> &operations,
         std::vector<string> *get_results) {
+    string result;
     for (const OpDescription &op : operations) {
-        if (op.type == INSERT) {
-            // Overwrite value if already present.
-            (*table_)[op.key] = op.value;
-        } 
-        else if (op.type == GET) {
-            string result;
-            //at function throws an out_of_range exception if key not found
-            result = table_->at(op.key);
-
-            if (get_results != NULL) {
-                get_results->push_back(result);
-            }
-        } 
-        else { // op.type == DELETE
-            table_->erase(op.key);
-        }
+	result = ExecuteTxnOp(op);
+	if (op.type == GET && get_results != NULL) {
+	    get_results->push_back(result);
+	}
     }
 
     return true;
+}
+
+string TxnManager::ExecuteTxnOp(const OpDescription &op)
+{
+    string result;
+    if (op.type == INSERT) {
+	result = (*table_)[op.key];
+
+	// Overwrite value if already present.
+	(*table_)[op.key] = op.value;
+    }
+    else if (op.type == GET) {
+	//at function throws an out_of_range exception if key not found
+	result = table_->at(op.key);
+    }
+    else { // op.type == DELETE
+	result = (*table_)[op.key];
+
+	table_->erase(op.key);
+    }
+
+    return result;
 }
 
 #endif /* _TXN_MANAGER_CPP */

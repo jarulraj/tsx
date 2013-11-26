@@ -27,7 +27,10 @@ struct Lock {
 
 class LockTableTxnManager : public TxnManager {
 public:
-    LockTableTxnManager(std::unordered_map<long,std::string> *table) : TxnManager(table) {}
+     LockTableTxnManager(std::unordered_map<long,std::string> *table,
+			 bool _dynamic)
+       : TxnManager(table),
+  	 dynamic(_dynamic){}
     // TODO: Implement me
     virtual bool RunTxn(const std::vector<OpDescription> &operations,
             std::vector<string> *get_results);
@@ -36,6 +39,7 @@ private:
     unordered_map<long, Lock*> lockTable;
     // Prevents concurrent insertions to the lock table.
     mutex tableMutex;
+    bool dynamic;
 };
 
 #endif /* _LOCK_TABLE_TXN_MANAGER_H_ */

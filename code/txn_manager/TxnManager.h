@@ -45,6 +45,8 @@ protected:
     virtual bool ExecuteTxnOps(const std::vector<OpDescription> &operations,
             std::vector<string> *get_results);
 
+    virtual string ExecuteTxnOp(const OpDescription &op);
+
 private:
     std::unordered_map<long,std::string> *table_;
 };

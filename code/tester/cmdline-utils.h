@@ -33,7 +33,8 @@ enum optionIndex {
     VALUE_LENGTH,
     SANITY_TEST,
     KEY_DIST,
-    VERBOSITY
+    VERBOSITY,
+    DYNAMIC
 };
 extern const option::Descriptor usage[];
 
