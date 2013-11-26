@@ -59,6 +59,7 @@ int main(int argc, const char* argv[]) {
     int num_seconds_to_run = getArgWithDefault(options, NUM_SECONDS, DEFAULT_SECONDS);
     int num_keys = getArgWithDefault(options, NUM_KEYS, DEFAULT_KEYS);
     int value_length = getArgWithDefault(options, VALUE_LENGTH, DEFAULT_VALUE_LENGTH);
+    int verbosity = getArgWithDefault(options, VERBOSITY, DEFAULT_VERBOSITY);
     bool sanity_test = options[SANITY_TEST];
     int num_threads;
     int ops_per_txn;
@@ -120,10 +121,13 @@ int main(int argc, const char* argv[]) {
     vector<thread> threads;
     vector<ThreadStats> thread_stats;
 
-    cout << "Time (s):     " << num_seconds_to_run << endl;
-    cout << "Num keys:     " << num_keys << endl;
-    cout << "Value length: " << value_length << endl;
-    cout << "CC type:      " << manager_type << endl;
+    if (verbosity >= 1) {
+	cout << "Time (s):     " << num_seconds_to_run << endl;
+	cout << "Num keys:     " << num_keys << endl;
+	cout << "Value length: " << value_length << endl;
+	cout << "CC type:      " << manager_type << endl;
+    }
+
     if (sanity_test) {
         // Each transaction reads keys multiple times. It's pretty likely that a writer
         // will write to the value that's being read during the time of the transaction,
@@ -142,10 +146,12 @@ int main(int argc, const char* argv[]) {
                 thread(RunMultiKeyThread, manager, &thread_stats[2], num_keys,
                         10 * num_keys, num_seconds_to_run, value_length));
     } else {
-        cout << "Num threads:  " << num_threads << endl;
-        cout << "Ops per txn:  " << ops_per_txn << endl;
-        cout << "Ratio:        " << ratio << endl;
-        cout << "Key distrib:  " << key_dist_type << endl;
+	if (verbosity >= 1) {
+	    cout << "Num threads:  " << num_threads << endl;
+	    cout << "Ops per txn:  " << ops_per_txn << endl;
+	    cout << "Ratio:        " << ratio << endl;
+	    cout << "Key distrib:  " << key_dist_type << endl;
+	}
 
         thread_stats.resize(num_threads);
         for (int i = 0; i < num_threads; ++i) {
@@ -170,10 +176,12 @@ int main(int argc, const char* argv[]) {
 
 	// Shouldn't need cout mutex anymore here -- all threads are done.
     for (const ThreadStats &stats : thread_stats) {
-        cout << "Thread " << stats.thread_id << ":\n"
-                << "  Transactions: " << stats.transactions << "\n"
-                << "  GETs: " << stats.gets << "\n"
-                << "  INSERTs: " << stats.inserts << endl;
+	if (verbosity >= 1) {
+	    cout << "Thread " << stats.thread_id << ":\n"
+		 << "  Transactions: " << stats.transactions << "\n"
+		 << "  GETs: " << stats.gets << "\n"
+		 << "  INSERTs: " << stats.inserts << endl;
+	}
 
         overall.transactions += stats.transactions;
         overall.gets += stats.gets;

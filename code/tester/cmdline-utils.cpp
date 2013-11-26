@@ -33,6 +33,7 @@ const option::Descriptor usage[] =
         " validity of CC schemes, instead of real workloads. Disables -t, -o, and -r flags."},
     {KEY_DIST,    0, "k", "keydist", option::Required, "  --keydist, -k  \tDistribution of keys to use."
         " Permitted values: " UNIFORM_NAME ", " ZIPF_NAME ". Default: " DEFAULT_DIST_NAME "."},
+    {VERBOSITY,   0, "e", "verbosity", option::Integer, "  --verbosity, -e \tRelative amount of detail to print out"},
     {0,0,0,0,0,0}
 };
 

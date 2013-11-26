@@ -10,6 +10,7 @@
 #define DEFAULT_OPS_PER_TXN  10
 #define DEFAULT_KEYS         4096
 #define DEFAULT_VALUE_LENGTH 4
+#define DEFAULT_VERBOSITY    1
 #define HLE_NAME             "hle"
 #define RTM_NAME             "rtm"
 #define SPIN_NAME            "spin"
@@ -31,7 +32,8 @@ enum optionIndex {
     NUM_KEYS,
     VALUE_LENGTH,
     SANITY_TEST,
-    KEY_DIST
+    KEY_DIST,
+    VERBOSITY
 };
 extern const option::Descriptor usage[];
 
