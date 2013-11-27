@@ -3,7 +3,7 @@
 import subprocess
 import shlex
 
-FILE = "data.log"
+FILE = "zipf.log"
 
 # LOOP THROUGH PARAMETERS
 

@@ -15,6 +15,8 @@ r = 1 # ratio of gets:puts (not used currently)
 
 itr = 0
 
+k = "zipf" # choose distribution
+
 while t<=32:
     
     o = 1
@@ -22,7 +24,7 @@ while t<=32:
     
         for cc in [ 'hle', 'rtm', 'tbl', 'spin' ]:
             # RUN EXPERIMENT        
-            cmd = [ EXEC, '-s'+str(s), '-t'+str(t), '-o'+str(o), cc]
+            cmd = [ EXEC, '-s'+str(s), '-t'+str(t), '-o'+str(o), '-k'+k, cc]
 
             itr += 1
             print "Case " + str(itr) + " " + str(cmd)
