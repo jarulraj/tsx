@@ -103,8 +103,9 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 	// Unlock all keys in reverse order.
 	for (auto rit = keys.rbegin(); rit != keys.rend(); ++rit) {
 	    tableMutex.lock();
-	    lockTable[*rit].clear(memory_order_release);
-	    tableMutex.unlock();
+	    atomic_flag *a = &lockTable[*rit];
+            tableMutex.unlock();
+	    a->clear(memory_order_release);
 	}
     }
 
