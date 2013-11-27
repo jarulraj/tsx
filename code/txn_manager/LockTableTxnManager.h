@@ -17,8 +17,8 @@ typedef enum LockMode {
 
 
 struct Lock {
-    std::mutex *mutex;
-    std::condition_variable *cv;
+    std::mutex mutex;
+    std::condition_variable cv;
     std::queue<std::thread::id> q;
     int num_readers;
     LockMode mode;
@@ -33,12 +33,12 @@ public:
   	 dynamic(_dynamic){}
     // TODO: Implement me
     virtual bool RunTxn(const std::vector<OpDescription> &operations,
-            std::vector<string> *get_results);
+            std::vector<std::string> *get_results);
 
 private:
-    unordered_map<long, Lock*> lockTable;
+    std::unordered_map<long, Lock> lockTable;
     // Prevents concurrent insertions to the lock table.
-    mutex tableMutex;
+    std::mutex tableMutex;
     bool dynamic;
 };
 
