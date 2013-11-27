@@ -1,4 +1,4 @@
-# Hardware Transactional Memory Based Concurrency Control 
+# HTM Based Multi-key Transactions 
 
 ## Concurrency Control
 
@@ -6,8 +6,8 @@ Evaluation of HTM support for concurrency control for `multi-key transactions` i
 
 ## Dependencies
 
-- ** g++ 4.8+ ** - (transactional memory support)
-- ** autoconf ** - (`apt-get install autoconf libtool`) 
+- *g++ 4.8+ * - (transactional memory support)
+- *autoconf * - (`apt-get install autoconf libtool`) 
 
 ## Setup
         
@@ -22,12 +22,16 @@ Evaluation of HTM support for concurrency control for `multi-key transactions` i
 
 ## Test
 
-*Example*
+*Example*    
 
+```
 ./tester/main 
+```
 - get Usage Message
 
+```
 ./tester/main -s1 -t16 -o16 -kzipf rtm
+```
 - runs 16 client threads that access the key-value store managed by a RTM-based concurrency controller
 - a zipf distribution is followed by the keys accessed by the requests
 - each transaction has 16 read/write operations (the ratio is configurable : default is 1:1)
