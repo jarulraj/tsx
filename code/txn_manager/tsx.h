@@ -99,6 +99,7 @@ static int g_rtm_retries  = 0;
 
 typedef struct spinlock { int v; } spinlock_t;
 
+// HLE
 static ALWAYS_INLINE void dyn_spinlock_init(spinlock_t* lock);
 
 static ALWAYS_INLINE void hle_spinlock_acquire(spinlock_t* lock); 
@@ -107,9 +108,12 @@ static ALWAYS_INLINE bool hle_spinlock_isfree(spinlock_t* lock);
 
 static ALWAYS_INLINE void hle_spinlock_release(spinlock_t* lock); 
 
-static ALWAYS_INLINE void rtm_spinlock_acquire(spinlock_t* lock); 
+// RTM
+static ALWAYS_INLINE bool rtm_spinlock_isfree(pthread_spinlock_t* lock); 
 
-static ALWAYS_INLINE void rtm_spinlock_release(spinlock_t* lock); 
+static ALWAYS_INLINE void rtm_spinlock_acquire(pthread_spinlock_t* lock); 
+
+static ALWAYS_INLINE void rtm_spinlock_release(pthread_spinlock_t* lock); 
 
 /* ---- DEFINITIONS ---- */
 
@@ -141,8 +145,14 @@ static ALWAYS_INLINE void hle_spinlock_release(spinlock_t* lock)
     __atomic_clear(&lock->v, __ATOMIC_RELEASE|__ATOMIC_HLE_RELEASE);
 }
 
+static ALWAYS_INLINE bool rtm_spinlock_isfree(pthread_spinlock_t* lock)
+{
+    // use lock value itself
+    return (__sync_bool_compare_and_swap(&lock, 0, 0) ? true : false);
+}
 
-static ALWAYS_INLINE void rtm_spinlock_acquire(spinlock_t* lock)
+
+static ALWAYS_INLINE void rtm_spinlock_acquire(pthread_spinlock_t* lock)
 {
     unsigned int tm_status = 0;
     int tries = 0, retries = 0;
@@ -151,7 +161,7 @@ tm_try:
     if(tries++ < _RTM_MAX_TRIES){
         if ((tm_status = _xbegin()) == _XBEGIN_STARTED) {
             // If the lock is free, speculatively elide acquisition and continue. 
-            if (hle_spinlock_isfree(lock)) 
+            if (rtm_spinlock_isfree(lock)) 
                 return;
 
             // Otherwise fall back to the spinlock by aborting. 
@@ -178,19 +188,18 @@ tm_try:
     //fprintf(stderr, "TSX RTM: failure; (code %d)\n", tm_status);
 tm_fail:
     //__sync_add_and_fetch(&g_locks_failed, 1);
-    hle_spinlock_acquire(lock);
-
+    pthread_spin_lock(lock);
 }
 
-static ALWAYS_INLINE void rtm_spinlock_release(spinlock_t* lock)
+static ALWAYS_INLINE void rtm_spinlock_release(pthread_spinlock_t* lock)
 {
     // If the lock is still free, we'll assume it was elided. This implies we're in a transaction. 
-    if (hle_spinlock_isfree(lock)) {
+    if (rtm_spinlock_isfree(lock)) {
         //g_locks_elided += 1;
         _xend(); // Commit transaction 
     } else {
         // Otherwise, the lock was taken by us, so release it too. 
-        hle_spinlock_release(lock);
+        pthread_spin_unlock(lock);
     }
 }
 

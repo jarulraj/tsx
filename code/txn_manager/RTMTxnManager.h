@@ -15,7 +15,7 @@ public:
             std::vector<string> *get_results);
 
 private:
-    static spinlock_t table_lock;
+    static pthread_spinlock_t table_lock;
 };
 
 

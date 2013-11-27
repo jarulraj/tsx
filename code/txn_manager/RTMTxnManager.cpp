@@ -3,7 +3,7 @@
 
 #include "RTMTxnManager.h"       
 
-spinlock_t RTMTxnManager::table_lock = { 0 } ;
+pthread_spinlock_t RTMTxnManager::table_lock ;
 
 RTMTxnManager::RTMTxnManager(std::unordered_map<long,std::string>* table)
     : TxnManager(table) {
@@ -17,6 +17,8 @@ RTMTxnManager::RTMTxnManager(std::unordered_map<long,std::string>* table)
         else{
             cout << "RTM AVAILABLE" << endl;
         }
+
+        pthread_spin_init(&table_lock, PTHREAD_PROCESS_PRIVATE);
 
     }
 
