@@ -4,7 +4,7 @@
 #include <iostream>
 #include <set>
 
-#include "TxnManager.h"       
+#include "TxnManager.h"
  
 class SpinLockTxnManager : public TxnManager {
 public:
@@ -16,7 +16,7 @@ public:
             std::vector<string> *get_results);
 
 private:
-    unordered_map<long, atomic_flag*> lockTable;
+    unordered_map<long, atomic_flag> lockTable;
     // Prevents concurrent insertions to the lock table.
     mutex tableMutex;
     bool dynamic;

@@ -17,8 +17,8 @@ typedef enum LockMode {
 
 
 struct Lock {
-    std::mutex *mutex;
-    std::condition_variable *cv;
+    std::mutex mutex;
+    std::condition_variable cv;
     std::queue<std::thread::id> q;
     int num_readers;
     LockMode mode;
@@ -36,7 +36,7 @@ public:
             std::vector<string> *get_results);
 
 private:
-    unordered_map<long, Lock*> lockTable;
+    unordered_map<long, Lock> lockTable;
     // Prevents concurrent insertions to the lock table.
     mutex tableMutex;
     bool dynamic;

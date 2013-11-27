@@ -2,7 +2,9 @@
 #include <iostream>
 #include <set>
 
-#include "SpinLockTxnManager.h"       
+#include "SpinLockTxnManager.h"
+
+const int MAX_TRIES = 10;
 
 bool SpinLockTxnManager::RunTxn(const std::vector<OpDescription> &operations,
         std::vector<string> *get_results) {
@@ -18,17 +20,16 @@ bool SpinLockTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 		if (keys.count(op.key) == 0) {
 		    tableMutex.lock();
 		    if (lockTable.count(op.key) == 0) {
-			atomic_flag *a = new atomic_flag();
-			lockTable[op.key] = a;
+			atomic_flag *a = &lockTable[op.key];  // Inserts flag
 			a->test_and_set(memory_order_acquire);
 			tableMutex.unlock();
 		    } else {
-			atomic_flag *a = lockTable[op.key];
+			atomic_flag *a = &lockTable[op.key];
 			tableMutex.unlock();
 			int tries = 0;
 			while (a->test_and_set(memory_order_acquire)) {
 			    tries++;
-			    if (tries == 10) {
+			    if (tries == MAX_TRIES) {
 				abort = true;
 				if (get_results != NULL) {
 				    get_results->clear();
@@ -71,7 +72,7 @@ bool SpinLockTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 	    std::set<long>::reverse_iterator rit;
 	    for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
 		tableMutex.lock();
-		lockTable[*rit]->clear(memory_order_release);
+		lockTable[*rit].clear(memory_order_release);
 		tableMutex.unlock();
 	    }
 	}
@@ -86,12 +87,11 @@ bool SpinLockTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 	for (long key : keys) {
 	    tableMutex.lock();
 	    if (lockTable.count(key) == 0) {
-		atomic_flag *a = new atomic_flag();
-		lockTable[key] = a;
+		atomic_flag *a = &lockTable[key];  // Creates flag
 		tableMutex.unlock();
 		a->test_and_set(memory_order_acquire);
 	    } else {
-		atomic_flag *a = lockTable[key];
+		atomic_flag *a = &lockTable[key];
 		tableMutex.unlock();
 		while (a->test_and_set(memory_order_acquire));
 	    }
@@ -104,7 +104,7 @@ bool SpinLockTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 	std::set<long>::reverse_iterator rit;
 	for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
 	    tableMutex.lock();
-	    lockTable[*rit]->clear(memory_order_release);
+	    lockTable[*rit].clear(memory_order_release);
 	    tableMutex.unlock();
 	}
     }

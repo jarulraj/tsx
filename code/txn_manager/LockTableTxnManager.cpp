@@ -177,12 +177,7 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 		if (keys.count(op.key) == 0) {
 		    tableMutex.lock();
 		    if (lockTable.count(op.key) == 0) {
-			Lock *l = new Lock();
-			lockTable[op.key] = l;
-			mutex *m = new mutex();
-			l->mutex = m;
-			condition_variable *cv = new condition_variable();
-			l->cv = cv;
+			Lock *l = &lockTable[op.key]; // Creates lock object
 			l->mode = requestMode;
 
 			if (requestMode == READ) {
@@ -192,16 +187,16 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 			}
 
 			tableMutex.unlock();
-			unique_lock<mutex> lk(*m);
+			unique_lock<mutex> lk(l->mutex);
 		    } else {
 			tableMutex.unlock();
-			Lock *l = lockTable[op.key];
-			unique_lock<mutex> lk(*l->mutex);
+			Lock *l = &lockTable[op.key];
+			unique_lock<mutex> lk(l->mutex);
 			thread::id id = this_thread::get_id();
 			l->q.push(id);
 			int wakeups = 0;
 			while (l->q.front() != id || conflict(requestMode, l->mode)) {
-			    l->cv->wait_for(lk, chrono::milliseconds(10));
+			    l->cv.wait_for(lk, chrono::milliseconds(10));
 			    wakeups++;
 			    if (wakeups > 2) {
 				// Remove this thread from the queue of waiting threads.
@@ -257,8 +252,8 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 		OpDescription op;
 		op.type = INSERT;
 		for (it = old_values.begin(); it != old_values.end(); it++) {
-		    op.key = (*it).first;
-		    op.value = (*it).second;
+		    op.key = it->first;
+		    op.value = it->second;
 		    ExecuteTxnOp(op);
 		}
 	    }
@@ -267,10 +262,10 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 	    std::set<long>::reverse_iterator rit;
 	    for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
 		tableMutex.lock();
-		Lock *l = lockTable[*rit];
+		Lock *l = &lockTable[*rit];
 		tableMutex.unlock();
 		{
-		    lock_guard<mutex> lk(*l->mutex);
+		    lock_guard<mutex> lk(l->mutex);
 		    if (l->mode == READ) {
 			assert(l->num_readers > 0);
 			l->num_readers--;
@@ -282,7 +277,7 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 			l->mode = FREE;
 		    }
 		}
-		l->cv->notify_all();
+		l->cv.notify_all();
 	    }
 	}
     } else {
@@ -311,12 +306,7 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 
 	    tableMutex.lock();
 	    if (lockTable.count(key) == 0) {
-		Lock *l = new Lock();
-		lockTable[key] = l;
-		mutex *m = new mutex();
-		l->mutex = m;
-		condition_variable *cv = new condition_variable();
-		l->cv = cv;
+		Lock *l = &lockTable[key]; // Creates Lock object
 		l->mode = requestMode;
 
 		if (requestMode == READ) {
@@ -326,15 +316,15 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 		}
 
 		tableMutex.unlock();
-		unique_lock<mutex> lk(*m);
+		unique_lock<mutex> lk(l->mutex);
 	    } else {
-		Lock *l = lockTable[key];
+		Lock *l = &lockTable[key];
 		tableMutex.unlock();
-		unique_lock<mutex> lk(*l->mutex);
+		unique_lock<mutex> lk(l->mutex);
 		thread::id id = this_thread::get_id();
 		l->q.push(id);
 		while (l->q.front() != id || conflict(requestMode, l->mode)) {
-		    l->cv->wait(lk);
+		    l->cv.wait(lk);
 		}
 
 		if (requestMode == READ) {
@@ -356,10 +346,10 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 	std::map<long, LockMode>::reverse_iterator rit;
 	for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
 	    tableMutex.lock();
-	    Lock *l = lockTable[rit->first];
+	    Lock *l = &lockTable[rit->first];
 	    tableMutex.unlock();
 	    {
-		lock_guard<mutex> lk(*l->mutex);
+		lock_guard<mutex> lk(l->mutex);
 		if (l->mode == READ) {
 		    assert(l->num_readers > 0);
 		    l->num_readers--;
@@ -372,7 +362,7 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 		    l->mode = FREE;
 		}
 	    }
-	    l->cv->notify_all();
+	    l->cv.notify_all();
 	}
     }
     return true;
