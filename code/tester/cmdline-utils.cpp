@@ -30,10 +30,11 @@ const option::Descriptor usage[] =
     {VALUE_LENGTH,0, "v", "val_len", option::Integer,  "  --val_len, -v  \tLength of each value string."
         " Default: " STRINGIFY(DEFAULT_VALUE_LENGTH) "." },
     {SANITY_TEST, 0, "a", "sanity",  option::Arg::None,     "  --sanity,  -a  \tRun a sanity test to check"
-        " validity of CC schemes, instead of real workloads. Disables -t, -o, and -r flags."},
+        " validity of CC schemes, instead of real workloads. Disables -t, -o, -r, and -d flags."},
     {KEY_DIST,    0, "k", "keydist", option::Required, "  --keydist, -k  \tDistribution of keys to use."
         " Permitted values: " UNIFORM_NAME ", " ZIPF_NAME ". Default: " DEFAULT_DIST_NAME "."},
-    {VERBOSITY,   0, "e", "verbosity", option::Integer, "  --verbosity, -e \tRelative amount of detail to print out"},
+    {VERBOSITY,   0, "e", "verbosity", option::Integer, "  --verbosity, -e \tRelative amount of detail to"
+        " print out. Default: " STRINGIFY(DEFAULT_VERBOSITY) "."},
     {DYNAMIC,     0, "d", "dynamic", option::Arg::None, "  --dynamic, -d \tUse dynamic read/write sets."},
     {0,0,0,0,0,0}
 };

@@ -28,10 +28,10 @@ protected:
 // This class has been ported almost in its entirety from the YCSB Java codebase.
 class ZipfianGenerator: public Generator<int> {
 public:
-    ZipfianGenerator(long min, long max, double zipfian_const = 0.99,
-            double zetan_init = nan(""),
+    ZipfianGenerator(long min, long max, time_t rand_seed,
+            double zipfian_const = 0.99, double zetan_init = nan(""),
             bool allow_decrease = false)
-        : generator(time(NULL)), distribution(0.0, 1.0),
+        : generator(rand_seed), distribution(0.0, 1.0),
           num_items(max - min + 1), min_item(min),
           zipfian_constant(zipfian_const), theta(zipfian_const),
           alpha(1.0/(1.0-zipfian_const)), count_for_zeta(num_items),

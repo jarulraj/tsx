@@ -85,7 +85,7 @@ int main(int argc, const char* argv[]) {
 
     // Use std::unordered_map as hashtable 
     // Making the underlying hashtable concurrency-safe is a different problem
-    std::unordered_map<long,std::string> table; 
+    unordered_map<long, string> table;
 
 
     TxnManager *manager;
@@ -158,8 +158,9 @@ int main(int argc, const char* argv[]) {
         for (int i = 0; i < num_threads; ++i) {
             // Each thread gets its own key generator.
             Generator<int> *key_generator;
+            time_t seed = time(NULL);
             if (key_dist_type == ZIPF_NAME) {
-                key_generator = new ZipfianGenerator(0, num_keys - 1);
+                key_generator = new ZipfianGenerator(0, num_keys - 1, seed);
             } else { // UNIFORM_NAME
                 key_generator = new UniformGenerator(0, num_keys - 1);
             }

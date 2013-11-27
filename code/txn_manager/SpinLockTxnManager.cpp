@@ -24,7 +24,7 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 		    if (lockTable.count(op.key) == 0) {
 			atomic_flag *a = &lockTable[op.key];  // Inserts flag
 			a->test_and_set(memory_order_acquire);
-			tableMutex.unlock();
+                        tableMutex.unlock();
 		    } else {
 			atomic_flag *a = &lockTable[op.key];
 			tableMutex.unlock();
@@ -60,10 +60,9 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 
 	    // Roll back changes if we aborted.
 	    if (abort) {
-		unordered_map<long, string>::iterator it;
 		OpDescription op;
 		op.type = INSERT;
-		for (it = old_values.begin(); it != old_values.end(); it++) {
+		for (auto it = old_values.begin(); it != old_values.end(); it++) {
 		    op.key = it->first;
 		    op.value = it->second;
 		    ExecuteTxnOp(op);
@@ -71,8 +70,7 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 	    }
 
 	    // Unlock all keys in reverse order.
-	    set<long>::reverse_iterator rit;
-	    for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
+	    for (auto rit = keys.rbegin(); rit != keys.rend(); ++rit) {
 		tableMutex.lock();
 		lockTable[*rit].clear(memory_order_release);
 		tableMutex.unlock();
@@ -94,7 +92,7 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 		a->test_and_set(memory_order_acquire);
 	    } else {
 		atomic_flag *a = &lockTable[key];
-		tableMutex.unlock();
+                tableMutex.unlock();
 		while (a->test_and_set(memory_order_acquire));
 	    }
 	}
@@ -103,8 +101,7 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 	ExecuteTxnOps(operations, get_results);
 
 	// Unlock all keys in reverse order.
-	set<long>::reverse_iterator rit;
-	for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
+	for (auto rit = keys.rbegin(); rit != keys.rend(); ++rit) {
 	    tableMutex.lock();
 	    lockTable[*rit].clear(memory_order_release);
 	    tableMutex.unlock();
