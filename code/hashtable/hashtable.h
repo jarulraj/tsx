@@ -7,8 +7,6 @@
 #include <stdint.h>
 #include <string>
 
-using namespace std;
-
 #define HT_INITIAL_SIZE 64  // Initial HT size
 
 // HT initialization flags

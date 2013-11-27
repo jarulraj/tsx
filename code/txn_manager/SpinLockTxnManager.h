@@ -13,12 +13,12 @@ public:
 	: TxnManager(table),
 	  dynamic(_dynamic) {}
     virtual bool RunTxn(const std::vector<OpDescription> &operations,
-            std::vector<string> *get_results);
+            std::vector<std::string> *get_results);
 
 private:
-    unordered_map<long, atomic_flag> lockTable;
+    std::unordered_map<long, std::atomic_flag> lockTable;
     // Prevents concurrent insertions to the lock table.
-    mutex tableMutex;
+    std::mutex tableMutex;
     bool dynamic;
 };
 

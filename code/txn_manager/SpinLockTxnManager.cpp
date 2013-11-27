@@ -4,10 +4,12 @@
 
 #include "SpinLockTxnManager.h"
 
+using namespace std;
+
 const int MAX_TRIES = 10;
 
-bool SpinLockTxnManager::RunTxn(const std::vector<OpDescription> &operations,
-        std::vector<string> *get_results) {
+bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
+        vector<string> *get_results) {
     if (dynamic) {
 	bool abort = true;
 	string result;
@@ -69,7 +71,7 @@ bool SpinLockTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 	    }
 
 	    // Unlock all keys in reverse order.
-	    std::set<long>::reverse_iterator rit;
+	    set<long>::reverse_iterator rit;
 	    for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
 		tableMutex.lock();
 		lockTable[*rit].clear(memory_order_release);
@@ -101,7 +103,7 @@ bool SpinLockTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 	ExecuteTxnOps(operations, get_results);
 
 	// Unlock all keys in reverse order.
-	std::set<long>::reverse_iterator rit;
+	set<long>::reverse_iterator rit;
 	for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
 	    tableMutex.lock();
 	    lockTable[*rit].clear(memory_order_release);
