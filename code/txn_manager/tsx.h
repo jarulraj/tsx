@@ -31,6 +31,9 @@
 #include <pthread.h>
 #include <cpuid.h>
 
+#include "immintrin.h"  /* for _mm_pause() */
+#include <iostream>
+
 using namespace std;
 
 /* -------------------------------------------------------------------------- */
@@ -159,65 +162,125 @@ static int g_rtm_retries  = 0;
 
 typedef struct LOCKABLE spinlock { int v; } spinlock_t;
 
-//void (*dyn_spinlock_acquire)(spinlock_t*);
-//void (*dyn_spinlock_release)(spinlock_t*);
+static ALWAYS_INLINE void dyn_spinlock_init(spinlock_t* lock);
 
-void dyn_spinlock_init(spinlock_t* lock);
+static ALWAYS_INLINE void hle_spinlock_acquire(spinlock_t* lock) EXCLUSIVE_LOCK_FUNCTION(lock);
 
-void hle_spinlock_acquire(spinlock_t* lock) EXCLUSIVE_LOCK_FUNCTION(lock);
+static ALWAYS_INLINE bool hle_spinlock_isfree(spinlock_t* lock); 
 
-bool hle_spinlock_isfree(spinlock_t* lock); 
+static ALWAYS_INLINE void hle_spinlock_release(spinlock_t* lock) UNLOCK_FUNCTION(lock);
 
-void hle_spinlock_release(spinlock_t* lock) UNLOCK_FUNCTION(lock);
+static ALWAYS_INLINE void rtm_spinlock_acquire(spinlock_t* lock) EXCLUSIVE_LOCK_FUNCTION(lock);
 
-void rtm_spinlock_acquire(spinlock_t* lock) EXCLUSIVE_LOCK_FUNCTION(lock);
+static ALWAYS_INLINE void rtm_spinlock_release(spinlock_t* lock) UNLOCK_FUNCTION(lock);
 
-void rtm_spinlock_release(spinlock_t* lock) UNLOCK_FUNCTION(lock);
+/* ---- DEFINITIONS ---- */
+                
+static ALWAYS_INLINE void dyn_spinlock_init(spinlock_t* lock)
+{
+    lock->v = 0;
+}
 
-/* -------------------------------------------------------------------------- */
-/* -- Intrusive linked list ------------------------------------------------- */
+static ALWAYS_INLINE void hle_spinlock_acquire(spinlock_t* lock) EXCLUSIVE_LOCK_FUNCTION(lock)
+{            
+    while (__atomic_exchange_n(&lock->v, 1, __ATOMIC_ACQUIRE|__ATOMIC_HLE_ACQUIRE) != 0) { 
+        int val; 
+        /* Wait for lock to become free again before retrying. */ 
+        do { 
+            _mm_pause(); 
+            /* Abort speculation */ 
+            val = __atomic_load_n(&lock->v, __ATOMIC_CONSUME); 
+        } while (val == 1); 
+    } 
+}
 
-#define container_of(ptr, type, member) ({                      \
-      const typeof( ((type *)0)->member ) *__mptr = (ptr);      \
-      (type *)( (char *)__mptr - offsetof(type,member) ); })
+static ALWAYS_INLINE bool hle_spinlock_isfree(spinlock_t* lock)
+{
+    return (__sync_bool_compare_and_swap(&lock->v, 0, 0) ? true : false);
+}
 
-typedef struct node {
-  struct node* next;
-} node_t;
+static ALWAYS_INLINE void hle_spinlock_release(spinlock_t* lock) UNLOCK_FUNCTION(lock)
+{
+    __atomic_clear(&lock->v, __ATOMIC_RELEASE|__ATOMIC_HLE_RELEASE);
+}
 
-typedef struct list { node_t root; } list_t;
+#define _MAX_TRY_XBEGIN         10
+#define _MAX_ABORT_RETRY        5
 
-void new_list(list_t* list);
+static ALWAYS_INLINE int new_rtm_spinlock_acquire (pthread_mutex_t *mutex)
+{
+    unsigned status;
+    int abort_retry = 0;
 
-void push_list(list_t* list, node_t* node);
+    for(int try_xbegin = 0; try_xbegin < _MAX_TRY_XBEGIN; try_xbegin ++) {
+        if ((status = _xbegin()) == _XBEGIN_STARTED) {
 
-void pop_list(list_t* list);
+            // POSIX pthreads locking does not export an operation to query internal lock status
+            if ((mutex)->__data.__lock == 0)
+                return 0;
 
-/* -------------------------------------------------------------------------- */
-/* -- Sample threaded application #1 ---------------------------------------- */
+            // Lock was busy. Fall back to normal locking. 
+            _xabort (0xff);
+        }
 
-static spinlock_t g_lock;
-static int g_testval GUARDED_BY(g_lock);
-static list_t g_list GUARDED_BY(g_lock);
+        if (!(status & _XABORT_RETRY)) {
+            if (abort_retry >= _MAX_ABORT_RETRY)
+                break;
+            abort_retry ++;
+        }
+    }
 
-typedef struct intobj {
-  unsigned int v;
-  node_t node;
-} intobj_t;
+    /* Use a normal lock here.  */
+    return pthread_mutex_lock(mutex);
+}
 
-typedef struct threadctx {
-  int id;
-} threadctx_t;
+static ALWAYS_INLINE int new_rtm_spinlock_release(pthread_mutex_t *mutex) {
 
-static void update_ctx(intobj_t* obj) EXCLUSIVE_LOCKS_REQUIRED(g_lock) ;
+    if ((mutex)->__data.__lock == 0) {
+        _xend();
+        return 0;
+    }
+}
 
-static void* runThread(void* voidctx);
+static ALWAYS_INLINE void rtm_spinlock_acquire(spinlock_t* lock) EXCLUSIVE_LOCK_FUNCTION(lock)
+{
+    unsigned int tm_status = 0;
 
-int begin(int nthr);
+tm_try:
+    if ((tm_status = _xbegin()) == _XBEGIN_STARTED) {
+        // If the lock is free, speculatively elide acquisition and continue. 
+        if (hle_spinlock_isfree(lock)) return;
 
-/* -------------------------------------------------------------------------- */
-/* -- Boilerplate & driver -------------------------------------------------- */
+        // Otherwise fall back to the spinlock by aborting. 
+        _xabort(0xff); // 0xff canonically denotes 'lock is taken'. 
+    } else {
+        // _xbegin could have had a conflict, been aborted, etc 
+        if (tm_status & _XABORT_RETRY) {
+            //__sync_add_and_fetch(&g_rtm_retries, 1);
+            goto tm_try; /* Retry */
+        }
+        if (tm_status & _XABORT_EXPLICIT) {
+            int code = _XABORT_CODE(tm_status);
+            if (code == 0xff) goto tm_fail; /* Lock was taken; fallback */
+        }
 
-void __attribute__((constructor)) init();
+        //fprintf(stderr, "TSX RTM: failure; (code %d)\n", tm_status);
+tm_fail:
+        //__sync_add_and_fetch(&g_locks_failed, 1);
+        hle_spinlock_acquire(lock);
+    }
+}
+
+static ALWAYS_INLINE void rtm_spinlock_release(spinlock_t* lock) UNLOCK_FUNCTION(lock)
+{
+    // If the lock is still free, we'll assume it was elided. This implies we're in a transaction. 
+    if (hle_spinlock_isfree(lock)) {
+        //g_locks_elided += 1;
+        _xend(); // Commit transaction 
+    } else {
+        // Otherwise, the lock was taken by us, so release it too. */
+        hle_spinlock_release(lock);
+    }
+}
 
 #endif /* _RTM_H_ */
