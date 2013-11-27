@@ -241,7 +241,7 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 		}
 
 		// Run this op.
-		result = ExecuteTxnOp(op);
+		ExecuteTxnOp(op, &result);
 		if (op.type == GET) {
 		    if (get_results != NULL) {
 			get_results->push_back(result);
@@ -356,7 +356,7 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 	std::map<long, LockMode>::reverse_iterator rit;
 	for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
 	    tableMutex.lock();
-	    Lock *l = lockTable[(*rit).first];
+	    Lock *l = lockTable[rit->first];
 	    tableMutex.unlock();
 	    {
 		lock_guard<mutex> lk(*l->mutex);
@@ -368,7 +368,7 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 		    }
 		} else {
 		    assert(l->num_readers == 0);
-		    assert((*rit).second == WRITE);
+		    assert(rit->second == WRITE);
 		    l->mode = FREE;
 		}
 	    }

@@ -45,7 +45,7 @@ bool SpinLockTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 		}
 
 		// Run this op.
-		result = ExecuteTxnOp(op);
+		ExecuteTxnOp(op, &result);
 		if (op.type == GET) {
 		    if (get_results != NULL) {
 			get_results->push_back(result);
@@ -61,8 +61,8 @@ bool SpinLockTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 		OpDescription op;
 		op.type = INSERT;
 		for (it = old_values.begin(); it != old_values.end(); it++) {
-		    op.key = (*it).first;
-		    op.value = (*it).second;
+		    op.key = it->first;
+		    op.value = it->second;
 		    ExecuteTxnOp(op);
 		}
 	    }
