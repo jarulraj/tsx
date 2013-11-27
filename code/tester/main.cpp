@@ -177,7 +177,7 @@ int main(int argc, const char* argv[]) {
 
 	// Shouldn't need cout mutex anymore here -- all threads are done.
     for (const ThreadStats &stats : thread_stats) {
-	if (verbosity >= 1) {
+	if (verbosity >= 2) {
 	    cout << "Thread " << stats.thread_id << ":\n"
 		 << "  Transactions: " << stats.transactions << "\n"
 		 << "  GETs: " << stats.gets << "\n"

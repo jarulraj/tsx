@@ -4,6 +4,7 @@
 /* 
  * Based on spinlock-rtm.c: A spinlock implementation with dynamic lock elision.
  * Copyright (c) 2013 Austin Seipp
+ * Copyright (c) 2013 CMU
  */
 
 #include <stdio.h>
@@ -54,44 +55,44 @@ int cpu_has_hle(void) ;
 #define _XABORT_NESTED          (1 << 5)
 #define _XABORT_CODE(x)         (((x) >> 24) & 0xff)
 
+#define _RTM_MAX_TRIES         3
+#define _RTM_MAX_ABORTS        2
+
 #define _xbegin()                                       \
-  ({                                                    \
-    int ret = _XBEGIN_STARTED;                          \
-    __asm__ __volatile__(".byte 0xc7,0xf8 ; .long 0"    \
-                         : "+a" (ret)                   \
-                         :                              \
-                         : "memory");                   \
-    ret;                                                \
-  })                                                    \
+    ({                                                    \
+     int ret = _XBEGIN_STARTED;                          \
+     __asm__ __volatile__(".byte 0xc7,0xf8 ; .long 0"    \
+         : "+a" (ret)                   \
+         :                              \
+         : "memory");                   \
+     ret;                                                \
+     })                                                    \
 
 #define _xend()                                                 \
-  ({                                                            \
-    __asm__ __volatile__(".byte 0x0f,0x01,0xd5"                 \
-                         ::: "memory");                         \
-  })
+    ({                                                            \
+     __asm__ __volatile__(".byte 0x0f,0x01,0xd5"                 \
+         ::: "memory");                         \
+     })
 
 #define _xabort(status)                                         \
-  ({                                                            \
-    __asm__ __volatile__( ".byte 0xc6,0xf8,%P0"                 \
-                          :                                     \
-                          : "i" (status)                        \
-                          : "memory");                          \
-  })
+    ({                                                            \
+     __asm__ __volatile__( ".byte 0xc6,0xf8,%P0"                 \
+         :                                     \
+         : "i" (status)                        \
+         : "memory");                          \
+     })
 
 #define _xtest()                                                 \
-  ({                                                             \
-    unsigned char out;                                           \
-    __asm__ __volatile__( ".byte 0x0f,0x01,0xd6 ; setnz %0"      \
-                          : "=r" (out)                           \
-                          :                                      \
-                          : "memory");                           \
-    out;                                                         \
-  })
+    ({                                                             \
+     unsigned char out;                                           \
+     __asm__ __volatile__( ".byte 0x0f,0x01,0xd6 ; setnz %0"      \
+         : "=r" (out)                           \
+         :                                      \
+         : "memory");                           \
+     out;                                                         \
+     })
 
-/* -------------------------------------------------------------------------- */
-/* -- A simple spinlock implementation with lock elision -------------------- */
-
-/* Statistics */
+/* Stats */
 static int g_locks_elided = 0;
 static int g_locks_failed = 0;
 static int g_rtm_retries  = 0;
@@ -111,7 +112,7 @@ static ALWAYS_INLINE void rtm_spinlock_acquire(spinlock_t* lock);
 static ALWAYS_INLINE void rtm_spinlock_release(spinlock_t* lock); 
 
 /* ---- DEFINITIONS ---- */
-                
+
 static ALWAYS_INLINE void dyn_spinlock_init(spinlock_t* lock)
 {
     lock->v = 0;
@@ -140,71 +141,45 @@ static ALWAYS_INLINE void hle_spinlock_release(spinlock_t* lock)
     __atomic_clear(&lock->v, __ATOMIC_RELEASE|__ATOMIC_HLE_RELEASE);
 }
 
-#define _MAX_TRY_XBEGIN         10
-#define _MAX_ABORT_RETRY        5
-
-static ALWAYS_INLINE int new_rtm_spinlock_acquire (pthread_mutex_t *mutex)
-{
-    unsigned status;
-    int abort_retry = 0;
-
-    for(int try_xbegin = 0; try_xbegin < _MAX_TRY_XBEGIN; try_xbegin ++) {
-        if ((status = _xbegin()) == _XBEGIN_STARTED) {
-
-            // POSIX pthreads locking does not export an operation to query internal lock status
-            if ((mutex)->__data.__lock == 0)
-                return 0;
-
-            // Lock was busy. Fall back to normal locking. 
-            _xabort (0xff);
-        }
-
-        if (!(status & _XABORT_RETRY)) {
-            if (abort_retry >= _MAX_ABORT_RETRY)
-                break;
-            abort_retry ++;
-        }
-    }
-
-    /* Use a normal lock here.  */
-    return pthread_mutex_lock(mutex);
-}
-
-static ALWAYS_INLINE int new_rtm_spinlock_release(pthread_mutex_t *mutex) {
-
-    if ((mutex)->__data.__lock == 0) {
-        _xend();
-        return 0;
-    }
-}
 
 static ALWAYS_INLINE void rtm_spinlock_acquire(spinlock_t* lock)
 {
     unsigned int tm_status = 0;
+    int tries = 0, retries = 0;
 
 tm_try:
-    if ((tm_status = _xbegin()) == _XBEGIN_STARTED) {
-        // If the lock is free, speculatively elide acquisition and continue. 
-        if (hle_spinlock_isfree(lock)) return;
+    if(tries++ < _RTM_MAX_TRIES){
+        if ((tm_status = _xbegin()) == _XBEGIN_STARTED) {
+            // If the lock is free, speculatively elide acquisition and continue. 
+            if (hle_spinlock_isfree(lock)) 
+                return;
 
-        // Otherwise fall back to the spinlock by aborting. 
-        _xabort(0xff); // 0xff canonically denotes 'lock is taken'. 
-    } else {
-        // _xbegin could have had a conflict, been aborted, etc 
-        if (tm_status & _XABORT_RETRY) {
-            //__sync_add_and_fetch(&g_rtm_retries, 1);
-            goto tm_try; /* Retry */
+            // Otherwise fall back to the spinlock by aborting. 
+            // 0xff canonically denotes 'lock is taken'.  
+            _xabort(0xff); 
+        } 
+        else {
+            // _xbegin could have had a conflict, been aborted, etc 
+            if (tm_status & _XABORT_RETRY) {
+                //__sync_add_and_fetch(&g_rtm_retries, 1);
+                if(retries++ < _RTM_MAX_ABORTS)
+                    goto tm_try; // Retry 
+                else
+                    goto tm_fail;
+            }
+            if (tm_status & _XABORT_EXPLICIT) {
+                int code = _XABORT_CODE(tm_status);
+                if (code == 0xff) 
+                    goto tm_fail; // Lock was taken; fallback 
+            }
         }
-        if (tm_status & _XABORT_EXPLICIT) {
-            int code = _XABORT_CODE(tm_status);
-            if (code == 0xff) goto tm_fail; /* Lock was taken; fallback */
-        }
-
-        //fprintf(stderr, "TSX RTM: failure; (code %d)\n", tm_status);
-tm_fail:
-        //__sync_add_and_fetch(&g_locks_failed, 1);
-        hle_spinlock_acquire(lock);
     }
+
+    //fprintf(stderr, "TSX RTM: failure; (code %d)\n", tm_status);
+tm_fail:
+    //__sync_add_and_fetch(&g_locks_failed, 1);
+    hle_spinlock_acquire(lock);
+
 }
 
 static ALWAYS_INLINE void rtm_spinlock_release(spinlock_t* lock)
@@ -214,9 +189,10 @@ static ALWAYS_INLINE void rtm_spinlock_release(spinlock_t* lock)
         //g_locks_elided += 1;
         _xend(); // Commit transaction 
     } else {
-        // Otherwise, the lock was taken by us, so release it too. */
+        // Otherwise, the lock was taken by us, so release it too. 
         hle_spinlock_release(lock);
     }
 }
+
 
 #endif /* _RTM_H_ */
