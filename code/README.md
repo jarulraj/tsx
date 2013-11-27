@@ -6,8 +6,8 @@ Evaluation of HTM support for concurrency control for `multi-key transactions` i
 
 ## Dependencies
 
-- *g++ 4.8+ * - (transactional memory support)
-- *autoconf * - (`apt-get install autoconf libtool`) 
+- **g++ 4.8+** (for transactional memory support)
+- **autoconf** (`apt-get install autoconf libtool`) 
 
 ## Setup
         
@@ -22,12 +22,12 @@ Evaluation of HTM support for concurrency control for `multi-key transactions` i
 
 ## Test
 
-*Example*    
+**Example**    
 
 ```
 ./tester/main 
 ```
-- get Usage Message
+- get usage message
 
 ```
 ./tester/main -s1 -t16 -o16 -kzipf rtm
