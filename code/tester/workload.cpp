@@ -223,7 +223,7 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
     nanoseconds duration = duration_cast<nanoseconds>(s);
     nanoseconds total(0);
 
-    do {
+    do {                
         high_resolution_clock::time_point t1 = high_resolution_clock::now();
         
         for (int i = 0; i < ops_per_txn; ++i) {
@@ -239,11 +239,10 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
             } else {
                 next_op.type = INSERT;
                 ++stats->inserts;
-                //GenRandomString(&next_op.value);
-                next_op.value = "test";
+                GenRandomString(&next_op.value);
             }
         }
-
+        
         // Timed code
         if (!manager->RunTxn(txn_ops, NULL)) {
             global_cout_mutex.lock();

@@ -8,21 +8,21 @@ EXEC = "./tester/main"
 
 # LOOP THROUGH PARAMETERS
 
-t = 2 # number of threads
-s = 1 # time for each run
+t = 8 # number of threads
+s = 3 # time for each run
 o = 1 # number of ops per txn
 r = 1 # ratio of gets:puts (not used currently)
 
 itr = 0
 
-k = "zipf" # choose distribution
+k = "uniform" # choose distribution
 
-while t<=32:
+while t<=128:
     
-    o = 1
-    while o<=16:
+    o = 2
+    while o<=64:
     
-        for cc in [ 'hle', 'rtm', 'tbl', 'spin' ]:
+        for cc in [ 'hle', 'rtm', 'tbl', 'spin', 'sspin' ]:
             # RUN EXPERIMENT        
             cmd = [ EXEC, '-s'+str(s), '-t'+str(t), '-o'+str(o), '-k'+k, cc]
 
@@ -37,5 +37,5 @@ while t<=32:
             (out, err) = task.communicate()
             print out
 
-        o *= 4
-    t *= 4
+        o *= 32
+    t *= 16

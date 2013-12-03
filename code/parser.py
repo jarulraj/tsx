@@ -3,7 +3,7 @@
 import subprocess
 import shlex
 
-FILE = "zipf.log"
+FILE = "data/zipf.log"
 
 # LOOP THROUGH PARAMETERS
 
@@ -12,9 +12,9 @@ r = 1 # ratio of gets:puts (not used currently)
 
 itr = 0
 
-while t<=32:
+while t<=64:
 
-    for cc in [ 'hle', 'rtm', 'tbl', 'spin' ]:
+    for cc in [ 'hle', 'rtm', 'tbl', 'spin', 'sspin' ]:
 
         print "Threads : "+str(t)+" CC : "+str(cc)
 
@@ -38,4 +38,4 @@ while t<=32:
         print out
         
 
-    t *= 4 
+    t *= 32
