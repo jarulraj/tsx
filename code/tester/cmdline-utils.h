@@ -8,7 +8,7 @@
 
 #define DEFAULT_SECONDS      10
 #define DEFAULT_OPS_PER_TXN  10
-#define DEFAULT_KEYS         4096
+#define DEFAULT_KEYS         128
 #define DEFAULT_VALUE_LENGTH 4
 #define DEFAULT_VERBOSITY    1
 #define HLE_NAME             "hle"

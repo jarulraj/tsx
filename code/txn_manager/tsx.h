@@ -109,12 +109,21 @@ static ALWAYS_INLINE bool hle_spinlock_isfree(spinlock_t* lock);
 static ALWAYS_INLINE void hle_spinlock_release(spinlock_t* lock); 
 
 // RTM
+/*
 static ALWAYS_INLINE bool rtm_spinlock_isfree(spinlock_t* lock); 
 
 static ALWAYS_INLINE void rtm_spinlock_acquire(spinlock_t* lock); 
 
 static ALWAYS_INLINE void rtm_spinlock_release(spinlock_t* lock); 
+*/
 
+// RTM
+static ALWAYS_INLINE bool rtm_spinlock_isfree(pthread_spinlock_t* lock); 
+
+static ALWAYS_INLINE void rtm_spinlock_acquire(pthread_spinlock_t* lock); 
+
+static ALWAYS_INLINE void rtm_spinlock_release(pthread_spinlock_t* lock); 
+ 
 /* ---- DEFINITIONS ---- */
 
 static ALWAYS_INLINE void dyn_spinlock_init(spinlock_t* lock)
@@ -145,15 +154,15 @@ static ALWAYS_INLINE void hle_spinlock_release(spinlock_t* lock)
     __atomic_clear(&lock->v, __ATOMIC_RELEASE|__ATOMIC_HLE_RELEASE);
 }
 
-static ALWAYS_INLINE bool rtm_spinlock_isfree(spinlock_t* lock)
+static ALWAYS_INLINE bool rtm_spinlock_isfree(pthread_spinlock_t* lock)
 {
     // use lock value itself
-    //return (__sync_bool_compare_and_swap(&lock, 0, 0) ? true : false);
-    return (__sync_bool_compare_and_swap(&lock->v, 0, 0) ? true : false);
+    return (__sync_bool_compare_and_swap(&lock, 0, 0) ? true : false);
+    //return (__sync_bool_compare_and_swap(&lock->v, 0, 0) ? true : false);
 }
 
 
-static ALWAYS_INLINE void rtm_spinlock_acquire(spinlock_t* lock)
+static ALWAYS_INLINE void rtm_spinlock_acquire(pthread_spinlock_t* lock)
 {
     unsigned int tm_status = 0;
     int tries = 0, retries = 0;
@@ -194,11 +203,13 @@ tm_fail:
 #ifdef DEBUG
     __sync_add_and_fetch(&g_locks_failed, 1);
 #endif
-    hle_spinlock_acquire(lock);
+    pthread_spin_lock(lock);
+    //hle_spinlock_acquire(lock);
+
 
 }
 
-static ALWAYS_INLINE void rtm_spinlock_release(spinlock_t* lock)
+static ALWAYS_INLINE void rtm_spinlock_release(pthread_spinlock_t* lock)
 {
     // If the lock is still free, we'll assume it was elided. This implies we're in a transaction. 
     if (rtm_spinlock_isfree(lock)) {
@@ -208,7 +219,8 @@ static ALWAYS_INLINE void rtm_spinlock_release(spinlock_t* lock)
        _xend(); // Commit transaction 
     } else {
         // Otherwise, the lock was taken by us, so release it too. 
-        hle_spinlock_release(lock);
+        pthread_spin_unlock(lock);
+        //hle_spinlock_release(lock);
     }
 }
 
