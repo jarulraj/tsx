@@ -196,5 +196,11 @@ int main(int argc, const char* argv[]) {
         << "  GETs: " << overall.gets << "\n"
         << "  INSERTs: " << overall.inserts << endl;
 
+    
+#ifdef DEBUG    
+    if (manager_type == RTM_NAME)
+        manager->printStats();
+#endif  
+
     return 0;
 }

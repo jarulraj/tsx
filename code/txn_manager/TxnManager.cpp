@@ -1,6 +1,3 @@
-#ifndef _TXN_MANAGER_CPP_
-#define _TXN_MANAGER_CPP_
-
 #include <iostream>
 #include <set>
 #include <unordered_map>
@@ -50,4 +47,7 @@ void TxnManager::ExecuteTxnOp(const OpDescription &op, string *result) {
     }
 }
 
-#endif /* _TXN_MANAGER_CPP */
+void TxnManager::printStats(){
+    cout<<"TxnManager Stats"<<endl;
+}
+

@@ -3,7 +3,8 @@
 
 #include "RTMTxnManager.h"       
 
-pthread_spinlock_t RTMTxnManager::table_lock ;
+//pthread_spinlock_t RTMTxnManager::table_lock ;
+spinlock_t RTMTxnManager::table_lock ;
 
 RTMTxnManager::RTMTxnManager(std::unordered_map<long,std::string>* table)
     : TxnManager(table) {
@@ -18,7 +19,8 @@ RTMTxnManager::RTMTxnManager(std::unordered_map<long,std::string>* table)
             cout << "RTM AVAILABLE" << endl;
         }
 
-        pthread_spin_init(&table_lock, PTHREAD_PROCESS_PRIVATE);
+        //pthread_spin_init(&table_lock, PTHREAD_PROCESS_PRIVATE);
+        table_lock.v = 0;
 
     }
 
@@ -78,4 +80,11 @@ return true;
 }
 */
 
+void RTMTxnManager::printStats(){    
+    cout<<"RTM Stats"<<endl;
 
+    cout<<"Locks elided : "<<g_locks_elided<<endl;
+    cout<<"Locks failed : "<<g_locks_failed<<endl;
+    cout<<"RTM retries : "<<g_rtm_retries<<endl;
+
+}

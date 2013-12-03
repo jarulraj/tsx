@@ -55,8 +55,8 @@ int cpu_has_hle(void) ;
 #define _XABORT_NESTED          (1 << 5)
 #define _XABORT_CODE(x)         (((x) >> 24) & 0xff)
 
-#define _RTM_MAX_TRIES         3
-#define _RTM_MAX_ABORTS        2
+#define _RTM_MAX_TRIES         10
+#define _RTM_MAX_ABORTS        5
 
 #define _xbegin()                                       \
     ({                                                    \
@@ -109,11 +109,11 @@ static ALWAYS_INLINE bool hle_spinlock_isfree(spinlock_t* lock);
 static ALWAYS_INLINE void hle_spinlock_release(spinlock_t* lock); 
 
 // RTM
-static ALWAYS_INLINE bool rtm_spinlock_isfree(pthread_spinlock_t* lock); 
+static ALWAYS_INLINE bool rtm_spinlock_isfree(spinlock_t* lock); 
 
-static ALWAYS_INLINE void rtm_spinlock_acquire(pthread_spinlock_t* lock); 
+static ALWAYS_INLINE void rtm_spinlock_acquire(spinlock_t* lock); 
 
-static ALWAYS_INLINE void rtm_spinlock_release(pthread_spinlock_t* lock); 
+static ALWAYS_INLINE void rtm_spinlock_release(spinlock_t* lock); 
 
 /* ---- DEFINITIONS ---- */
 
@@ -145,24 +145,26 @@ static ALWAYS_INLINE void hle_spinlock_release(spinlock_t* lock)
     __atomic_clear(&lock->v, __ATOMIC_RELEASE|__ATOMIC_HLE_RELEASE);
 }
 
-static ALWAYS_INLINE bool rtm_spinlock_isfree(pthread_spinlock_t* lock)
+static ALWAYS_INLINE bool rtm_spinlock_isfree(spinlock_t* lock)
 {
     // use lock value itself
-    return (__sync_bool_compare_and_swap(&lock, 0, 0) ? true : false);
+    //return (__sync_bool_compare_and_swap(&lock, 0, 0) ? true : false);
+    return (__sync_bool_compare_and_swap(&lock->v, 0, 0) ? true : false);
 }
 
 
-static ALWAYS_INLINE void rtm_spinlock_acquire(pthread_spinlock_t* lock)
+static ALWAYS_INLINE void rtm_spinlock_acquire(spinlock_t* lock)
 {
     unsigned int tm_status = 0;
     int tries = 0, retries = 0;
 
 tm_try:
-    if(tries++ < _RTM_MAX_TRIES){
+    //if(tries++ < _RTM_MAX_TRIES){
         if ((tm_status = _xbegin()) == _XBEGIN_STARTED) {
             // If the lock is free, speculatively elide acquisition and continue. 
-            if (rtm_spinlock_isfree(lock)) 
-                return;
+            if (rtm_spinlock_isfree(lock)){ 
+                 return;
+            }
 
             // Otherwise fall back to the spinlock by aborting. 
             // 0xff canonically denotes 'lock is taken'.  
@@ -171,11 +173,13 @@ tm_try:
         else {
             // _xbegin could have had a conflict, been aborted, etc 
             if (tm_status & _XABORT_RETRY) {
-                //__sync_add_and_fetch(&g_rtm_retries, 1);
-                if(retries++ < _RTM_MAX_ABORTS)
+#ifdef DEBUG                
+                __sync_add_and_fetch(&g_rtm_retries, 1);
+#endif
+                //if(retries++ < _RTM_MAX_ABORTS)
                     goto tm_try; // Retry 
-                else
-                    goto tm_fail;
+                //else
+                //    goto tm_fail;
             }
             if (tm_status & _XABORT_EXPLICIT) {
                 int code = _XABORT_CODE(tm_status);
@@ -183,23 +187,28 @@ tm_try:
                     goto tm_fail; // Lock was taken; fallback 
             }
         }
-    }
+    //}
 
     //fprintf(stderr, "TSX RTM: failure; (code %d)\n", tm_status);
 tm_fail:
-    //__sync_add_and_fetch(&g_locks_failed, 1);
-    pthread_spin_lock(lock);
+#ifdef DEBUG
+    __sync_add_and_fetch(&g_locks_failed, 1);
+#endif
+    hle_spinlock_acquire(lock);
+
 }
 
-static ALWAYS_INLINE void rtm_spinlock_release(pthread_spinlock_t* lock)
+static ALWAYS_INLINE void rtm_spinlock_release(spinlock_t* lock)
 {
     // If the lock is still free, we'll assume it was elided. This implies we're in a transaction. 
     if (rtm_spinlock_isfree(lock)) {
-        //g_locks_elided += 1;
-        _xend(); // Commit transaction 
+#ifdef DEBUG
+        g_locks_elided += 1;
+#endif
+       _xend(); // Commit transaction 
     } else {
         // Otherwise, the lock was taken by us, so release it too. 
-        pthread_spin_unlock(lock);
+        hle_spinlock_release(lock);
     }
 }
 
