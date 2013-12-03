@@ -30,6 +30,7 @@ main_SOURCES	= $(top_builddir)/txn_manager/TxnManager.cpp \
 				  $(top_builddir)/txn_manager/tsx.cpp \
 				  $(top_builddir)/txn_manager/HLETxnManager.cpp \
 				  $(top_builddir)/txn_manager/RTMTxnManager.cpp \
+				  $(top_builddir)/txn_manager/SpinLockSimpleTxnManager.cpp \
 				  main.cpp \
 				  workload.cpp \
 				  cmdline-utils.cpp \

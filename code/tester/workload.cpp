@@ -224,6 +224,8 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
     nanoseconds total(0);
 
     do {
+        high_resolution_clock::time_point t1 = high_resolution_clock::now();
+        
         for (int i = 0; i < ops_per_txn; ++i) {
             double action_chooser = operation_distribution(generator);
             // Modify operation description in place. (Values left around from
@@ -237,11 +239,10 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
             } else {
                 next_op.type = INSERT;
                 ++stats->inserts;
-                GenRandomString(&next_op.value);
+                //GenRandomString(&next_op.value);
+                next_op.value = "test";
             }
         }
-
-        high_resolution_clock::time_point t1 = high_resolution_clock::now();
 
         // Timed code
         if (!manager->RunTxn(txn_ops, NULL)) {

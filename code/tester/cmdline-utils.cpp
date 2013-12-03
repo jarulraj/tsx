@@ -13,8 +13,8 @@ mutex global_cout_mutex;
 
 const option::Descriptor usage[] =
 {
-    {UNKNOWN,     0, "" , "",        option::Arg::None,     "Usage: htm-test [options] "
-        HLE_NAME "|" RTM_NAME "|" LOCK_TABLE_NAME "|" SPIN_NAME "\n\n"
+    {UNKNOWN,     0, "" , "",        option::Arg::None,     "Usage: tester [options] "
+        HLE_NAME "|" RTM_NAME "|" LOCK_TABLE_NAME "|" SPIN_NAME "|" SPIN_SIMPLE_NAME " \n\n"
             "Options:" },
     {HELP,        0, "" , "help",    option::Arg::None,     "  --help  \tPrint usage and exit." },
     {NUM_THREADS, 0, "t", "threads", option::Integer,  "  --threads, -t  \tNumber of threads to run with."

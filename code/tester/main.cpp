@@ -13,6 +13,7 @@
 #include "LockTableTxnManager.h"
 #include "RTMTxnManager.h"
 #include "SpinLockTxnManager.h"
+#include "SpinLockSimpleTxnManager.h"
 #include "TxnManager.h"
 
 #include "cmdline-utils.h"
@@ -97,6 +98,8 @@ int main(int argc, const char* argv[]) {
         manager = new LockTableTxnManager(&table, dynamic);
     } else if (manager_type == SPIN_NAME) {
         manager = new SpinLockTxnManager(&table, dynamic);
+    } else if (manager_type == SPIN_SIMPLE_NAME) {
+        manager = new SpinLockSimpleTxnManager(&table);
     } else {
         cerr << "Invalid concurrency control mechanism: " << manager_type << endl;
         option::printUsage(std::cout, usage);

@@ -15,6 +15,7 @@
 #define RTM_NAME             "rtm"
 #define SPIN_NAME            "spin"
 #define LOCK_TABLE_NAME      "tbl"
+#define SPIN_SIMPLE_NAME     "sspin"
 #define ZIPF_NAME            "zipf"
 #define UNIFORM_NAME         "uniform"
 #define DEFAULT_DIST_NAME    UNIFORM_NAME
