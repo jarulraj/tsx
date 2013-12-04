@@ -20,10 +20,11 @@
 #include "workload.h"
 
 using namespace std;
+using namespace std::chrono;
 
 // Stupid dummy function to make threading library link properly
 void pause_thread(int n) {
-  this_thread::sleep_for(std::chrono::seconds(n));
+  this_thread::sleep_for(seconds(n));
 }
 
 int main(int argc, const char* argv[]) {
@@ -185,19 +186,24 @@ int main(int argc, const char* argv[]) {
 	    cout << "Thread " << stats.thread_id << ":\n"
 		 << "  Transactions: " << stats.transactions << "\n"
 		 << "  GETs: " << stats.gets << "\n"
-		 << "  INSERTs: " << stats.inserts << endl;
+		 << "  INSERTs: " << stats.inserts << "\n"
+		 << "  Contention time: " << duration_cast<nanoseconds>(overall.contention_time).count()
+		     << " ns" << endl;
 	}
 
         overall.transactions += stats.transactions;
         overall.gets += stats.gets;
         overall.inserts += stats.inserts;
+        overall.contention_time += stats.contention_time;
     }
 
     cout << "--------------------------------------------"<<endl;
     cout << "Overall stats:\n"
         << "  Total transactions: " << overall.transactions << "\n"
         << "  GETs: " << overall.gets << "\n"
-        << "  INSERTs: " << overall.inserts << endl;
+        << "  INSERTs: " << overall.inserts << "\n"
+        << "  Contention time: " << duration_cast<nanoseconds>(overall.contention_time).count()
+            << " ns" << endl;
 
     
 #ifdef DEBUG    

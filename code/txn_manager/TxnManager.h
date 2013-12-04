@@ -20,6 +20,7 @@ typedef struct OpDescription {
 } OpDescription;
 
 
+struct ThreadStats;
 class TxnManager {
 public:
     TxnManager(std::unordered_map<long,std::string> *table) : table_(table) {}
@@ -33,7 +34,8 @@ public:
     // finalization/cleanup.  If get_results is non-null, it contains the
     // results of all GET operations when the function returns.
     virtual bool RunTxn(const std::vector<OpDescription> &operations,
-            std::vector<std::string> *get_results) = 0;
+            std::vector<std::string> *get_results,
+            ThreadStats *stats) = 0;
 
     // Display CC stats
     virtual void printStats();

@@ -2,6 +2,7 @@
 #include <set>
 
 #include "HLETxnManager.h"       
+#include "tester/workload.h"
 
 spinlock_t HLETxnManager::table_lock = { 0 } ;
 
@@ -22,9 +23,9 @@ HLETxnManager::HLETxnManager(std::unordered_map<long,std::string> *table)
 
 
 bool HLETxnManager::RunTxn(const std::vector<OpDescription> &operations,
-        std::vector<string> *get_results) {
+        std::vector<string> *get_results, ThreadStats *stats) {
 
-    hle_spinlock_acquire(&table_lock);
+    TIME_CODE(stats, hle_spinlock_acquire(&table_lock));
 
     // Do transaction.
     ExecuteTxnOps(operations, get_results);

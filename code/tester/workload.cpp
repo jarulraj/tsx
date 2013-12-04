@@ -1,9 +1,9 @@
+#include <chrono>
 #include <iostream>
 #include <thread>
 
 #include "cmdline-utils.h"
 #include "workload.h"
-#include <chrono>
 
 using namespace std::chrono;
 
@@ -22,7 +22,7 @@ void RunTestWriterThread(TxnManager *manager, ThreadStats *stats, long num_keys,
         ops[0].value = std::to_string(key);
         ++stats->inserts;
 
-        manager->RunTxn(ops, NULL);
+        manager->RunTxn(ops, NULL, stats);
         key = (key + 1) % num_keys;
         ++stats->transactions;
     } while (time(NULL) <= end_time);
@@ -50,7 +50,7 @@ void RunTestReaderThread(TxnManager *manager, ThreadStats *stats, long num_keys,
         }
         stats->gets += num_reads;
 
-        if (!manager->RunTxn(ops, &get_results)) {
+        if (!manager->RunTxn(ops, &get_results, stats)) {
             global_cout_mutex.lock();
             cerr << "ERROR: transaction failed in thread "
                     << this_thread::get_id();
@@ -111,7 +111,7 @@ void RunTestReaderWriterThread(TxnManager *manager, ThreadStats *stats,
         }
         stats->gets += num_reads;
 
-        if (!manager->RunTxn(ops, &get_results)) {
+        if (!manager->RunTxn(ops, &get_results, stats)) {
             global_cout_mutex.lock();
             cerr << "ERROR: transaction failed in reader/writer thread "
                     << this_thread::get_id();
@@ -174,7 +174,7 @@ void RunMultiKeyThread(TxnManager *manager, ThreadStats *stats, long num_keys,
         stats->gets += num_ops / 2;
         stats->inserts += num_ops / 2;
 
-        if (!manager->RunTxn(ops, &get_results)) {
+        if (!manager->RunTxn(ops, &get_results, stats)) {
             global_cout_mutex.lock();
             cerr << "ERROR: transaction failed in multi-key thread "
                     << this_thread::get_id();
@@ -244,7 +244,7 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
         }
         
         // Timed code
-        if (!manager->RunTxn(txn_ops, NULL)) {
+        if (!manager->RunTxn(txn_ops, NULL, stats)) {
             global_cout_mutex.lock();
             cerr << "ERROR: transaction failed.";
             global_cout_mutex.unlock();

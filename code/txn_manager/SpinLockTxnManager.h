@@ -1,6 +1,7 @@
 #ifndef _SPIN_LOCK_TXN_MANAGER_H_
 #define _SPIN_LOCK_TXN_MANAGER_H_
 
+#include <chrono>
 #include <iostream>
 #include <set>
 
@@ -13,7 +14,7 @@ public:
 	: TxnManager(table),
 	  dynamic(_dynamic) {}
     virtual bool RunTxn(const std::vector<OpDescription> &operations,
-            std::vector<std::string> *get_results);
+            std::vector<std::string> *get_results, ThreadStats *stats);
 
 private:
     std::unordered_map<long, std::atomic_flag> lockTable;

@@ -1,6 +1,7 @@
 #ifndef _WORKLOAD_H_
 #define _WORKLOAD_H_
 
+#include <chrono>
 #include <cstdlib>
 #include <random>
 #include <thread>
@@ -11,12 +12,22 @@
 
 using namespace std;
 
+
+#define TIME_CODE(stats, code) \
+    auto __timing_start = std::chrono::high_resolution_clock::now();\
+    code;\
+    \
+    auto __timing_end = std::chrono::high_resolution_clock::now();\
+    stats->contention_time += __timing_end - __timing_start;
+
 struct ThreadStats {
     thread::id thread_id;
     int transactions;
     int gets;
     int inserts;
-    ThreadStats() : gets(0), transactions(0), inserts(0) {}
+    std::chrono::high_resolution_clock::duration contention_time;
+    ThreadStats()
+            : gets(0), transactions(0), inserts(0), contention_time(0) {}
 };
 
 // Replaces every character in the provided string with a random alphanumeric

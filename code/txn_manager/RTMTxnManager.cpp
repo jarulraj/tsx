@@ -1,7 +1,8 @@
 #include <iostream>
 #include <set>
 
-#include "RTMTxnManager.h"       
+#include "RTMTxnManager.h"
+#include "tester/workload.h"
 
 pthread_spinlock_t RTMTxnManager::table_lock ;
 //spinlock_t RTMTxnManager::table_lock ;
@@ -26,9 +27,9 @@ RTMTxnManager::RTMTxnManager(std::unordered_map<long,std::string>* table)
 
 
 bool RTMTxnManager::RunTxn(const std::vector<OpDescription> &operations,
-        std::vector<string> *get_results) {
+        std::vector<string> *get_results, ThreadStats *stats) {
 
-    rtm_spinlock_acquire(&table_lock);
+    TIME_CODE(stats, rtm_spinlock_acquire(&table_lock));
 
     // Do transaction.
     ExecuteTxnOps(operations, get_results);

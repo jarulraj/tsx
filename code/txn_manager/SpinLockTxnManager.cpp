@@ -3,13 +3,14 @@
 #include <set>
 
 #include "SpinLockTxnManager.h"
+#include "tester/workload.h"
 
 using namespace std;
 
 const int MAX_TRIES = 10;
 
 bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
-        vector<string> *get_results) {
+        vector<string> *get_results, ThreadStats *stats) {
     if (dynamic) {
 	bool abort = true;
 	string result;
@@ -29,7 +30,11 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 			atomic_flag *a = &lockTable[op.key];
 			tableMutex.unlock();
 			int tries = 0;
+		        auto start = std::chrono::high_resolution_clock::now();
 			while (a->test_and_set(memory_order_acquire)) {
+                            auto end = std::chrono::high_resolution_clock::now();
+                            stats->contention_time += end - start;
+
 			    tries++;
 			    if (tries == MAX_TRIES) {
 				abort = true;
@@ -38,7 +43,13 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 				}
 				break;
 			    }
+
+			    // Prepare timing info for next iteration.
+			    start = std::chrono::high_resolution_clock::now();
 			}
+
+			auto end = std::chrono::high_resolution_clock::now();
+                        stats->contention_time += end - start;
 
 			if (abort) {
 			    break;
@@ -88,12 +99,13 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 	    tableMutex.lock();
 	    if (lockTable.count(key) == 0) {
 		atomic_flag *a = &lockTable[key];  // Creates flag
+		// TODO: Are these in the right order?
 		tableMutex.unlock();
 		a->test_and_set(memory_order_acquire);
 	    } else {
 		atomic_flag *a = &lockTable[key];
                 tableMutex.unlock();
-		while (a->test_and_set(memory_order_acquire));
+                TIME_CODE(stats, while (a->test_and_set(memory_order_acquire)));
 	    }
 	}
 
