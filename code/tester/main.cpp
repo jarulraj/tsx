@@ -9,9 +9,9 @@
 
 #include "optionparser.h"
 #include "hashtable.h"
-#include "HLETxnManager.h"
-#include "LockTableTxnManager.h"
-#include "RTMTxnManager.h"
+//#include "HLETxnManager.h"
+//#include "LockTableTxnManager.h"
+//#include "RTMTxnManager.h"
 #include "SpinLockTxnManager.h"
 #include "SpinLockSimpleTxnManager.h"
 #include "TxnManager.h"
@@ -83,20 +83,20 @@ int main(int argc, const char* argv[]) {
 
 
     // Initialize hashtable
-    // HashTable table(static_cast<ht_flags>(HT_KEY_CONST | HT_VALUE_CONST), 0.05);
+    HashTable table(static_cast<ht_flags>(HT_KEY_CONST | HT_VALUE_CONST), 0.05);
 
     // Use std::unordered_map as hashtable 
     // Making the underlying hashtable concurrency-safe is a different problem
-    unordered_map<long, string> table;
+    //unordered_map<long, string> table;
 
 
     TxnManager *manager;
     if (manager_type == HLE_NAME) {
-        manager = new HLETxnManager(&table);
+      //manager = new HLETxnManager(&table);
     } else if (manager_type == RTM_NAME) {
-        manager = new RTMTxnManager(&table);
+      //manager = new RTMTxnManager(&table);
     } else if (manager_type == LOCK_TABLE_NAME) {
-        manager = new LockTableTxnManager(&table, dynamic);
+      //manager = new LockTableTxnManager(&table, dynamic);
     } else if (manager_type == SPIN_NAME) {
         manager = new SpinLockTxnManager(&table, dynamic);
     } else if (manager_type == SPIN_SIMPLE_NAME) {
@@ -116,8 +116,9 @@ int main(int argc, const char* argv[]) {
     // Make sure all the keys we'll be using are there so GETs don't fail
     for (long i = 0; i < num_keys; ++i) {
         string istr = std::to_string(i) ;
-        std::pair<long,std::string> entry (i,istr);
-        table.insert(entry);
+        //std::pair<long,std::string> entry (i,istr);
+        //table.insert(entry);
+	table.Insert(i, istr);
     }
 
     //for (auto& x: table)

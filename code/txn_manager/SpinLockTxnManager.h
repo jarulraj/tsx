@@ -9,7 +9,7 @@
  
 class SpinLockTxnManager : public TxnManager {
 public:
-    SpinLockTxnManager(std::unordered_map<long,std::string> *table,
+    SpinLockTxnManager(HashTable *table,
 		       bool _dynamic)
 	: TxnManager(table),
 	  dynamic(_dynamic) {}
@@ -22,5 +22,6 @@ private:
     std::mutex tableMutex;
     bool dynamic;
 };
+
 
 #endif /* _SPIN_LOCK_TXN_MANAGER_H_ */

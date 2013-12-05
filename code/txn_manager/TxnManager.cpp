@@ -25,25 +25,31 @@ bool TxnManager::ExecuteTxnOps(const vector<OpDescription> &operations,
 void TxnManager::ExecuteTxnOp(const OpDescription &op, string *result) {
     if (op.type == INSERT) {
         if (result) {
-            *result = (*table_)[op.key];
+	  //*result = (*table_)[op.key];
+	  table_->Get(op.key, result);
         }
 
         // Overwrite value if already present.
-        (*table_)[op.key] = op.value;
+        //(*table_)[op.key] = op.value;
+	table_->Insert(op.key, op.value);
     }
     else if (op.type == GET) {
         //at function throws an out_of_range exception if key not found
-        const string &get_result = table_->at(op.key);
+        //const string &get_result = table_->at(op.key);
+      string get_result;
+      table_->Get(op.key, &get_result);
         if (result) {
             *result = get_result;
         }
     }
     else { // op.type == DELETE
         if (result) {
-            *result = table_->at(op.key);
+	  //*result = table_->at(op.key);
+	  table_->Get(op.key, result);
         }
 
-        table_->erase(op.key);
+        //table_->erase(op.key);
+	table_->Delete(op.key);
     }
 }
 
