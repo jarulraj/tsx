@@ -187,14 +187,14 @@ int main(int argc, const char* argv[]) {
 		 << "  Transactions: " << stats.transactions << "\n"
 		 << "  GETs: " << stats.gets << "\n"
 		 << "  INSERTs: " << stats.inserts << "\n"
-		 << "  Contention time: " << duration_cast<nanoseconds>(overall.contention_time).count()
+		 << "  Contention time: " << duration_cast<nanoseconds>(overall.lock_acq_time).count()
 		     << " ns" << endl;
 	}
 
         overall.transactions += stats.transactions;
         overall.gets += stats.gets;
         overall.inserts += stats.inserts;
-        overall.contention_time += stats.contention_time;
+        overall.lock_acq_time += stats.lock_acq_time;
     }
 
     cout << "--------------------------------------------"<<endl;
@@ -202,7 +202,7 @@ int main(int argc, const char* argv[]) {
         << "  Total transactions: " << overall.transactions << "\n"
         << "  GETs: " << overall.gets << "\n"
         << "  INSERTs: " << overall.inserts << "\n"
-        << "  Contention time: " << duration_cast<nanoseconds>(overall.contention_time).count()
+        << "  Contention time: " << duration_cast<nanoseconds>(overall.lock_acq_time).count()
             << " ns" << endl;
 
     
