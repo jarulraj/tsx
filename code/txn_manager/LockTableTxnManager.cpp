@@ -55,10 +55,9 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 			    l->num_readers = 0;
 			}
 
-			tableMutex.unlock();
                         TIME_CODE(stats, unique_lock<mutex> lk(l->mutex));
+			tableMutex.unlock();
 		    } else {
-		        // TODO: Is this in the right order?
 			Lock *l = &lockTable[op.key];
 			tableMutex.unlock();
 
@@ -187,9 +186,8 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 		    l->num_readers = 0;
 		}
 
-		// TODO: Make sure this is ordered right.
-		tableMutex.unlock();
 		TIME_CODE(stats, unique_lock<mutex> lk(l->mutex));
+		tableMutex.unlock();
 	    } else {
 		Lock *l = &lockTable[key];
 		tableMutex.unlock();

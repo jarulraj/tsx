@@ -99,9 +99,8 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 	    tableMutex.lock();
 	    if (lockTable.count(key) == 0) {
 		atomic_flag *a = &lockTable[key];  // Creates flag
-		// TODO: Are these in the right order?
-		tableMutex.unlock();
 		TIME_CODE(stats, a->test_and_set(memory_order_acquire));
+		tableMutex.unlock();
 	    } else {
 		atomic_flag *a = &lockTable[key];
                 tableMutex.unlock();
