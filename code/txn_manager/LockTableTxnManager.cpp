@@ -26,15 +26,14 @@ bool LockTableTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 
     // Lock keys in order.
     for (long key : keys) {
-      lockTable[key].lock();
+      TIME_CODE(stats, lockTable[key].lock());
     }
 
     // Do transaction.
     ExecuteTxnOps(operations, get_results);
 
     // Unlock all keys in reverse order.
-    std::set<long>::reverse_iterator rit;
-    for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
+    for (auto rit = keys.rbegin(); rit != keys.rend(); ++rit) {
         lockTable[*rit].unlock();
     }
 

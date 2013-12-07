@@ -257,6 +257,5 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
         ++stats->transactions;
     } while (total <= duration);
 
-
     delete key_generator;
 }
