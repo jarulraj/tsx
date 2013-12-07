@@ -62,7 +62,7 @@ def experiment(num_vals):
                                          stderr=subprocess.PIPE
                                          )
                 (out, err) = task.communicate()
-                results.append(int(out) * int(val['o']) / val['s'])
+                results.append(int(out) * int(val['o']) / int(val['s']))
                 
             print("%s" % cc),
             for result in results:
@@ -107,7 +107,7 @@ if __name__ == "__main__":
         elif arg == '--k' or arg == '--key-dist':
             num_vals = add_variable('k', convert(val, ['uniform', 'zipf']))
         elif arg == '--r' or arg == '--ratio':
-            num_vals = add_variable('r', convert(val, ['100:1', '1:1', '1:100']))
+            num_vals = add_variable('r', convert(val, ['10000:1', '1:1', '1:10000']))
         elif arg == '--h' or arg == '--help':
             usage()
 
