@@ -77,7 +77,7 @@ def convert(val, default):
         (start, end, step) = val
         return range(start, end, step)
     else:
-        return [int(val)]
+        return [val]
         
 
 def usage():
@@ -103,9 +103,9 @@ if __name__ == "__main__":
         elif arg == '--t' or arg == '--threads':
             num_vals = add_variable('t', convert(val, range(1, 5, 1)))
         elif arg == '--s' or arg == '--sec':
-            num_vals = add_variable('s', [int(val)])
+            num_vals = add_variable('s', convert(val, [val]))
         elif arg == '--k' or arg == '--key-dist':
-            num_vals = add_variable('k', ['uniform', 'zipf'])
+            num_vals = add_variable('k', convert(val, ['uniform', 'zipf']))
         elif arg == '--h' or arg == '--help':
             usage()
 
