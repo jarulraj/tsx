@@ -69,6 +69,17 @@ def experiment(num_vals):
                 print("\t%s" % result),
             print("")
 
+def convert(val, default):
+    if val == "":
+        return default
+    elif ',' in val:
+        val = eval(val)
+        (start, end, step) = val
+        return range(start, end, step)
+    else:
+        return [int(val)]
+        
+
 def usage():
     print """experiment.py [--t [min,max,step]] [--o [min,max,step]]
    [--s secc] [--k]"""
@@ -82,32 +93,20 @@ if __name__ == "__main__":
 
     for i in range(0, len(sys.argv)):
         arg = sys.argv[i]
-        vals = ""
+        val = ""
         if i < len(sys.argv) - 1:
             if '--' not in sys.argv[i+1]:
-                vals = sys.argv[i+1]
+                val = sys.argv[i+1]
 
-        if arg == '--o':
-            if vals == "":
-                vals = range(1, 10, 2)
-            else:
-                vals = eval(vals)
-                (start, end, step) = vals
-                vals = range(start, end, step)
-            num_vals = add_variable('o', vals)
-        elif arg == '--t':
-            if vals == "":
-                vals = range(1, 5, 1)
-            else:
-                vals = eval(vals)
-                (start, end, step) = vals
-                vals = range(start, end, step)
-            num_vals = add_variable('t', vals)
-        elif arg == '--s':
-            num_vals = add_variable('s', [int(vals)])
-        elif arg == '--k':
+        if arg == '--o' or arg == '--ops':
+            num_vals = add_variable('o', convert(val, range(1, 10, 2)))
+        elif arg == '--t' or arg == '--threads':
+            num_vals = add_variable('t', convert(val, range(1, 5, 1)))
+        elif arg == '--s' or arg == '--sec':
+            num_vals = add_variable('s', [int(val)])
+        elif arg == '--k' or arg == '--key-dist':
             num_vals = add_variable('k', ['uniform', 'zipf'])
-        elif arg == '--h':
+        elif arg == '--h' or arg == '--help':
             usage()
 
     experiment(num_vals)
