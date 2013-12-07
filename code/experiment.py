@@ -69,6 +69,11 @@ def experiment(num_vals):
                 print("\t%s" % result),
             print("")
 
+def usage():
+    print """experiment.py [--t [min,max,step]] [--o [min,max,step]]
+   [--s secc] [--k]"""
+    sys.exit(1)
+
 if __name__ == "__main__":
     experiments.append({'s':s, 't':t, 'o':o, 'k':k})
 
@@ -98,5 +103,7 @@ if __name__ == "__main__":
             num_vals = add_variable('s', [int(vals)])
         elif arg == '--k':
             num_vals = add_variable('k', ['uniform', 'zipf'])
+        elif arg == '--h':
+            usage()
 
     experiment(num_vals)
