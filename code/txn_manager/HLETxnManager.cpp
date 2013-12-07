@@ -15,10 +15,6 @@ HLETxnManager::HLETxnManager(std::unordered_map<long,std::string> *table)
             cerr << "HLE not found on machine " << endl;
             exit(-1);
         }
-        else {
-            cout << "HLE AVAILABLE" << endl;
-        }
- 
     }
 
 

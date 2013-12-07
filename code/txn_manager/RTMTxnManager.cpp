@@ -16,9 +16,6 @@ RTMTxnManager::RTMTxnManager(std::unordered_map<long,std::string>* table)
             cerr << "RTM not found on machine " << endl;
             exit(-1);
         }
-        else{
-            cout << "RTM AVAILABLE" << endl;
-        }
 
         pthread_spin_init(&table_lock, PTHREAD_PROCESS_PRIVATE);
         //table_lock.v = 0;
