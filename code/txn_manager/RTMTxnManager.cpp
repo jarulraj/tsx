@@ -7,7 +7,7 @@
 pthread_spinlock_t RTMTxnManager::table_lock ;
 //spinlock_t RTMTxnManager::table_lock ;
 
-RTMTxnManager::RTMTxnManager(std::unordered_map<long,std::string>* table)
+RTMTxnManager::RTMTxnManager(HashTable *table)
     : TxnManager(table) {
                
         int rtm = cpu_has_rtm();
@@ -15,9 +15,6 @@ RTMTxnManager::RTMTxnManager(std::unordered_map<long,std::string>* table)
         if(rtm == 0){
             cerr << "RTM not found on machine " << endl;
             exit(-1);
-        }
-        else{
-            cout << "RTM AVAILABLE" << endl;
         }
 
         pthread_spin_init(&table_lock, PTHREAD_PROCESS_PRIVATE);

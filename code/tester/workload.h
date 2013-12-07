@@ -13,21 +13,27 @@
 using namespace std;
 
 
+#ifdef DEBUG
 #define TIME_CODE(stats, code) \
     auto __timing_start = std::chrono::high_resolution_clock::now();\
     code;\
     \
     auto __timing_end = std::chrono::high_resolution_clock::now();\
-    stats->contention_time += __timing_end - __timing_start;
+    stats->lock_acq_time += __timing_end - __timing_start;
+#else
+#define TIME_CODE(stats, code) \
+    code;
+#endif
+
 
 struct ThreadStats {
     thread::id thread_id;
     int transactions;
     int gets;
     int inserts;
-    std::chrono::high_resolution_clock::duration contention_time;
+    std::chrono::high_resolution_clock::duration lock_acq_time;
     ThreadStats()
-            : gets(0), transactions(0), inserts(0), contention_time(0) {}
+            : gets(0), transactions(0), inserts(0), lock_acq_time(0) {}
 };
 
 // Replaces every character in the provided string with a random alphanumeric

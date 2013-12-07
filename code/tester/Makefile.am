@@ -24,20 +24,21 @@ noinst_HEADERS	= $(top_builddir)/hashtable/hashtable.h
 
 bin_PROGRAMS	= main
 
-
 main_SOURCES	= $(top_builddir)/hashtable/murmur.cpp $(top_builddir)/hashtable/hashtable.cpp \
 				$(top_builddir)/txn_manager/TxnManager.cpp \
 				  $(top_builddir)/txn_manager/SpinLockTxnManager.cpp \
 				  $(top_builddir)/txn_manager/tsx.cpp \
 				  $(top_builddir)/txn_manager/SpinLockSimpleTxnManager.cpp \
+				  $(top_builddir)/txn_manager/LockTableTxnManager.cpp \
+				  $(top_builddir)/txn_manager/LockTableRWTxnManager.cpp \
+				  $(top_builddir)/txn_manager/RTMTxnManager.cpp \
+				  $(top_builddir)/txn_manager/HLETxnManager.cpp \
 				  main.cpp \
 				  workload.cpp \
 				  cmdline-utils.cpp \
 				  generators.cpp
 
-#				  $(top_builddir)/txn_manager/LockTableTxnManager.cpp \
-#				  $(top_builddir)/txn_manager/HLETxnManager.cpp \
-#				  $(top_builddir)/txn_manager/RTMTxnManager.cpp 
+
 
 
 main_CXXFLAGS   = -pthread 

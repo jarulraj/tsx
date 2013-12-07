@@ -24,7 +24,7 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 		    tableMutex.lock();
 		    if (lockTable.count(op.key) == 0) {
 			atomic_flag *a = &lockTable[op.key];  // Inserts flag
-			a->test_and_set(memory_order_acquire);
+			TIME_CODE(stats, a->test_and_set(memory_order_acquire));
                         tableMutex.unlock();
 		    } else {
 			atomic_flag *a = &lockTable[op.key];
@@ -33,7 +33,7 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 		        auto start = std::chrono::high_resolution_clock::now();
 			while (a->test_and_set(memory_order_acquire)) {
                             auto end = std::chrono::high_resolution_clock::now();
-                            stats->contention_time += end - start;
+                            stats->lock_acq_time += end - start;
 
 			    tries++;
 			    if (tries == MAX_TRIES) {
@@ -49,7 +49,7 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 			}
 
 			auto end = std::chrono::high_resolution_clock::now();
-                        stats->contention_time += end - start;
+                        stats->lock_acq_time += end - start;
 
 			if (abort) {
 			    break;
@@ -96,17 +96,8 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 
 	// Lock keys in order.
 	for (long key : keys) {
-	    tableMutex.lock();
-	    if (lockTable.count(key) == 0) {
-		atomic_flag *a = &lockTable[key];  // Creates flag
-		// TODO: Are these in the right order?
-		tableMutex.unlock();
-		a->test_and_set(memory_order_acquire);
-	    } else {
-		atomic_flag *a = &lockTable[key];
-                tableMutex.unlock();
-                TIME_CODE(stats, while (a->test_and_set(memory_order_acquire)));
-	    }
+	  atomic_flag *a = &lockTable[key];
+	  TIME_CODE(stats, while (a->test_and_set(memory_order_acquire)));
 	}
 
 	// Do transaction.
@@ -114,9 +105,7 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 
 	// Unlock all keys in reverse order.
 	for (auto rit = keys.rbegin(); rit != keys.rend(); ++rit) {
-	    tableMutex.lock();
 	    atomic_flag *a = &lockTable[*rit];
-            tableMutex.unlock();
 	    a->clear(memory_order_release);
 	}
     }

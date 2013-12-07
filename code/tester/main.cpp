@@ -9,9 +9,10 @@
 
 #include "optionparser.h"
 #include "hashtable.h"
-//#include "HLETxnManager.h"
-//#include "LockTableTxnManager.h"
-//#include "RTMTxnManager.h"
+#include "HLETxnManager.h"
+#include "LockTableTxnManager.h"
+#include "LockTableRWTxnManager.h"
+#include "RTMTxnManager.h"
 #include "SpinLockTxnManager.h"
 #include "SpinLockSimpleTxnManager.h"
 #include "TxnManager.h"
@@ -92,13 +93,15 @@ int main(int argc, const char* argv[]) {
 
     TxnManager *manager;
     if (manager_type == HLE_NAME) {
-      //manager = new HLETxnManager(&table);
+      manager = new HLETxnManager(&table);
     } else if (manager_type == RTM_NAME) {
-      //manager = new RTMTxnManager(&table);
+      manager = new RTMTxnManager(&table);
     } else if (manager_type == LOCK_TABLE_NAME) {
-      //manager = new LockTableTxnManager(&table, dynamic);
+      manager = new LockTableTxnManager(&table, dynamic, num_keys);
+    } else if (manager_type == LOCK_TABLE_RW_NAME) {
+      manager = new LockTableRWTxnManager(&table, dynamic, num_keys);
     } else if (manager_type == SPIN_NAME) {
-        manager = new SpinLockTxnManager(&table, dynamic);
+      manager = new SpinLockTxnManager(&table, dynamic, num_keys);
     } else if (manager_type == SPIN_SIMPLE_NAME) {
         manager = new SpinLockSimpleTxnManager(&table);
     } else {
@@ -188,23 +191,27 @@ int main(int argc, const char* argv[]) {
 		 << "  Transactions: " << stats.transactions << "\n"
 		 << "  GETs: " << stats.gets << "\n"
 		 << "  INSERTs: " << stats.inserts << "\n"
-		 << "  Contention time: " << duration_cast<nanoseconds>(overall.contention_time).count()
+		 << "  Contention time: " << duration_cast<nanoseconds>(overall.lock_acq_time).count()
 		     << " ns" << endl;
 	}
 
         overall.transactions += stats.transactions;
         overall.gets += stats.gets;
         overall.inserts += stats.inserts;
-        overall.contention_time += stats.contention_time;
+        overall.lock_acq_time += stats.lock_acq_time;
     }
 
-    cout << "--------------------------------------------"<<endl;
-    cout << "Overall stats:\n"
-        << "  Total transactions: " << overall.transactions << "\n"
-        << "  GETs: " << overall.gets << "\n"
-        << "  INSERTs: " << overall.inserts << "\n"
-        << "  Contention time: " << duration_cast<nanoseconds>(overall.contention_time).count()
-            << " ns" << endl;
+    if (verbosity > 0) {
+      cout << "--------------------------------------------"<<endl;
+      cout << "Overall stats:\n"
+	   << "  Total transactions: " << overall.transactions << "\n"
+	   << "  GETs: " << overall.gets << "\n"
+	   << "  INSERTs: " << overall.inserts << "\n"
+	   << "  Contention time: " << duration_cast<nanoseconds>(overall.lock_acq_time).count()
+	   << " ns" << endl;
+    } else {
+      cout << overall.transactions;
+    }
 
     
 #ifdef DEBUG    
