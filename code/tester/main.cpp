@@ -11,6 +11,7 @@
 #include "hashtable.h"
 #include "HLETxnManager.h"
 #include "LockTableTxnManager.h"
+#include "LockTableRWTxnManager.h"
 #include "RTMTxnManager.h"
 #include "SpinLockTxnManager.h"
 #include "SpinLockSimpleTxnManager.h"
@@ -96,9 +97,11 @@ int main(int argc, const char* argv[]) {
     } else if (manager_type == RTM_NAME) {
         manager = new RTMTxnManager(&table);
     } else if (manager_type == LOCK_TABLE_NAME) {
-        manager = new LockTableTxnManager(&table, dynamic);
+      manager = new LockTableTxnManager(&table, dynamic, num_keys);
+    } else if (manager_type == LOCK_TABLE_RW_NAME) {
+      manager = new LockTableRWTxnManager(&table, dynamic, num_keys);
     } else if (manager_type == SPIN_NAME) {
-        manager = new SpinLockTxnManager(&table, dynamic);
+      manager = new SpinLockTxnManager(&table, dynamic, num_keys);
     } else if (manager_type == SPIN_SIMPLE_NAME) {
         manager = new SpinLockSimpleTxnManager(&table);
     } else {
@@ -197,13 +200,17 @@ int main(int argc, const char* argv[]) {
         overall.lock_acq_time += stats.lock_acq_time;
     }
 
-    cout << "--------------------------------------------"<<endl;
-    cout << "Overall stats:\n"
-        << "  Total transactions: " << overall.transactions << "\n"
-        << "  GETs: " << overall.gets << "\n"
-        << "  INSERTs: " << overall.inserts << "\n"
-        << "  Contention time: " << duration_cast<nanoseconds>(overall.lock_acq_time).count()
-            << " ns" << endl;
+    if (verbosity > 0) {
+      cout << "--------------------------------------------"<<endl;
+      cout << "Overall stats:\n"
+	   << "  Total transactions: " << overall.transactions << "\n"
+	   << "  GETs: " << overall.gets << "\n"
+	   << "  INSERTs: " << overall.inserts << "\n"
+	   << "  Contention time: " << duration_cast<nanoseconds>(overall.lock_acq_time).count()
+	   << " ns" << endl;
+    } else {
+      cout << overall.transactions;
+    }
 
     
 #ifdef DEBUG    

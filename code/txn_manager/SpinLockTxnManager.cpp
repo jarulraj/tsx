@@ -96,17 +96,8 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 
 	// Lock keys in order.
 	for (long key : keys) {
-	    tableMutex.lock();
-	    if (lockTable.count(key) == 0) {
-		atomic_flag *a = &lockTable[key];  // Creates flag
-		// TODO: Are these in the right order?
-		tableMutex.unlock();
-		TIME_CODE(stats, a->test_and_set(memory_order_acquire));
-	    } else {
-		atomic_flag *a = &lockTable[key];
-                tableMutex.unlock();
-                TIME_CODE(stats, while (a->test_and_set(memory_order_acquire)));
-	    }
+	  atomic_flag *a = &lockTable[key];
+	  TIME_CODE(stats, while (a->test_and_set(memory_order_acquire)));
 	}
 
 	// Do transaction.
@@ -114,9 +105,7 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 
 	// Unlock all keys in reverse order.
 	for (auto rit = keys.rbegin(); rit != keys.rend(); ++rit) {
-	    TIME_CODE(stats, tableMutex.lock());
 	    atomic_flag *a = &lockTable[*rit];
-            tableMutex.unlock();
 	    a->clear(memory_order_release);
 	}
     }

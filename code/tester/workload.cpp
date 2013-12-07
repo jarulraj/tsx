@@ -215,9 +215,9 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
     // ahead of time. We want there to be no memory management happening inside the
     // main loop of the thread.
     vector<OpDescription> txn_ops(ops_per_txn);
-    for (OpDescription &op : txn_ops) {
+    /*for (OpDescription &op : txn_ops) {
         op.value.resize(value_length);
-    }
+	}*/
         
     seconds s(seconds_to_run);
     nanoseconds duration = duration_cast<nanoseconds>(s);
@@ -241,7 +241,7 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
                 ++stats->inserts;
                 GenRandomString(&next_op.value);
             }
-        }
+	}
         
         // Timed code
         if (!manager->RunTxn(txn_ops, NULL, stats)) {
@@ -249,7 +249,7 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
             cerr << "ERROR: transaction failed.";
             global_cout_mutex.unlock();
             return;
-        }
+	}
 
         high_resolution_clock::time_point t2 = high_resolution_clock::now();
         nanoseconds gap = duration_cast<nanoseconds>(t2 - t1);

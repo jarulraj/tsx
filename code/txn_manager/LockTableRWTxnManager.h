@@ -1,5 +1,5 @@
-#ifndef _LOCK_TABLE_TXN_MANAGER_H_
-#define _LOCK_TABLE_TXN_MANAGER_H_
+#ifndef _LOCK_TABLE_RW_TXN_MANAGER_H_
+#define _LOCK_TABLE_RW_TXN_MANAGER_H_
 
 #include <chrono>
 #include <iostream>
@@ -11,16 +11,26 @@
 #include "tester/workload.h"
 #include "TxnManager.h"
 
+struct Lock {
+    std::mutex mutex;
+    std::condition_variable cv;
+    std::queue<std::thread::id> q;
+    int num_readers;
+    LockMode mode;
+};
 
-class LockTableTxnManager : public TxnManager {
+
+class LockTableRWTxnManager : public TxnManager {
 public:
-     LockTableTxnManager(std::unordered_map<long,std::string> *table,
+     LockTableRWTxnManager(std::unordered_map<long,std::string> *table,
 			 bool _dynamic, int num_keys)
        : TxnManager(table),
   	 dynamic(_dynamic){
 
 	   for (int i=0; i < num_keys; i++) {
-	     std::mutex *m = &lockTable[i]; // Creates Lock object
+	     Lock *l = &lockTable[i]; // Creates Lock object
+	     l->mode = FREE;
+	     l->num_readers = 0;
 	   }
 	 }
 
@@ -46,10 +56,10 @@ private:
         std::mutex *mutex;
     };
 
-    std::unordered_map<long, std::mutex> lockTable;
+    std::unordered_map<long, Lock> lockTable;
     // Prevents concurrent insertions to the lock table.
     std::mutex tableMutex;
     bool dynamic;
 };
 
-#endif /* _LOCK_TABLE_TXN_MANAGER_H_ */
+#endif /* _LOCK_TABLE_RW_TXN_MANAGER_H_ */
