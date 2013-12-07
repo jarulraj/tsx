@@ -21,5 +21,3 @@ bool SpinLockSimpleTxnManager::RunTxn(const vector<OpDescription> &operations,
 
     return true;
 }
-
-
