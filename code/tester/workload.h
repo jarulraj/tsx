@@ -13,17 +13,12 @@
 using namespace std;
 
 
-#ifdef DEBUG
 #define TIME_CODE(stats, code) \
     auto __timing_start = std::chrono::high_resolution_clock::now();\
     code;\
     \
     auto __timing_end = std::chrono::high_resolution_clock::now();\
     stats->lock_acq_time += __timing_end - __timing_start;
-#else
-#define TIME_CODE(stats, code) \
-    code;
-#endif
 
 
 struct ThreadStats {
