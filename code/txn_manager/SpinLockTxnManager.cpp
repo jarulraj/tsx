@@ -21,7 +21,7 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 	    abort = false;
 	    for (const OpDescription &op : operations) {
 		if (keys.count(op.key) == 0) {
-		    tableMutex.lock();
+		    TIME_CODE(stats, tableMutex.lock());
 		    if (lockTable.count(op.key) == 0) {
 			atomic_flag *a = &lockTable[op.key];  // Inserts flag
 			TIME_CODE(stats, a->test_and_set(memory_order_acquire));
@@ -82,7 +82,7 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 
 	    // Unlock all keys in reverse order.
 	    for (auto rit = keys.rbegin(); rit != keys.rend(); ++rit) {
-		tableMutex.lock();
+		TIME_CODE(stats, tableMutex.lock());
 		lockTable[*rit].clear(memory_order_release);
 		tableMutex.unlock();
 	    }
