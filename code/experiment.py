@@ -92,12 +92,16 @@ if __name__ == "__main__":
                 vals = range(1, 10, 2)
             else:
                 vals = eval(vals)
+                (start, end, step) = vals
+                vals = range(start, end, step)
             num_vals = add_variable('o', vals)
         elif arg == '--t':
             if vals == "":
                 vals = range(1, 5, 1)
             else:
                 vals = eval(vals)
+                (start, end, step) = vals
+                vals = range(start, end, step)
             num_vals = add_variable('t', vals)
         elif arg == '--s':
             num_vals = add_variable('s', [int(vals)])
