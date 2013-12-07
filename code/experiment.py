@@ -16,8 +16,6 @@ s = 1 # time for each run
 o = 1 # number of ops per txn
 r = 1 # ratio of gets:puts (not used currently)
 
-itr = 0
-
 k = "uniform" # choose distribution
 
 variables = []
@@ -64,7 +62,7 @@ def experiment(num_vals):
                                          stderr=subprocess.PIPE
                                          )
                 (out, err) = task.communicate()
-                results.append(int(out) * val['o'])
+                results.append(int(out) * val['o'] / val['s'])
                 
             print("%s" % cc),
             for result in results:
@@ -81,7 +79,7 @@ if __name__ == "__main__":
         arg = sys.argv[i]
         vals = ""
         if i < len(sys.argv) - 1:
-            if ',' in sys.argv[i+1]:
+            if '--' not in sys.argv[i+1]:
                 vals = sys.argv[i+1]
 
         if arg == '--o':
@@ -92,16 +90,12 @@ if __name__ == "__main__":
             num_vals = add_variable('o', vals)
         elif arg == '--t':
             if vals == "":
-                vals = range(1, 10, 2)
+                vals = range(1, 5, 1)
             else:
                 vals = eval(vals)
             num_vals = add_variable('t', vals)
         elif arg == '--s':
-            if vals == "":
-                vals = range(1, 10, 2)
-            else:
-                vals = eval(vals)
-            num_vals = add_variable('s', vals)
+            num_vals = add_variable('s', [int(vals)])
         elif arg == '--k':
             num_vals = add_variable('k', ['uniform', 'zipf'])
 
