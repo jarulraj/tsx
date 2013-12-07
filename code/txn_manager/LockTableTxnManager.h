@@ -28,16 +28,12 @@ public:
             std::vector<std::string> *get_results, ThreadStats *stats);
 
 private:
-    static inline void lock_timed(std::mutex *mutex, ThreadStats *stats) {
-        TIME_CODE(stats, mutex->lock());
-    }
-
     // Based on std::lock_guard<mutex>, but with support for timing.
     class TimedLockGuard {
     public:
         explicit inline TimedLockGuard(std::mutex *mut, ThreadStats *stats)
             : mutex(mut) {
-            lock_timed(mut, stats);
+            TIME_CODE(stats, mut->lock());
         }
         inline ~TimedLockGuard() {
             mutex->unlock();
