@@ -65,7 +65,7 @@ void RunMultiKeyThread(TxnManager *manager, ThreadStats *stats, long max_key,
         int num_ops, int seconds_to_run, size_t value_length);
 
 void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
-        int key_max, int seconds_to_run, double get_to_put_ratio,
+	int keys_per_txn, int key_max, int seconds_to_run, double get_to_put_ratio,
         size_t value_length, Generator<int> *key_generator);
 
 #endif /* _WORKLOAD_H__ */

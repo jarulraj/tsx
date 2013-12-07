@@ -67,10 +67,12 @@ int main(int argc, const char* argv[]) {
     bool dynamic = options[DYNAMIC];
     int num_threads;
     int ops_per_txn;
+    int keys_per_txn;
     double ratio;
     if (!sanity_test) {
         num_threads = getArgWithDefault(options, NUM_THREADS, thread::hardware_concurrency());
         ops_per_txn = getArgWithDefault(options, OPS_PER_TXN, DEFAULT_OPS_PER_TXN);
+	keys_per_txn = getArgWithDefault(options, KEYS_PER_TXN, DEFAULT_KEYS_PER_TXN);
         ratio = option::getRatio(options[RATIO]);
         if (std::isnan(ratio)) {
             // The ratio should have already been checked by the option parser.
@@ -158,6 +160,7 @@ int main(int argc, const char* argv[]) {
 	if (verbosity >= 1) {
 	    cout << "Num threads:  " << num_threads << endl;
 	    cout << "Ops per txn:  " << ops_per_txn << endl;
+	    cout << "Keys per txn: " << keys_per_txn << endl;
 	    cout << "Ratio:        " << ratio << endl;
 	    cout << "Key distrib:  " << key_dist_type << endl;
 	}
@@ -173,8 +176,8 @@ int main(int argc, const char* argv[]) {
                 key_generator = new UniformGenerator(0, num_keys - 1);
             }
             threads.push_back(
-                    thread(RunWorkloadThread, manager, &thread_stats[i], ops_per_txn, num_keys-1,
-                        num_seconds_to_run, ratio, value_length, key_generator));
+	        thread(RunWorkloadThread, manager, &thread_stats[i], ops_per_txn, keys_per_txn,
+		        num_keys-1, num_seconds_to_run, ratio, value_length, key_generator));
         }
     }
 

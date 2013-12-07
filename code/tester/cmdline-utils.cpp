@@ -23,6 +23,8 @@ const option::Descriptor usage[] =
         " Default: " STRINGIFY(DEFAULT_SECONDS) "." },
     {OPS_PER_TXN, 0, "o", "txn_ops", option::Integer,  "  --txn_ops, -o  \tOperations per transaction."
         " Default: " STRINGIFY(DEFAULT_OPS_PER_TXN) "." },
+    {KEYS_PER_TXN, 0, "y", "txn_keys", option::Integer,  "  --txn_keys, -y  \tKeys per transaction."
+        " Default: " STRINGIFY(DEFAULT_KEYS_PER_TXN) "." },
     {RATIO,       0, "r", "ratio",   option::CheckRatio, "  --ratio,   -r  \tRatio of gets to puts in each"
         " transaction, in the format gets:puts. Default: 1:1." },
     {NUM_KEYS,    0, "n", "keys",    option::Integer,  "  --keys,    -n  \tNumber of keys in the database."
