@@ -5,6 +5,7 @@ import copy
 import os
 import subprocess
 import shlex
+import sys
 
 EXEC = "./tester/main"
 
@@ -19,33 +20,43 @@ itr = 0
 
 k = "uniform" # choose distribution
 
-def add_variable(title, labels, vals, variable, this_range):
+variables = []
+labels = []
+experiments = []
+
+def add_variable(variable, vals):
+    global labels
+    global experiments
     new_labels = []
-    title.append(variable)
-    new_vals = []
-    for i in range(0, len(vals)):
-        for j in this_range:
-            new_arg = copy.copy(vals[i])
+    variables.append(variable)
+    new_experiments = []
+    for i in range(0, len(experiments)):
+        num_vals = 0
+        for j in vals:
+            num_vals += 1
+            new_arg = copy.copy(experiments[i])
             new_arg[variable] = j
-            new_vals.append(new_arg)
+            new_experiments.append(new_arg)
 
             new_label = copy.copy(labels[i])
             new_label.append(j)
             new_labels.append(new_label)
 
-    return (new_labels, new_vals)
+    labels = new_labels
+    experiments = new_experiments
+    return num_vals
 
-def experiment(title, labels, vals, iters):
-    for i in range(0, len(labels), iters):
-        print str(title),
-        for j in range(0, iters):
+def experiment(num_vals):
+    for i in range(0, len(labels), num_vals):
+        print str(variables),
+        for j in range(0, num_vals):
             print("\t%s" % labels[i+j]),
         print("")
         for cc in [ 'hle', 'rtm', 'tbl', 'spin', 'sspin']:
             results = []
-            for j in range(0, iters):
-                val = vals[i+j]
-                # RUN EXPERIMENT
+            for j in range(0, num_vals):
+                val = experiments[i+j]
+
                 cmd = [ EXEC, '-s'+str(val['s']), '-t'+str(val['t']), '-o'+str(val['o']), '-k'+val['k'], '-e0', cc]
                 #print str(cmd)
                 task =  subprocess.Popen(cmd, 
@@ -61,30 +72,37 @@ def experiment(title, labels, vals, iters):
             print("")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Run various workloads.")
-    parser.add_argument('--ops', dest='ops', action='store_true',
-                        default=False)
-    parser.add_argument('--threads', dest='threads', action='store_true',
-                        default=False)
-    args = parser.parse_args()
+    experiments.append({'s':s, 't':t, 'o':o, 'k':k})
 
-    vals = []
-    vals.append({'s':s, 't':t, 'o':o, 'k':k})
-
-    labels = []
     labels.append([])
+    num_vals = 1
 
-    title = []
+    for i in range(0, len(sys.argv)):
+        arg = sys.argv[i]
+        vals = ""
+        if i < len(sys.argv) - 1:
+            if ',' in sys.argv[i+1]:
+                vals = sys.argv[i+1]
 
-    iters = 1
+        if arg == '--o':
+            if vals == "":
+                vals = range(1, 10, 2)
+            else:
+                vals = eval(vals)
+            num_vals = add_variable('o', vals)
+        elif arg == '--t':
+            if vals == "":
+                vals = range(1, 10, 2)
+            else:
+                vals = eval(vals)
+            num_vals = add_variable('t', vals)
+        elif arg == '--s':
+            if vals == "":
+                vals = range(1, 10, 2)
+            else:
+                vals = eval(vals)
+            num_vals = add_variable('s', vals)
+        elif arg == '--k':
+            num_vals = add_variable('k', ['uniform', 'zipf'])
 
-    print str(args)
-    if args.ops:
-        (labels, vals) = add_variable(title, labels, vals, 'o', range(1, 10, 2))
-        iters = 5
-    if args.threads:
-        (labels, vals) = add_variable(title, labels, vals, 't', range(1, 10, 2))
-        iters = 5
-
-    experiment(title, labels, vals, iters)
+    experiment(num_vals)
