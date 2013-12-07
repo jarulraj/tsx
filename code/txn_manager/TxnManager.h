@@ -19,6 +19,21 @@ typedef struct OpDescription {
     std::string value;
 } OpDescription;
 
+typedef enum LockMode {
+    READ,
+    WRITE,
+    FREE
+} LockMode;
+
+inline bool conflict(LockMode mode1, LockMode mode2) {
+    if ((mode1 == WRITE && mode2 != FREE) ||
+	(mode2 == WRITE && mode1 != FREE)) {
+	return true;
+    }
+
+    return false;
+}
+
 
 struct ThreadStats;
 class TxnManager {
