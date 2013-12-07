@@ -13,8 +13,7 @@ class SpinLockTxnManager : public TxnManager {
 public:
     SpinLockTxnManager(std::unordered_map<long,std::string> *table,
 		       bool _dynamic, int num_keys)
-	: TxnManager(table),
-	  dynamic(_dynamic) {
+	: TxnManager(table), dynamic(_dynamic) {
 	    for (int i=0; i<num_keys; i++) {
 	      std::atomic_flag *a = &lockTable[i];  // Creates flag
 	    }

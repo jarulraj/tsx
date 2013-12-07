@@ -215,9 +215,9 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
     // ahead of time. We want there to be no memory management happening inside the
     // main loop of the thread.
     vector<OpDescription> txn_ops(ops_per_txn);
-    /*for (OpDescription &op : txn_ops) {
+    for (OpDescription &op : txn_ops) {
         op.value.resize(value_length);
-	}*/
+    }
         
     seconds s(seconds_to_run);
     nanoseconds duration = duration_cast<nanoseconds>(s);
