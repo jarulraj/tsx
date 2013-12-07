@@ -13,7 +13,8 @@ EXEC = "./tester/main"
 
 t = 8 # number of threads
 s = 1 # time for each run
-o = 1 # number of ops per txn
+o = 10 # number of ops per txn
+y = 10 # number of distinct keys per txn
 r = 1 # ratio of gets:puts (not used currently)
 
 k = "uniform" # choose distribution
@@ -55,7 +56,7 @@ def experiment(num_vals):
             for j in range(0, num_vals):
                 val = experiments[i+j]
 
-                cmd = [ EXEC, '-s'+str(val['s']), '-t'+str(val['t']), '-o'+str(val['o']), '-k'+val['k'], '-e0', cc]
+                cmd = [ EXEC, '-s'+str(val['s']), '-t'+str(val['t']), '-o'+str(val['o']), '-k'+val['k'], '-y'+str(val['y']), '-e0', cc]
                 #print str(cmd)
                 task =  subprocess.Popen(cmd, 
                                          stdout=subprocess.PIPE,
@@ -86,7 +87,7 @@ def usage():
     sys.exit(1)
 
 if __name__ == "__main__":
-    experiments.append({'s':s, 't':t, 'o':o, 'k':k})
+    experiments.append({'s':s, 't':t, 'o':o, 'k':k, 'y':y})
 
     labels.append([])
     num_vals = 1
@@ -108,6 +109,8 @@ if __name__ == "__main__":
             num_vals = add_variable('k', convert(val, ['uniform', 'zipf']))
         elif arg == '--r' or arg == '--ratio':
             num_vals = add_variable('r', convert(val, ['10000:1', '1:1', '1:10000']))
+        elif arg == '--y' or arg == '--keys':
+            num_vals = add_variable('y', convert(val, range(1, 10, 2)))
         elif arg == '--h' or arg == '--help':
             usage()
 

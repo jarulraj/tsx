@@ -8,6 +8,7 @@
 
 #define DEFAULT_SECONDS      10
 #define DEFAULT_OPS_PER_TXN  10
+#define DEFAULT_KEYS_PER_TXN 10
 #define DEFAULT_KEYS         16384
 #define DEFAULT_VALUE_LENGTH 4
 #define DEFAULT_VERBOSITY    1
@@ -30,6 +31,7 @@ enum optionIndex {
     NUM_THREADS,
     NUM_SECONDS,
     OPS_PER_TXN,
+    KEYS_PER_TXN,
     RATIO,
     NUM_KEYS,
     VALUE_LENGTH,

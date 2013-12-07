@@ -202,7 +202,7 @@ void RunMultiKeyThread(TxnManager *manager, ThreadStats *stats, long num_keys,
 
 // Main workload Generator
 void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
-        int key_max, int seconds_to_run, double get_to_put_ratio,
+        int keys_per_txn, int key_max, int seconds_to_run, double get_to_put_ratio,
         size_t value_length, Generator<int> *key_generator) {
     stats->thread_id = this_thread::get_id();
 
@@ -231,7 +231,11 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
             // Modify operation description in place. (Values left around from
             // old insert actions will just be ignored.)
             OpDescription &next_op = txn_ops[i];
-            next_op.key = key_generator->nextElement();
+	    if (i < keys_per_txn) {
+	      next_op.key = key_generator->nextElement();
+	    } else {
+	      next_op.key = txn_ops[i - keys_per_txn].key;
+	    }
 
             if (action_chooser < get_to_put_ratio) {
                 next_op.type = GET;
