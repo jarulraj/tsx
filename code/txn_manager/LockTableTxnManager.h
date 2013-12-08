@@ -14,7 +14,7 @@
 
 class LockTableTxnManager : public TxnManager {
 public:
-     LockTableTxnManager(HashTable *table,
+     LockTableTxnManager(std::unordered_map<long,std::string> *table,
 			 bool _dynamic, int num_keys)
        : TxnManager(table),
   	 dynamic(_dynamic){

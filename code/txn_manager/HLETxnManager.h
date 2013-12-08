@@ -9,17 +9,35 @@
 #include "tsx.h"
 
 class HLETxnManager : public TxnManager {
-public:
-    HLETxnManager(HashTable *table, bool _dynamic, int num_keys);
+    public:
+        HLETxnManager(std::unordered_map<long,std::string> *table, bool _dynamic, int num_keys)
+            : TxnManager(table), dynamic(_dynamic) {
 
-    virtual bool RunTxn(const std::vector<OpDescription> &operations,
-            std::vector<string> *get_results, ThreadStats *stats);
+                int hle = cpu_has_hle();
 
-private:
-    // Prevents concurrent insertions to the lock table.
-    spinlock_t table_lock;
-    std::unordered_map<long, spinlock_t> lockTable;
-    bool dynamic;    
+                if(hle == 0) {
+                    cerr << "HLE not found on machine " << endl;
+                    exit(-1);
+                }
+
+                // Initiliaze lock table
+                for (int i=0; i<num_keys; i++) {
+                    spinlock_t key_lock = { 0 };
+                    lockTable[i] = key_lock;  
+                }
+
+                table_lock = { 0 };
+
+            }
+
+        virtual bool RunTxn(const std::vector<OpDescription> &operations,
+                std::vector<string> *get_results, ThreadStats *stats);
+
+    private:
+        // Prevents concurrent insertions to the lock table.
+        spinlock_t table_lock;
+        std::unordered_map<long, spinlock_t> lockTable;
+        bool dynamic;    
 };
 
 

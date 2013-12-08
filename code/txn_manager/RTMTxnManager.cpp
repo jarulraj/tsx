@@ -4,26 +4,6 @@
 #include "RTMTxnManager.h"
 #include "tester/workload.h"
 
-//pthread_spinlock_t RTMTxnManager::table_lock ;
-pthread_mutex_t RTMTxnManager::table_lock ;
-//spinlock_t RTMTxnManager::table_lock ;
-
-RTMTxnManager::RTMTxnManager(HashTable *table)
-    : TxnManager(table) {
-               
-        int rtm = cpu_has_rtm();
-
-        if(rtm == 0){
-            cerr << "RTM not found on machine " << endl;
-            exit(-1);
-        }
-
-        table_lock = PTHREAD_MUTEX_INITIALIZER;
-        //pthread_spin_init(&table_lock, PTHREAD_PROCESS_PRIVATE);       
-        //table_lock.v = 0;
-
-    }
-
 
 bool RTMTxnManager::RunTxn(const std::vector<OpDescription> &operations,
         std::vector<string> *get_results, ThreadStats *stats) {

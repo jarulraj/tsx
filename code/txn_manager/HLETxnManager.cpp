@@ -4,26 +4,6 @@
 #include "HLETxnManager.h"
 #include "tester/workload.h"
 
-HLETxnManager::HLETxnManager(HashTable *table, bool _dynamic, int num_keys)
-    : TxnManager(table), dynamic(_dynamic) {
-
-        int hle = cpu_has_hle();
-
-        if(hle == 0) {
-            cerr << "HLE not found on machine " << endl;
-            exit(-1);
-        }
-        
-        // Initiliaze lock table
-        for (int i=0; i<num_keys; i++) {
-            spinlock_t key_lock = { 0 };
-            lockTable[i] = key_lock;  
-        }
-
-        table_lock = { 0 };
-    
-    }
-
 const int MAX_TRIES = 10;
 
 /*

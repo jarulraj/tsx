@@ -90,11 +90,10 @@ int main(int argc, const char* argv[]) {
 
 
     // Initialize hashtable
-    HashTable table(static_cast<ht_flags>(HT_KEY_CONST | HT_VALUE_CONST), 0.05);
-
-    // Use std::unordered_map as hashtable 
-    // Making the underlying hashtable concurrency-safe is a different problem
-    //unordered_map<long, string> table;
+    // Custom HashTable
+    //HashTable table(static_cast<ht_flags>(HT_KEY_CONST | HT_VALUE_CONST), 0.05);
+    // std::unordered_map 
+    unordered_map<long, string> table;
 
 
     TxnManager *manager;
@@ -126,9 +125,13 @@ int main(int argc, const char* argv[]) {
     // Make sure all the keys we'll be using are there so GETs don't fail
     for (long i = 0; i < num_keys; ++i) {
         string istr = std::to_string(i) ;
-        //std::pair<long,std::string> entry (i,istr);
-        //table.insert(entry);
-	table.Insert(i, istr);
+        
+        // Unordered map
+        std::pair<long,std::string> entry (i,istr);
+        table.insert(entry);
+        
+        // Custom Hashtable
+	    //table.Insert(i, istr);
     }
 
     //for (auto& x: table)

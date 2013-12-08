@@ -26,36 +26,59 @@ bool TxnManager::ExecuteTxnOps(const vector<OpDescription> &operations,
     return true;
 }
 
+// UNORDERED MAP
 void TxnManager::ExecuteTxnOp(const OpDescription &op, string *result) {
     if (op.type == INSERT) {
         if (result) {
-	  //*result = (*table_)[op.key];
-	  table_->Get(op.key, result);
+            *result = (*table_)[op.key];
         }
 
         // Overwrite value if already present.
-        //(*table_)[op.key] = op.value;
-	table_->Insert(op.key, op.value);
+        (*table_)[op.key] = op.value;
     }
     else if (op.type == GET) {
         //at function throws an out_of_range exception if key not found
-        //const string &get_result = table_->at(op.key);
-      string get_result;
-      table_->Get(op.key, &get_result);
-        if (result) {
+        string get_result = (*table_)[op.key];
+
+        if(result){
             *result = get_result;
         }
     }
     else { // op.type == DELETE
         if (result) {
-	  //*result = table_->at(op.key);
-	  table_->Get(op.key, result);
+            *result = table_->at(op.key);
         }
 
-        //table_->erase(op.key);
-	table_->Delete(op.key);
+        table_->erase(op.key);
     }
 }
+
+// CUSTOM HASHTABLE
+/*
+   void TxnManager::ExecuteTxnOp(const OpDescription &op, string *result) {
+   if (op.type == INSERT) {
+   if (result) {
+   table_->Get(op.key, result);
+   }
+
+   table_->Insert(op.key, op.value);
+   }
+   else if (op.type == GET) {
+   string get_result;
+   table_->Get(op.key, &get_result);
+   if (result) {
+ *result = get_result;
+ }
+ }
+ else { // op.type == DELETE
+ if (result) {
+ table_->Get(op.key, result);
+ }
+
+ table_->Delete(op.key);
+ }
+ }
+ */
 
 void TxnManager::printStats(){
     cout<<"TxnManager Stats"<<endl;

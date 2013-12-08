@@ -10,22 +10,22 @@
 #include "TxnManager.h"
  
 class SpinLockTxnManager : public TxnManager {
-public:
-    SpinLockTxnManager(HashTable *table,
-		       bool _dynamic, int num_keys)
-	: TxnManager(table), dynamic(_dynamic) {
-	    for (int i=0; i<num_keys; i++) {
-	      std::atomic_flag *a = &lockTable[i];  // Creates flag
-	    }
-	  }
-    virtual bool RunTxn(const std::vector<OpDescription> &operations,
-            std::vector<std::string> *get_results, ThreadStats *stats);
+    public:
+        SpinLockTxnManager(std::unordered_map<long,std::string> *table,
+                bool _dynamic, int num_keys)
+            : TxnManager(table), dynamic(_dynamic) {
+                for (int i=0; i<num_keys; i++) {
+                    std::atomic_flag *a = &lockTable[i];  // Creates flag
+                }
+            }
+        virtual bool RunTxn(const std::vector<OpDescription> &operations,
+                std::vector<std::string> *get_results, ThreadStats *stats);
 
-private:
-    std::unordered_map<long, std::atomic_flag> lockTable;
-    // Prevents concurrent insertions to the lock table.
-    std::mutex tableMutex;
-    bool dynamic;
+    private:
+        std::unordered_map<long, std::atomic_flag> lockTable;
+        // Prevents concurrent insertions to the lock table.
+        std::mutex tableMutex;
+        bool dynamic;
 };
 
 
