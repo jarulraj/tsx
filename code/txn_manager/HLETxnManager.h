@@ -31,8 +31,7 @@ class HLETxnManager : public TxnManager {
                     lockTable[i] = key_lock;  
                 }
 
-                table_lock = { 0 };
-                
+                table_lock = { 0 } ;
 
             }
 

@@ -45,7 +45,10 @@ int cpu_has_rtm(void) ;
 
 int cpu_has_hle(void) ;
 
+#define _RTM_MAX_TRIES         10
+#define _RTM_MAX_ABORTS        5
 
+/*
 #define _XBEGIN_STARTED         (~0u)
 #define _XABORT_EXPLICIT        (1 << 0)
 #define _XABORT_RETRY           (1 << 1)
@@ -54,9 +57,6 @@ int cpu_has_hle(void) ;
 #define _XABORT_DEBUG           (1 << 4)
 #define _XABORT_NESTED          (1 << 5)
 #define _XABORT_CODE(x)         (((x) >> 24) & 0xff)
-
-#define _RTM_MAX_TRIES         10
-#define _RTM_MAX_ABORTS        5
 
 #define _xbegin()                                       \
     ({                                                    \
@@ -91,6 +91,8 @@ int cpu_has_hle(void) ;
          : "memory");                           \
      out;                                                         \
      })
+*/
+
 
 /* Stats */
 static int g_locks_elided = 0;
@@ -145,14 +147,14 @@ static ALWAYS_INLINE void dyn_spinlock_init(spinlock_t* lock)
 
 static ALWAYS_INLINE void hle_spinlock_acquire(spinlock_t* lock)
 {            
-    while (__atomic_exchange_n(&lock->v, true, __ATOMIC_ACQUIRE|__ATOMIC_HLE_ACQUIRE)) { 
-        int val; 
-        /* Wait for lock to become free again before retrying. */ 
+    while (__atomic_exchange_n(&lock->v, true, __ATOMIC_ACQUIRE|__ATOMIC_HLE_ACQUIRE))
+    { 
+        // Wait for lock to become free again before retrying. 
         do { 
-            _mm_pause(); 
-            /* Abort speculation */ 
-            val = __atomic_load_n(&lock->v, __ATOMIC_CONSUME); 
-        } while (val == 1); 
+            _mm_pause();       
+            //__asm__ __volatile__ ("pause" ::: "memory");
+            // Abort speculation 
+        } while (__atomic_load_n(&lock->v, __ATOMIC_CONSUME)); 
     } 
 }
 

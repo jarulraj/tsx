@@ -20,4 +20,4 @@ MAINTAINERCLEANFILES = Makefile.in
 
 INCLUDES	= -I$(top_builddir)  
                     
-AM_LDFLAGS = $(AM_LDFLAGS) -fgnu-tm -mrtm -mhle
+CFLAGS = -fgnu-tm -mrtm -mhle -march=native

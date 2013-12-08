@@ -16,7 +16,7 @@ Evaluation of HTM support for concurrency control for `multi-key transactions` i
                                   
 ```
     ./bootstrap
-    ./configure
+    ./configure CXX=/usr/bin/g++-4.8 CXXFLAGS="-march=native -fgnu-tm -mrtm -mhle"
     make
 ```
 
