@@ -53,7 +53,7 @@ void RunTestReaderThread(TxnManager *manager, ThreadStats *stats, long num_keys,
         if (!manager->RunTxn(ops, &get_results, stats)) {
             global_cout_mutex.lock();
             cerr << "ERROR: transaction failed in thread "
-                    << this_thread::get_id();
+                << this_thread::get_id();
             global_cout_mutex.unlock();
             return;
         }
@@ -69,8 +69,8 @@ void RunTestReaderThread(TxnManager *manager, ThreadStats *stats, long num_keys,
             if (result.compare(next_result) != 0) {
                 global_cout_mutex.lock();
                 cerr << "ERROR: all reads should have returned '" << result
-                        << "'; got '" << next_result << "' instead (reader thread "
-                        << this_thread::get_id() << ')' << endl;
+                    << "'; got '" << next_result << "' instead (reader thread "
+                    << this_thread::get_id() << ')' << endl;
                 global_cout_mutex.unlock();
                 break;
             }
@@ -114,7 +114,7 @@ void RunTestReaderWriterThread(TxnManager *manager, ThreadStats *stats,
         if (!manager->RunTxn(ops, &get_results, stats)) {
             global_cout_mutex.lock();
             cerr << "ERROR: transaction failed in reader/writer thread "
-                    << this_thread::get_id();
+                << this_thread::get_id();
             global_cout_mutex.unlock();
             return;
         }
@@ -127,9 +127,9 @@ void RunTestReaderWriterThread(TxnManager *manager, ThreadStats *stats,
             if (result.compare(next_result) != 0) {
                 global_cout_mutex.lock();
                 cerr << "ERROR: next read should have returned '" << result
-                        << "'; got '" << next_result
-                        << "' instead (reader/writer thread "
-                        << this_thread::get_id() << ')' << endl;
+                    << "'; got '" << next_result
+                    << "' instead (reader/writer thread "
+                    << this_thread::get_id() << ')' << endl;
                 global_cout_mutex.unlock();
                 break;
             }
@@ -177,7 +177,7 @@ void RunMultiKeyThread(TxnManager *manager, ThreadStats *stats, long num_keys,
         if (!manager->RunTxn(ops, &get_results, stats)) {
             global_cout_mutex.lock();
             cerr << "ERROR: transaction failed in multi-key thread "
-                    << this_thread::get_id();
+                << this_thread::get_id();
             global_cout_mutex.unlock();
             return;
         }
@@ -188,8 +188,8 @@ void RunMultiKeyThread(TxnManager *manager, ThreadStats *stats, long num_keys,
             if (next_input.compare(next_result) != 0) {
                 global_cout_mutex.lock();
                 cerr << "ERROR: next read should have returned '" << next_input
-                        << "'; got '" << next_result << "' instead (multi-key thread "
-                        << this_thread::get_id() << ')' << endl;
+                    << "'; got '" << next_result << "' instead (multi-key thread "
+                    << this_thread::get_id() << ')' << endl;
                 global_cout_mutex.unlock();
                 break;
             }
@@ -218,24 +218,24 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
     for (OpDescription &op : txn_ops) {
         op.value.resize(value_length);
     }
-        
+
     seconds s(seconds_to_run);
     nanoseconds duration = duration_cast<nanoseconds>(s);
     nanoseconds total(0);
 
     do {                
         high_resolution_clock::time_point t1 = high_resolution_clock::now();
-        
+
         for (int i = 0; i < ops_per_txn; ++i) {
             double action_chooser = operation_distribution(generator);
             // Modify operation description in place. (Values left around from
             // old insert actions will just be ignored.)
             OpDescription &next_op = txn_ops[i];
-	    if (i < keys_per_txn) {
-	      next_op.key = key_generator->nextElement();
-	    } else {
-	      next_op.key = txn_ops[i - keys_per_txn].key;
-	    }
+            if (i < keys_per_txn) {
+                next_op.key = key_generator->nextElement();
+            } else {
+                next_op.key = txn_ops[i - keys_per_txn].key;
+            }
 
             if (action_chooser < get_to_put_ratio) {
                 next_op.type = GET;
@@ -245,15 +245,15 @@ void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
                 ++stats->inserts;
                 GenRandomString(&next_op.value);
             }
-	}
-        
+        }
+
         // Timed code
         if (!manager->RunTxn(txn_ops, NULL, stats)) {
             global_cout_mutex.lock();
             cerr << "ERROR: transaction failed.";
             global_cout_mutex.unlock();
             return;
-	}
+        }
 
         high_resolution_clock::time_point t2 = high_resolution_clock::now();
         nanoseconds gap = duration_cast<nanoseconds>(t2 - t1);

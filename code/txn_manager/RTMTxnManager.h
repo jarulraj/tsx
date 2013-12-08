@@ -17,7 +17,8 @@ public:
     void printStats();
 
 private:
-    static pthread_spinlock_t table_lock;
+    static pthread_mutex_t table_lock;
+    //static pthread_spinlock_t table_lock;
     //static spinlock_t table_lock;
 };
 
