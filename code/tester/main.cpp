@@ -95,7 +95,7 @@ int main(int argc, const char* argv[]) {
 
     TxnManager *manager;
     if (manager_type == HLE_NAME) {
-      manager = new HLETxnManager(&table);
+      manager = new HLETxnManager(&table, dynamic, num_keys);
     } else if (manager_type == RTM_NAME) {
       manager = new RTMTxnManager(&table);
     } else if (manager_type == LOCK_TABLE_NAME) {

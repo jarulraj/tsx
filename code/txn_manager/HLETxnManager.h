@@ -10,15 +10,16 @@
 
 class HLETxnManager : public TxnManager {
 public:
-    HLETxnManager(HashTable *table);
+    HLETxnManager(HashTable *table, bool _dynamic, int num_keys);
 
     virtual bool RunTxn(const std::vector<OpDescription> &operations,
             std::vector<string> *get_results, ThreadStats *stats);
 
 private:
-    static spinlock_t table_lock;
-    
-    unordered_map<long, spinlock_t*> lockTable;
+    // Prevents concurrent insertions to the lock table.
+    spinlock_t table_lock;
+    std::unordered_map<long, spinlock_t> lockTable;
+    bool dynamic;    
 };
 
 
