@@ -7,8 +7,6 @@
 
 using namespace std;
  
-pthread_spinlock_t SpinLockSimpleTxnManager::table_lock ;
-
 bool SpinLockSimpleTxnManager::RunTxn(const vector<OpDescription> &operations,
         vector<string> *get_results, ThreadStats *stats) {
 
