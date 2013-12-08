@@ -8,7 +8,7 @@
 #include "tsx.h"
 
 const int RTM_MAX_TRIES = 10   ;
-const int RTM_SUBSETS   = 1024 ;
+const int RTM_SUBSETS   = 128  ;
 
 class RTMTxnManager : public TxnManager {
     public:
@@ -22,8 +22,8 @@ class RTMTxnManager : public TxnManager {
                     exit(-1);
                 }
 
-               subsets = RTM_SUBSETS;
-               //subsets = num_keys;
+               //subsets = RTM_SUBSETS;
+               subsets = num_keys;
 
                 // Initiliaze lock table
                 for (int i=0; i<RTM_SUBSETS; i++) {
