@@ -221,8 +221,8 @@ int main(int argc, const char* argv[]) {
 	   << "  Total transactions: " << overall.transactions << "\n"
 	   << "  GETs: " << overall.gets << "\n"
 	   << "  INSERTs: " << overall.inserts << "\n"
-	   << "  Contention time: " << duration_cast<nanoseconds>(overall.lock_acq_time).count()
-	   << " ns" << endl;
+	   << "  Contention time: " << duration_cast<nanoseconds>(overall.lock_acq_time).count()/1000000
+	   << " ms" << endl;
     } else {
       cout << overall.transactions;
     }

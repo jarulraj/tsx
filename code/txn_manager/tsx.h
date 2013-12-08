@@ -97,7 +97,9 @@ static int g_locks_elided = 0;
 static int g_locks_failed = 0;
 static int g_rtm_retries  = 0;
 
-typedef struct spinlock { int v; } spinlock_t;
+struct spinlock { bool v; }  __attribute__ ((aligned (64)));;
+
+typedef spinlock spinlock_t ;
 
 // HLE
 static ALWAYS_INLINE void dyn_spinlock_init(spinlock_t* lock);
@@ -142,7 +144,7 @@ static ALWAYS_INLINE void dyn_spinlock_init(spinlock_t* lock)
 
 static ALWAYS_INLINE void hle_spinlock_acquire(spinlock_t* lock)
 {            
-    while (__atomic_exchange_n(&lock->v, 1, __ATOMIC_ACQUIRE|__ATOMIC_HLE_ACQUIRE) != 0) { 
+    while (__atomic_exchange_n(&lock->v, true, __ATOMIC_ACQUIRE|__ATOMIC_HLE_ACQUIRE)) { 
         int val; 
         /* Wait for lock to become free again before retrying. */ 
         do { 
@@ -155,7 +157,7 @@ static ALWAYS_INLINE void hle_spinlock_acquire(spinlock_t* lock)
 
 static ALWAYS_INLINE bool hle_spinlock_isfree(spinlock_t* lock)
 {
-    return (__sync_bool_compare_and_swap(&lock->v, 0, 0) ? true : false);
+    return (__sync_bool_compare_and_swap(&lock->v, false, false) ? true : false);
 }
 
 static ALWAYS_INLINE void hle_spinlock_release(spinlock_t* lock)

@@ -26,6 +26,7 @@ HLETxnManager::HLETxnManager(HashTable *table, bool _dynamic, int num_keys)
 
 const int MAX_TRIES = 10;
 
+/*
 bool HLETxnManager::RunTxn(const vector<OpDescription> &operations,
         vector<string> *get_results, ThreadStats *stats) {
     // DYNAMIC KEY SET 
@@ -57,10 +58,10 @@ bool HLETxnManager::RunTxn(const vector<OpDescription> &operations,
                         
                         while (__atomic_exchange_n(&a->v, 1, __ATOMIC_ACQUIRE|__ATOMIC_HLE_ACQUIRE) != 0 && abort == false) { 
                             int val; 
-                            /* Wait for lock to become free again before retrying. */ 
+                            //  Wait for lock to become free again before retrying. 
                             do { 
                                 _mm_pause(); 
-                                /* Abort speculation */ 
+                                // Abort speculation  
                                 val = __atomic_load_n(&a->v, __ATOMIC_CONSUME);
 
                                 tries++;
@@ -138,19 +139,18 @@ bool HLETxnManager::RunTxn(const vector<OpDescription> &operations,
 
     return true;
 }
-
-/*
-   bool HLETxnManager::RunTxn(const std::vector<OpDescription> &operations,
-   std::vector<string> *get_results, ThreadStats *stats) {
-
-   TIME_CODE(stats, hle_spinlock_acquire(&table_lock));
-
-// Do transaction.
-ExecuteTxnOps(operations, get_results);
-
-hle_spinlock_release(&table_lock);
-
-return true;
-}
 */
+
+bool HLETxnManager::RunTxn(const std::vector<OpDescription> &operations,
+        std::vector<string> *get_results, ThreadStats *stats) {
+
+    TIME_CODE(stats, hle_spinlock_acquire(&table_lock));
+
+    // Do transaction.
+    ExecuteTxnOps(operations, get_results);
+
+    hle_spinlock_release(&table_lock);
+
+    return true;
+}
 
