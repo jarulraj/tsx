@@ -52,7 +52,7 @@ def experiment(num_vals, iters):
             print("\t%s" % labels[i+j]),
         print ""
         output = []
-        control_schemes = ['hle', 'rtm', 'tbl', 'spin', 'sspin']
+        control_schemes = ['hle', 'rtm', 'tbl', 'spin', 'sspin', 'rtmopt']
         for k in range(0, len(control_schemes)):
             result = []
             for j in range(0, num_vals):
