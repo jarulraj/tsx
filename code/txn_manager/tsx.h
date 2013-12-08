@@ -45,8 +45,8 @@ int cpu_has_rtm(void) ;
 
 int cpu_has_hle(void) ;
 
-#define _RTM_MAX_TRIES         10
-#define _RTM_MAX_ABORTS         3
+#define _RTM_MAX_TRIES         100
+#define _RTM_MAX_ABORTS         30
 
 #define _XBEGIN_STARTED         (~0u)
 #define _XABORT_EXPLICIT        (1 << 0)
@@ -114,12 +114,12 @@ static ALWAYS_INLINE void hle_spinlock_release(spinlock_t* lock);
 
 // RTM + HLE
 /*
-static ALWAYS_INLINE bool rtm_spinlock_isfree(spinlock_t* lock); 
+   static ALWAYS_INLINE bool rtm_spinlock_isfree(spinlock_t* lock); 
 
-static ALWAYS_INLINE void rtm_spinlock_acquire(spinlock_t* lock); 
+   static ALWAYS_INLINE void rtm_spinlock_acquire(spinlock_t* lock); 
 
-static ALWAYS_INLINE void rtm_spinlock_release(spinlock_t* lock); 
-*/
+   static ALWAYS_INLINE void rtm_spinlock_release(spinlock_t* lock); 
+   */
 
 // RTM + PTHREAD SPINLOCK
 static ALWAYS_INLINE bool rtm_spinlock_isfree(pthread_spinlock_t* lock); 
@@ -127,9 +127,9 @@ static ALWAYS_INLINE bool rtm_spinlock_isfree(pthread_spinlock_t* lock);
 static ALWAYS_INLINE void rtm_spinlock_acquire(pthread_spinlock_t* lock); 
 
 static ALWAYS_INLINE void rtm_spinlock_release(pthread_spinlock_t* lock); 
- 
+
 // RTM + PTHREAD MUTEX
- 
+
 static ALWAYS_INLINE bool rtm_mutex_isfree(pthread_mutex_t* lock); 
 
 static ALWAYS_INLINE void rtm_mutex_acquire(pthread_mutex_t* lock); 
@@ -137,7 +137,7 @@ static ALWAYS_INLINE void rtm_mutex_acquire(pthread_mutex_t* lock);
 static ALWAYS_INLINE bool rtm_mutex_try_acquire(pthread_mutex_t* lock); 
 
 static ALWAYS_INLINE void rtm_mutex_release(pthread_mutex_t* lock); 
- 
+
 
 /* ---- DEFINITIONS ---- */
 
@@ -187,7 +187,7 @@ tm_try:
         if ((tm_status = _xbegin()) == _XBEGIN_STARTED) {
             // If the lock is free, speculatively elide acquisition and continue. 
             if (rtm_spinlock_isfree(lock)){ 
-                 return;
+                return;
             }
 
             // Otherwise fall back to the spinlock by aborting. 
@@ -231,14 +231,14 @@ static ALWAYS_INLINE void rtm_spinlock_release(pthread_spinlock_t* lock)
 #ifdef DEBUG
         g_locks_elided += 1;
 #endif
-       _xend(); // Commit transaction 
+        _xend(); // Commit transaction 
     } else {
         // Otherwise, the lock was taken by us, so release it too. 
         pthread_spin_unlock(lock);
         //hle_spinlock_release(lock);
     }
 }
- 
+
 static ALWAYS_INLINE bool rtm_mutex_isfree(pthread_mutex_t* lock)
 {
     // use lock value itself
@@ -257,7 +257,7 @@ tm_try:
         if ((tm_status = _xbegin()) == _XBEGIN_STARTED) {
             // If the lock is free, speculatively elide acquisition and continue. 
             if (rtm_mutex_isfree(lock)){ 
-                 return;
+                return;
             }
 
             // Otherwise fall back to the spinlock by aborting. 
@@ -345,30 +345,33 @@ static ALWAYS_INLINE void rtm_mutex_release(pthread_mutex_t* lock)
         pthread_mutex_unlock(lock);
     }
 }
- 
+
 static ALWAYS_INLINE bool rtm_optimistic_acquire(pthread_mutex_t* lock)
 {
     unsigned int tm_status = 0;
     int tries = 0, retries = 0;
+    pthread_mutex_t* val;
 
 tm_try:
     if(tries++ < _RTM_MAX_TRIES){
         if ((tm_status = _xbegin()) == _XBEGIN_STARTED) {
-            pthread_mutex_t* val = lock; // Just read
+            val = lock; // Just read
             return true;
         } 
         else {
             // _xbegin could have had a conflict, been aborted, etc 
             if (tm_status & _XABORT_RETRY) {
-                if(retries++ < _RTM_MAX_ABORTS)
-                    goto tm_try; // Retry 
-                else
-                    goto tm_fail;
+              if(retries++ < _RTM_MAX_ABORTS)
+                  goto tm_try; // Retry 
+              else
+                  goto tm_fail;
             }
             if (tm_status & _XABORT_EXPLICIT) {
                 if (_XABORT_CODE(tm_status) == 0xff) 
                     goto tm_fail; // Lock was taken; fallback 
-            }
+            }  
+            else
+                goto tm_try;
         }
     }
 
@@ -386,6 +389,6 @@ static ALWAYS_INLINE void rtm_optimistic_release(pthread_mutex_t* lock, bool noL
         pthread_mutex_unlock(lock);
     }
 }
- 
+
 
 #endif /* _RTM_H_ */
