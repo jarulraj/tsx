@@ -48,8 +48,8 @@ int cpu_has_hle(void) ;
 #define _RTM_MAX_TRIES         10
 #define _RTM_MAX_ABORTS         3
 
-#define _RTM_OPT_MAX_TRIES      3
-#define _RTM_OPT_MAX_ABORTS     1
+#define _RTM_OPT_MAX_TRIES      10
+#define _RTM_OPT_MAX_ABORTS     3
 
 #define _XBEGIN_STARTED         (~0u)
 #define _XABORT_EXPLICIT        (1 << 0)
@@ -353,18 +353,12 @@ static ALWAYS_INLINE bool rtm_optimistic_acquire(pthread_mutex_t* lock)
 {
     unsigned int tm_status = 0;
     int tries = 0, retries = 0;
-#pragma GCC push_options
-#pragma GCC optimize ("O0")
     int val;
-#pragma GCC pop_options
 
 tm_try:
     if(tries++ < _RTM_OPT_MAX_TRIES){
         if ((tm_status = _xbegin()) == _XBEGIN_STARTED) {
-#pragma GCC push_options
-#pragma GCC optimize ("O0")
             val = lock->__data.__lock; // Just read
-#pragma GCC pop_options
             return true;
         } 
         else {
