@@ -45,28 +45,37 @@ def add_variable(variable, vals):
     experiments = new_experiments
     return num_vals
 
-def experiment(num_vals):
+def experiment(num_vals, iters):
     for i in range(0, len(labels), num_vals):
         print str(variables),
         for j in range(0, num_vals):
             print("\t%s" % labels[i+j]),
-        print("")
-        for cc in [ 'hle', 'rtm', 'tbl', 'spin', 'sspin', 'rwtbl']:
-            results = []
+        print ""
+        output = []
+        control_schemes = ['hle', 'rtm', 'tbl', 'spin', 'sspin']
+        for k in range(0, len(control_schemes)):
+            result = []
             for j in range(0, num_vals):
-                val = experiments[i+j]
+                result.append(0)
+            output.append(result)
 
-                cmd = [ EXEC, '-s'+str(val['s']), '-t'+str(val['t']), '-o'+str(val['o']), '-k'+val['k'], '-y'+str(val['y']), '-e0', cc]
-                #print str(cmd)
-                task =  subprocess.Popen(cmd, 
-                                         stdout=subprocess.PIPE,
-                                         stderr=subprocess.PIPE
-                                         )
-                (out, err) = task.communicate()
-                results.append(int(out) * int(val['o']) / int(val['s']))
-                
-            print("%s" % cc),
-            for result in results:
+        for k in range(0, iters):
+            for l in range(0, len(control_schemes)):
+                results = []
+                for j in range(0, num_vals):
+                    val = experiments[i+j]
+
+                    cmd = [ EXEC, '-s'+str(val['s']), '-t'+str(val['t']), '-o'+str(val['o']), '-k'+val['k'], '-y'+str(val['y']), '-e0', control_schemes[l]]
+                    #print str(cmd)
+                    task =  subprocess.Popen(cmd, 
+                                             stdout=subprocess.PIPE,
+                                             stderr=subprocess.PIPE
+                                             )
+                    (out, err) = task.communicate()
+                    output[l][j] += (int(out) * int(val['o']) / int(val['s'])) / iters
+        for i in range (0, len(control_schemes)):
+            print("%s" % control_schemes[i]),
+            for result in output[i]:
                 print("\t%s" % result),
             print("")
 
@@ -75,8 +84,9 @@ def convert(val, default):
         return default
     elif ',' in val:
         val = eval(val)
-        (start, end, step) = val
-        return range(start, end, step)
+        #(start, end, step) = val
+        #return range(start, end, step)
+        return val
     else:
         return [val]
         
@@ -91,6 +101,7 @@ if __name__ == "__main__":
 
     labels.append([])
     num_vals = 1
+    iters = 1
 
     for i in range(0, len(sys.argv)):
         arg = sys.argv[i]
@@ -111,7 +122,9 @@ if __name__ == "__main__":
             num_vals = add_variable('r', convert(val, ['10000:1', '1:1', '1:10000']))
         elif arg == '--y' or arg == '--keys':
             num_vals = add_variable('y', convert(val, range(1, 10, 2)))
+        elif arg == '--i' or arg == '--iters':
+            iters = int(val)
         elif arg == '--h' or arg == '--help':
             usage()
 
-    experiment(num_vals)
+    experiment(num_vals, iters)
