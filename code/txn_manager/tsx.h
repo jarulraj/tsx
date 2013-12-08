@@ -45,8 +45,8 @@ int cpu_has_rtm(void) ;
 
 int cpu_has_hle(void) ;
 
-#define _RTM_MAX_TRIES         100
-#define _RTM_MAX_ABORTS         30
+#define _RTM_MAX_TRIES         10
+#define _RTM_MAX_ABORTS         3
 
 #define _XBEGIN_STARTED         (~0u)
 #define _XABORT_EXPLICIT        (1 << 0)
