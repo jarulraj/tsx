@@ -7,10 +7,13 @@
 #include "TxnManager.h"       
 #include "tsx.h"
 
+const int RTM_MAX_TRIES = 10   ;
+const int RTM_SUBSETS   = 1024 ;
+
 class RTMTxnManager : public TxnManager {
     public:
-        RTMTxnManager(std::unordered_map<long,std::string> *table)
-            : TxnManager(table), table_lock(PTHREAD_MUTEX_INITIALIZER) {
+        RTMTxnManager(std::unordered_map<long,std::string> *table , bool _dynamic, int num_keys)
+            : TxnManager(table), dynamic(_dynamic) {
 
                 int rtm = cpu_has_rtm();
 
@@ -19,6 +22,17 @@ class RTMTxnManager : public TxnManager {
                     exit(-1);
                 }
 
+               subsets = RTM_SUBSETS;
+               //subsets = num_keys;
+
+                // Initiliaze lock table
+                for (int i=0; i<RTM_SUBSETS; i++) {
+                    pthread_mutex_t key_lock = PTHREAD_MUTEX_INITIALIZER ;
+                    lockTable[i] = key_lock;  
+                }
+
+                table_lock = PTHREAD_MUTEX_INITIALIZER ;
+ 
                 //pthread_spin_init(&table_lock, PTHREAD_PROCESS_PRIVATE);       
                 //table_lock.v = 0;
 
@@ -31,8 +45,10 @@ class RTMTxnManager : public TxnManager {
 
     private:
         pthread_mutex_t table_lock;
-        //pthread_spinlock_t table_lock;
-        //spinlock_t table_lock;
+        std::unordered_map<long, pthread_mutex_t> lockTable;
+        
+        int subsets;
+        bool dynamic; 
 };
 
 

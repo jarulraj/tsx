@@ -251,7 +251,7 @@ static ALWAYS_INLINE void rtm_mutex_acquire(pthread_mutex_t* lock)
     int tries = 0, retries = 0;
 
 tm_try:
-    if(tries++ < _RTM_MAX_TRIES){
+    //if(tries++ < _RTM_MAX_TRIES){
         if ((tm_status = _xbegin()) == _XBEGIN_STARTED) {
             // If the lock is free, speculatively elide acquisition and continue. 
             if (rtm_mutex_isfree(lock)){ 
@@ -268,10 +268,10 @@ tm_try:
 #ifdef DEBUG                
                 __sync_add_and_fetch(&g_rtm_retries, 1);
 #endif
-                if(retries++ < _RTM_MAX_ABORTS)
-                    goto tm_try; // Retry 
-                else
-                    goto tm_fail;
+                //if(retries++ < _RTM_MAX_ABORTS)
+                goto tm_try; // Retry 
+                //else
+                //    goto tm_fail;
             }
             if (tm_status & _XABORT_EXPLICIT) {
                 int code = _XABORT_CODE(tm_status);
@@ -279,7 +279,7 @@ tm_try:
                     goto tm_fail; // Lock was taken; fallback 
             }
         }
-    }
+    //}
 
     //fprintf(stderr, "TSX RTM: failure; (code %d)\n", tm_status);
 tm_fail:

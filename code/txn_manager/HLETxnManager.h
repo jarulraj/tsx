@@ -8,8 +8,8 @@
 #include "TxnManager.h"       
 #include "tsx.h"
 
-#define MAX_TRIES 10
-#define SUBSETS   8
+const int HLE_MAX_TRIES = 10 ;
+const int HLE_SUBSETS  =  8 ;
 
 class HLETxnManager : public TxnManager {
     public:
@@ -23,10 +23,10 @@ class HLETxnManager : public TxnManager {
                     exit(-1);
                 }
 
-                subsets = SUBSETS;
+                subsets = HLE_SUBSETS;
 
                 // Initiliaze lock table
-                for (int i=0; i<SUBSETS; i++) {
+                for (int i=0; i<HLE_SUBSETS; i++) {
                     spinlock_t key_lock = { 0 };
                     lockTable[i] = key_lock;  
                 }

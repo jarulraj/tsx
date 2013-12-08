@@ -100,7 +100,7 @@ int main(int argc, const char* argv[]) {
     if (manager_type == HLE_NAME) {
       manager = new HLETxnManager(&table, dynamic, num_keys);
     } else if (manager_type == RTM_NAME) {
-      manager = new RTMTxnManager(&table);
+      manager = new RTMTxnManager(&table, dynamic, num_keys);
     } else if (manager_type == LOCK_TABLE_NAME) {
       manager = new LockTableTxnManager(&table, dynamic, num_keys);
     } else if (manager_type == LOCK_TABLE_RW_NAME) {

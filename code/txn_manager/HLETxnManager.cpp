@@ -3,6 +3,19 @@
 
 #include "HLETxnManager.h"
 #include "tester/workload.h"
+ 
+bool HLETxnManager::RunTxn(const std::vector<OpDescription> &operations,
+        std::vector<string> *get_results, ThreadStats *stats) {
+
+    TIME_CODE(stats, hle_spinlock_acquire(&table_lock));
+
+    // Do transaction.
+    ExecuteTxnOps(operations, get_results);
+
+    hle_spinlock_release(&table_lock);
+
+    return true;
+}
 
 /*
 bool HLETxnManager::RunTxn(const vector<OpDescription> &operations,
@@ -43,7 +56,7 @@ bool HLETxnManager::RunTxn(const vector<OpDescription> &operations,
                                 val = __atomic_load_n(&a->v, __ATOMIC_CONSUME);
 
                                 tries++;
-                                if(tries == MAX_TRIES) {
+                                if(tries == HLE_MAX_TRIES) {
                                     abort = true;
                                     if (get_results != NULL) {
                                         get_results->clear();
@@ -119,15 +132,3 @@ bool HLETxnManager::RunTxn(const vector<OpDescription> &operations,
 }
 */
 
-bool HLETxnManager::RunTxn(const std::vector<OpDescription> &operations,
-        std::vector<string> *get_results, ThreadStats *stats) {
-
-    TIME_CODE(stats, hle_spinlock_acquire(&table_lock));
-
-    // Do transaction.
-    ExecuteTxnOps(operations, get_results);
-
-    hle_spinlock_release(&table_lock);
-
-    return true;
-}
