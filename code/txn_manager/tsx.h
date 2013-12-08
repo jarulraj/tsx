@@ -98,6 +98,7 @@ static int g_locks_failed = 0;
 static int g_rtm_retries  = 0;
 
 struct spinlock { bool v; }  __attribute__ ((aligned (64)));;
+//struct spinlock { bool v; bool pad[63]; } ;
 
 typedef spinlock spinlock_t ;
 

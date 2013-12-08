@@ -8,6 +8,9 @@
 #include "TxnManager.h"       
 #include "tsx.h"
 
+#define MAX_TRIES 10
+#define SUBSETS   8
+
 class HLETxnManager : public TxnManager {
     public:
         HLETxnManager(std::unordered_map<long,std::string> *table, bool _dynamic, int num_keys)
@@ -20,13 +23,16 @@ class HLETxnManager : public TxnManager {
                     exit(-1);
                 }
 
+                subsets = SUBSETS;
+
                 // Initiliaze lock table
-                for (int i=0; i<num_keys; i++) {
+                for (int i=0; i<SUBSETS; i++) {
                     spinlock_t key_lock = { 0 };
                     lockTable[i] = key_lock;  
                 }
 
                 table_lock = { 0 };
+                
 
             }
 
@@ -37,6 +43,8 @@ class HLETxnManager : public TxnManager {
         // Prevents concurrent insertions to the lock table.
         spinlock_t table_lock;
         std::unordered_map<long, spinlock_t> lockTable;
+        
+        int subsets;
         bool dynamic;    
 };
 

@@ -4,8 +4,6 @@
 #include "HLETxnManager.h"
 #include "tester/workload.h"
 
-const int MAX_TRIES = 10;
-
 /*
 bool HLETxnManager::RunTxn(const vector<OpDescription> &operations,
         vector<string> *get_results, ThreadStats *stats) {
@@ -100,12 +98,12 @@ bool HLETxnManager::RunTxn(const vector<OpDescription> &operations,
         // Construct an ordered set of keys to lock.
         set<long> keys;
         for (const OpDescription &op : operations) {
-            keys.insert(op.key);
+            keys.insert(op.key%SUBSETS);
         }
 
         // Lock keys in order.
         for (long key : keys) {
-            TIME_CODE(stats, hle_spinlock_acquire(&lockTable[key]));
+            TIME_CODE(stats,hle_spinlock_acquire(&(lockTable[key])));
         }
 
         // Do transaction.
@@ -113,7 +111,7 @@ bool HLETxnManager::RunTxn(const vector<OpDescription> &operations,
 
         // Unlock all keys in reverse order.
         for (auto rit = keys.rbegin(); rit != keys.rend(); ++rit) {
-            hle_spinlock_release(&lockTable[*rit]);
+            hle_spinlock_release(&(lockTable[*rit]));
         }
     }
 
@@ -133,4 +131,3 @@ bool HLETxnManager::RunTxn(const std::vector<OpDescription> &operations,
 
     return true;
 }
-
