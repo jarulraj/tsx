@@ -20,7 +20,10 @@
 #define SPIN_SIMPLE_NAME     "sspin"
 #define ZIPF_NAME            "zipf"
 #define UNIFORM_NAME         "uniform"
+#define HOTSPOT_NAME         "hotspot"
 #define DEFAULT_DIST_NAME    UNIFORM_NAME
+#define DEFAULT_HS_FRAC      0.1
+#define DEFAULT_HS_OP_FRAC   0.9
 
 
 extern std::mutex global_cout_mutex;
@@ -38,9 +41,19 @@ enum optionIndex {
     SANITY_TEST,
     KEY_DIST,
     VERBOSITY,
-    DYNAMIC
+    DYNAMIC,
+    HOTSPOT_FRAC,
+    HOTSPOT_OP_FRAC
 };
 extern const option::Descriptor usage[];
+
+inline double getArgWithDefault(const option::Option *options, optionIndex index, double defaultVal) {
+    if (options[index]) {
+        return atof(options[index].arg);
+    } else {
+        return defaultVal;
+    }
+}
 
 inline int getArgWithDefault(const option::Option *options, optionIndex index, int defaultVal) {
     if (options[index]) {

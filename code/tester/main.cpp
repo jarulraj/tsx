@@ -68,9 +68,11 @@ int main(int argc, const char* argv[]) {
     int num_threads;
     int ops_per_txn;
     int keys_per_txn;
+    double hs_fraction;
+    double hs_op_fraction;
     double ratio;
     if (!sanity_test) {
-        num_threads = getArgWithDefault(options, NUM_THREADS, thread::hardware_concurrency());
+        num_threads = getArgWithDefault(options, NUM_THREADS, (int)thread::hardware_concurrency());
         ops_per_txn = getArgWithDefault(options, OPS_PER_TXN, DEFAULT_OPS_PER_TXN);
 	keys_per_txn = getArgWithDefault(options, KEYS_PER_TXN, DEFAULT_KEYS_PER_TXN);
         ratio = option::getRatio(options[RATIO]);
@@ -79,6 +81,8 @@ int main(int argc, const char* argv[]) {
             cerr << "WARNING: We should never have gotten here!" << endl;
             return 1;
         }
+        hs_fraction = getArgWithDefault(options, HOTSPOT_FRAC, DEFAULT_HS_FRAC);
+        hs_op_fraction = getArgWithDefault(options, HOTSPOT_OP_FRAC, DEFAULT_HS_OP_FRAC);
     }
 
     delete[] options;
@@ -112,7 +116,8 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
-    if (key_dist_type != UNIFORM_NAME && key_dist_type != ZIPF_NAME) {
+    if (key_dist_type != UNIFORM_NAME && key_dist_type != ZIPF_NAME
+            && key_dist_type != HOTSPOT_NAME) {
         cerr << "Invalid key distribution type: " << key_dist_type << endl;
         option::printUsage(std::cout, usage);
         return 1;
@@ -157,23 +162,29 @@ int main(int argc, const char* argv[]) {
                 thread(RunMultiKeyThread, manager, &thread_stats[2], num_keys,
                         10 * num_keys, num_seconds_to_run, value_length));
     } else {
-	if (verbosity >= 1) {
-	    cout << "Num threads:  " << num_threads << endl;
-	    cout << "Ops per txn:  " << ops_per_txn << endl;
-	    cout << "Keys per txn: " << keys_per_txn << endl;
-	    cout << "Ratio:        " << ratio << endl;
-	    cout << "Key distrib:  " << key_dist_type << endl;
-	}
+        if (verbosity >= 1) {
+            cout << "Num threads:  " << num_threads << endl;
+            cout << "Ops per txn:  " << ops_per_txn << endl;
+            cout << "Keys per txn: " << keys_per_txn << endl;
+            cout << "Ratio:        " << ratio << endl;
+            cout << "Key distrib:  " << key_dist_type;
+            if (key_dist_type == HOTSPOT_NAME) {
+                cout << "(" << hs_fraction << ", " << hs_op_fraction << ")";
+            }
+            cout << endl;
+        }
 
         thread_stats.resize(num_threads);
         for (int i = 0; i < num_threads; ++i) {
             // Each thread gets its own key generator.
-            Generator<int> *key_generator;
+            Generator<long> *key_generator;
             time_t seed = time(NULL);
             if (key_dist_type == ZIPF_NAME) {
                 key_generator = new ZipfianGenerator(0, num_keys - 1, seed);
-            } else { // UNIFORM_NAME
+            } else if(key_dist_type == UNIFORM_NAME) {
                 key_generator = new UniformGenerator(0, num_keys - 1);
+            } else {    // HOTSPOT_NAME
+                key_generator = new HotSpotGenerator(0, num_keys, hs_fraction, hs_op_fraction);
             }
             threads.push_back(
 	        thread(RunWorkloadThread, manager, &thread_stats[i], ops_per_txn, keys_per_txn,

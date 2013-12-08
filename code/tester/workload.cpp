@@ -203,7 +203,7 @@ void RunMultiKeyThread(TxnManager *manager, ThreadStats *stats, long num_keys,
 // Main workload Generator
 void RunWorkloadThread(TxnManager *manager, ThreadStats *stats, int ops_per_txn,
         int keys_per_txn, int key_max, int seconds_to_run, double get_to_put_ratio,
-        size_t value_length, Generator<int> *key_generator) {
+        size_t value_length, Generator<long> *key_generator) {
     stats->thread_id = this_thread::get_id();
 
     // Set up operation distribution

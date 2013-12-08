@@ -23,7 +23,7 @@ const option::Descriptor usage[] =
         " Default: " STRINGIFY(DEFAULT_SECONDS) "." },
     {OPS_PER_TXN, 0, "o", "txn_ops", option::Integer,  "  --txn_ops, -o  \tOperations per transaction."
         " Default: " STRINGIFY(DEFAULT_OPS_PER_TXN) "." },
-    {KEYS_PER_TXN, 0, "y", "txn_keys", option::Integer,  "  --txn_keys, -y  \tKeys per transaction."
+    {KEYS_PER_TXN,0, "y", "txn_keys", option::Integer,  "  --txn_keys, -y  \tKeys per transaction."
         " Default: " STRINGIFY(DEFAULT_KEYS_PER_TXN) "." },
     {RATIO,       0, "r", "ratio",   option::CheckRatio, "  --ratio,   -r  \tRatio of gets to puts in each"
         " transaction, in the format gets:puts. Default: 1:1." },
@@ -34,10 +34,16 @@ const option::Descriptor usage[] =
     {SANITY_TEST, 0, "a", "sanity",  option::Arg::None,     "  --sanity,  -a  \tRun a sanity test to check"
         " validity of CC schemes, instead of real workloads. Disables -t, -o, -r, and -d flags."},
     {KEY_DIST,    0, "k", "keydist", option::Required, "  --keydist, -k  \tDistribution of keys to use."
-        " Permitted values: " UNIFORM_NAME ", " ZIPF_NAME ". Default: " DEFAULT_DIST_NAME "."},
+        " Permitted values: " UNIFORM_NAME ", " ZIPF_NAME ", " HOTSPOT_NAME
+        ". Default: " DEFAULT_DIST_NAME "."},
     {VERBOSITY,   0, "e", "verbosity", option::Integer, "  --verbosity, -e \tRelative amount of detail to"
         " print out. Default: " STRINGIFY(DEFAULT_VERBOSITY) "."},
     {DYNAMIC,     0, "d", "dynamic", option::Arg::None, "  --dynamic, -d \tUse dynamic read/write sets."},
+    {HOTSPOT_FRAC,0, "h", "hs_frac", option::Double, "  --hs_frac, -h \tFraction of key set to consider 'hot'."
+            " Applies only to hotspot key distribution. Default:" STRINGIFY(DEFAULT_HS_FRAC) "."},
+    {HOTSPOT_OP_FRAC,0, "f", "hs_op_frac", option::Double, "  --hs_op_frac, -f \tFraction of operations"
+            " that should use the 'hot' key set. to consider 'hot'."
+            " Applies only to hotspot key distribution. Default:" STRINGIFY(DEFAULT_HS_OP_FRAC) "."},
     {0,0,0,0,0,0}
 };
 

@@ -5,12 +5,12 @@
 
 using namespace std;
 
-const int &UniformGenerator::nextElement() {
+const long &UniformGenerator::nextElement() {
     lastElement = distribution(generator);
     return lastElement;
 }
 
-const int &ZipfianGenerator::nextElement() {
+const long &ZipfianGenerator::nextElement() {
     if (num_items != count_for_zeta) {
 
         //have to recompute zetan and eta, since they depend on num_items
@@ -36,15 +36,59 @@ const int &ZipfianGenerator::nextElement() {
     double uz = u * zetan;
 
     if (uz < 1.0) {
-        static const int ZERO = 0;
         return ZERO;
     }
 
     if (uz < 1.0 + pow(0.5, theta)) {
-        static const int ONE = 1;
         return ONE;
     }
 
-    lastElement = min_item + (int) ((num_items) * pow(eta * u - eta + 1, alpha));
+    long next = min_item + static_cast<int>( ((num_items) * pow(eta * u - eta + 1, alpha)) );
+    next = ScrambleIfNeeded(next);
+    lastElement = next;
+    return lastElement;
+}
+
+HotSpotGenerator::HotSpotGenerator(int lower_bound, int upper_bound,
+        double hotset_fraction, double hot_opn_fraction)
+        : generator(time(NULL)) {
+    if (hotset_fraction < 0.0 || hotset_fraction > 1.0) {
+        cerr << "Hotset fraction out of range. Setting to 0.0" << endl;
+        hotset_fraction = 0.0;
+    }
+    if (hot_opn_fraction < 0.0 || hot_opn_fraction > 1.0) {
+        cerr << "Hot operation fraction out of range. Setting to 0.0" << endl;
+        hot_opn_fraction = 0.0;
+    }
+    if (lower_bound > upper_bound) {
+        cerr << "Upper bound of HotSpot generator smaller than the lower bound. "
+             << "Swapping the values." << endl;
+        int temp = lower_bound;
+        lower_bound = upper_bound;
+        upper_bound = temp;
+    }
+
+    this->lower_bound = lower_bound;
+    this->upper_bound = upper_bound;
+    this->hotset_fraction = hotset_fraction;
+
+    int interval = upper_bound - lower_bound + 1;
+    this->hot_interval = static_cast<int>(interval * hotset_fraction);
+    this->cold_interval = interval - hot_interval;
+    this->hotset_opn_fraction = hot_opn_fraction;
+}
+
+const long &HotSpotGenerator::nextElement() {
+    uniform_real_distribution<double> doubles;
+    if (doubles(generator) < hotset_opn_fraction) {
+      // Choose a value from the hot set.
+        uniform_int_distribution<int> ints(0, hot_interval);
+        lastElement = lower_bound + ints(generator);
+    } else {
+      // Choose a value from the cold set.
+        uniform_int_distribution<int> ints(0, cold_interval);
+        lastElement = lower_bound + hot_interval + ints(generator);
+    }
+
     return lastElement;
 }
