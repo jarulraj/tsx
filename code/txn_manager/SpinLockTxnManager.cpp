@@ -11,7 +11,8 @@ const int MAX_TRIES = 10;
 
 bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
         vector<string> *get_results, ThreadStats *stats) {
-    // DYNAMIC KEY SET  
+    // DYNAMIC KEY SET 
+    // Deadlock detection and txn termination after undoing effects 
     if (dynamic) {
         bool abort = true;
         string result;
@@ -24,15 +25,17 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
             for (const OpDescription &op : operations) {
                 if (keys.count(op.key) == 0) {
                     
-                    TIME_CODE(stats, tableMutex.lock());
+                    TIME_CODE(stats, tableMutex.lock()); // Lock tableMutex
+                    
                     if (lockTable.count(op.key) == 0) {
                         atomic_flag *a = &lockTable[op.key];  // Inserts flag
                         TIME_CODE(stats, a->test_and_set(memory_order_acquire));
-                        tableMutex.unlock();
+                        tableMutex.unlock();    // Unlock tableMutex
                     } 
                     else {
                         atomic_flag *a = &lockTable[op.key];
-                        tableMutex.unlock();
+                        tableMutex.unlock();    // Unlock tableMutex
+                        
                         int tries = 0;
                         auto start = std::chrono::high_resolution_clock::now();
                         
@@ -95,7 +98,7 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
             }
         }
     } 
-    // STATIC SET  
+    // STATIC KEY SET  
     else {
         // Construct an ordered set of keys to lock.
         set<long> keys;
