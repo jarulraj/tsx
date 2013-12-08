@@ -1,14 +1,14 @@
 #include <iostream>
 #include <set>
 
-#include "HLETxnManager.h"       
+#include "HLETxnManager.h"
 #include "tester/workload.h"
 
 spinlock_t HLETxnManager::table_lock = { 0 } ;
 
-HLETxnManager::HLETxnManager(std::unordered_map<long,std::string> *table)
+HLETxnManager::HLETxnManager(HashTable *table)
     : TxnManager(table) {
-         
+
         int hle = cpu_has_hle();
 
         if(hle == 0) {

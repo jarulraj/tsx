@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "hashtable.h"
+
 typedef enum OpType {
     INSERT,
     GET,
@@ -38,7 +40,7 @@ inline bool conflict(LockMode mode1, LockMode mode2) {
 struct ThreadStats;
 class TxnManager {
 public:
-    TxnManager(std::unordered_map<long,std::string> *table) : table_(table) {}
+    TxnManager(HashTable *table) : table_(table) {}
 
     virtual ~TxnManager() {
         delete table_;
@@ -64,7 +66,7 @@ protected:
     void ExecuteTxnOp(const OpDescription &op, std::string *result=NULL);
 
 private:
-    std::unordered_map<long, std::string> *table_;
+    HashTable *table_;
 };
 
 #endif /* _TXN_MANAGER_H_ */

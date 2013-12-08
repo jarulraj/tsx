@@ -7,7 +7,7 @@
 pthread_spinlock_t RTMTxnManager::table_lock ;
 //spinlock_t RTMTxnManager::table_lock ;
 
-RTMTxnManager::RTMTxnManager(std::unordered_map<long,std::string>* table)
+RTMTxnManager::RTMTxnManager(HashTable *table)
     : TxnManager(table) {
                
         int rtm = cpu_has_rtm();

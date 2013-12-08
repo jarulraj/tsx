@@ -9,7 +9,7 @@
 
 class RTMTxnManager : public TxnManager {
 public:
-    RTMTxnManager(std::unordered_map<long,std::string> *table);
+    RTMTxnManager(HashTable *table);
 
     virtual bool RunTxn(const std::vector<OpDescription> &operations,
             std::vector<string> *get_results, ThreadStats *stats);

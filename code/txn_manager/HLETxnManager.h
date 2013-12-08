@@ -4,12 +4,13 @@
 #include <iostream>
 #include <set>
 
+#include "hashtable.h"
 #include "TxnManager.h"       
 #include "tsx.h"
 
 class HLETxnManager : public TxnManager {
 public:
-    HLETxnManager(std::unordered_map<long,std::string> *table);
+    HLETxnManager(HashTable *table);
 
     virtual bool RunTxn(const std::vector<OpDescription> &operations,
             std::vector<string> *get_results, ThreadStats *stats);
