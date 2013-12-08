@@ -6,9 +6,30 @@
 
 bool RTMTxnManager::RunTxn(const vector<OpDescription> &operations,
         vector<string> *get_results, ThreadStats *stats) {
+    // STATIC KEY SET  
+    if(!dynamic){
+        // Construct an ordered set of keys to lock.
+        set<long> keys;
+        for (const OpDescription &op : operations) {
+            keys.insert(op.key%RTM_SUBSETS);
+        }
+
+        // Lock keys in order.
+        for (long key : keys) {
+            TIME_CODE(stats,rtm_mutex_acquire(&(lockTable[key])));
+        }
+
+        // Do transaction.
+        ExecuteTxnOps(operations, get_results);
+
+        // Unlock all keys in reverse order.
+        for (auto rit = keys.rbegin(); rit != keys.rend(); ++rit) {
+            rtm_mutex_release(&(lockTable[*rit]));
+        }
+    }
     // DYNAMIC KEY SET 
     // Deadlock detection and txn termination after undoing effects 
-    if (dynamic) {
+    else{
         bool abort = true;
         string result;
 
@@ -22,7 +43,7 @@ bool RTMTxnManager::RunTxn(const vector<OpDescription> &operations,
                 modkey = op.key%RTM_SUBSETS ; 
 
                 if (keys.count(op.key) == 0) {
-                                              
+
                     TIME_CODE(stats, rtm_mutex_acquire(&table_lock));
 
                     if (lockTable.count(modkey) == 0) {
@@ -73,27 +94,6 @@ bool RTMTxnManager::RunTxn(const vector<OpDescription> &operations,
             }
         }
     } 
-    // STATIC KEY SET  
-    else {
-        // Construct an ordered set of keys to lock.
-        set<long> keys;
-        for (const OpDescription &op : operations) {
-            keys.insert(op.key%RTM_SUBSETS);
-        }
-
-        // Lock keys in order.
-        for (long key : keys) {
-            TIME_CODE(stats,rtm_mutex_acquire(&(lockTable[key])));
-        }
-
-        // Do transaction.
-        ExecuteTxnOps(operations, get_results);
-
-        // Unlock all keys in reverse order.
-        for (auto rit = keys.rbegin(); rit != keys.rend(); ++rit) {
-            rtm_mutex_release(&(lockTable[*rit]));
-        }
-    }
 
     return true;
 }

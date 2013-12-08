@@ -46,7 +46,7 @@ int cpu_has_rtm(void) ;
 int cpu_has_hle(void) ;
 
 #define _RTM_MAX_TRIES         10
-#define _RTM_MAX_ABORTS        5
+#define _RTM_MAX_ABORTS         3
 
 /*
 #define _XBEGIN_STARTED         (~0u)
@@ -250,10 +250,10 @@ static ALWAYS_INLINE bool rtm_mutex_isfree(pthread_mutex_t* lock)
 static ALWAYS_INLINE void rtm_mutex_acquire(pthread_mutex_t* lock)
 {
     unsigned int tm_status = 0;
-    //int tries = 0, retries = 0;
+    int tries = 0, retries = 0;
 
 tm_try:
-    //if(tries++ < _RTM_MAX_TRIES){
+    if(tries++ < _RTM_MAX_TRIES){
         if ((tm_status = _xbegin()) == _XBEGIN_STARTED) {
             // If the lock is free, speculatively elide acquisition and continue. 
             if (rtm_mutex_isfree(lock)){ 
@@ -270,17 +270,17 @@ tm_try:
 #ifdef DEBUG                
                 __sync_add_and_fetch(&g_rtm_retries, 1);
 #endif
-                //if(retries++ < _RTM_MAX_ABORTS)
-                goto tm_try; // Retry 
-                //else
-                //    goto tm_fail;
+                if(retries++ < _RTM_MAX_ABORTS)
+                    goto tm_try; // Retry 
+                else
+                    goto tm_fail;
             }
             if (tm_status & _XABORT_EXPLICIT) {
                 if (_XABORT_CODE(tm_status) == 0xff) 
                     goto tm_fail; // Lock was taken; fallback 
             }
         }
-    //}
+    }
 
     //fprintf(stderr, "TSX RTM: failure; (code %d)\n", tm_status);
 tm_fail:
@@ -290,7 +290,7 @@ tm_fail:
     pthread_mutex_lock(lock);
 
 }
- 
+
 static ALWAYS_INLINE bool rtm_mutex_try_acquire(pthread_mutex_t* lock)
 {
     unsigned int tm_status = 0;
