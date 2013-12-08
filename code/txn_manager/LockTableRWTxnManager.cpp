@@ -108,10 +108,9 @@ bool LockTableRWTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 
 	    // Roll back changes if we aborted.
 	    if (abort) {
-		unordered_map<long, string>::iterator it;
 		OpDescription op;
 		op.type = INSERT;
-		for (it = old_values.begin(); it != old_values.end(); it++) {
+		for (auto it = old_values.begin(); it != old_values.end(); it++) {
 		    op.key = it->first;
 		    op.value = it->second;
 		    ExecuteTxnOp(op);
@@ -119,8 +118,7 @@ bool LockTableRWTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 	    }
 
 	    // Unlock all keys in reverse order.
-	    std::set<long>::reverse_iterator rit;
-	    for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
+	    for (auto rit = keys.rbegin(); rit != keys.rend(); ++rit) {
 		lock_timed(&tableMutex, stats);
 		Lock *l = &lockTable[*rit];
 		tableMutex.unlock();
@@ -161,7 +159,7 @@ bool LockTableRWTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 	//std::cout << keys.size() << " ";
 
 	// Lock keys in order.
-	for (pair<long, LockMode> p : keys) {
+	for (const pair<long, LockMode> &p : keys) {
 	    long key = p.first;
 	    LockMode requestMode = p.second;
 
@@ -193,8 +191,7 @@ bool LockTableRWTxnManager::RunTxn(const std::vector<OpDescription> &operations,
 	ExecuteTxnOps(operations, get_results);
 
 	// Unlock all keys in reverse order.
-	std::map<long, LockMode>::reverse_iterator rit;
-	for (rit = keys.rbegin(); rit != keys.rend(); ++rit) {
+	for (auto rit = keys.rbegin(); rit != keys.rend(); ++rit) {
 	    Lock *l = &lockTable[rit->first];
 	    bool notify = false;
 	    {
