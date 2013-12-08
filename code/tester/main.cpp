@@ -13,6 +13,7 @@
 #include "LockTableTxnManager.h"
 #include "LockTableRWTxnManager.h"
 #include "RTMTxnManager.h"
+#include "RTMOptimisticTxnManager.h"
 #include "SpinLockTxnManager.h"
 #include "SpinLockSimpleTxnManager.h"
 #include "TxnManager.h"
@@ -101,6 +102,8 @@ int main(int argc, const char* argv[]) {
       manager = new HLETxnManager(&table, dynamic, num_keys);
     } else if (manager_type == RTM_NAME) {
       manager = new RTMTxnManager(&table, dynamic, num_keys);
+    } else if (manager_type == RTM_OPT_NAME) {
+      manager = new RTMOptimisticTxnManager(&table, dynamic, num_keys);
     } else if (manager_type == LOCK_TABLE_NAME) {
       manager = new LockTableTxnManager(&table, dynamic, num_keys);
     } else if (manager_type == LOCK_TABLE_RW_NAME) {

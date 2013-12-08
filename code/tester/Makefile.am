@@ -32,6 +32,7 @@ main_SOURCES	= $(top_builddir)/hashtable/murmur.cpp $(top_builddir)/hashtable/ha
 				  $(top_builddir)/txn_manager/LockTableTxnManager.cpp \
 				  $(top_builddir)/txn_manager/LockTableRWTxnManager.cpp \
 				  $(top_builddir)/txn_manager/RTMTxnManager.cpp \
+				  $(top_builddir)/txn_manager/RTMOptimisticTxnManager.cpp \
 				  $(top_builddir)/txn_manager/HLETxnManager.cpp \
 				  main.cpp \
 				  workload.cpp \

@@ -14,6 +14,7 @@
 #define DEFAULT_VERBOSITY    1
 #define HLE_NAME             "hle"
 #define RTM_NAME             "rtm"
+#define RTM_OPT_NAME         "rtmopt"
 #define SPIN_NAME            "spin"
 #define LOCK_TABLE_NAME      "tbl"
 #define LOCK_TABLE_RW_NAME   "rwtbl"
