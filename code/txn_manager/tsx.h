@@ -48,6 +48,9 @@ int cpu_has_hle(void) ;
 #define _RTM_MAX_TRIES         10
 #define _RTM_MAX_ABORTS         3
 
+#define _RTM_OPT_MAX_TRIES      3
+#define _RTM_OPT_MAX_ABORTS     1
+
 #define _XBEGIN_STARTED         (~0u)
 #define _XABORT_EXPLICIT        (1 << 0)
 #define _XABORT_RETRY           (1 << 1)
@@ -353,7 +356,7 @@ static ALWAYS_INLINE bool rtm_optimistic_acquire(pthread_mutex_t* lock)
     pthread_mutex_t* val;
 
 tm_try:
-    if(tries++ < _RTM_MAX_TRIES){
+    if(tries++ < _RTM_OPT_MAX_TRIES){
         if ((tm_status = _xbegin()) == _XBEGIN_STARTED) {
             val = lock; // Just read
             return true;
@@ -361,7 +364,7 @@ tm_try:
         else {
             // _xbegin could have had a conflict, been aborted, etc 
             if (tm_status & _XABORT_RETRY) {
-              if(retries++ < _RTM_MAX_ABORTS)
+              if(retries++ < _RTM_OPT_MAX_ABORTS)
                   goto tm_try; // Retry 
               else
                   goto tm_fail;
