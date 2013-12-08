@@ -48,7 +48,6 @@ int cpu_has_hle(void) ;
 #define _RTM_MAX_TRIES         10
 #define _RTM_MAX_ABORTS         3
 
-/*
 #define _XBEGIN_STARTED         (~0u)
 #define _XABORT_EXPLICIT        (1 << 0)
 #define _XABORT_RETRY           (1 << 1)
@@ -91,7 +90,7 @@ int cpu_has_hle(void) ;
          : "memory");                           \
      out;                                                         \
      })
-*/
+
 
 
 /* Stats */
@@ -247,6 +246,7 @@ static ALWAYS_INLINE bool rtm_mutex_isfree(pthread_mutex_t* lock)
 }
 
 
+
 static ALWAYS_INLINE void rtm_mutex_acquire(pthread_mutex_t* lock)
 {
     unsigned int tm_status = 0;
@@ -328,6 +328,7 @@ tm_try:
 
     //fprintf(stderr, "TSX RTM: failure; (code %d)\n", tm_status);
 tm_fail:
+    pthread_mutex_lock(lock);
     return false;
 }
 
@@ -344,6 +345,47 @@ static ALWAYS_INLINE void rtm_mutex_release(pthread_mutex_t* lock)
         pthread_mutex_unlock(lock);
     }
 }
+ 
+static ALWAYS_INLINE bool rtm_optimistic_acquire(pthread_mutex_t* lock)
+{
+    unsigned int tm_status = 0;
+    int tries = 0, retries = 0;
 
+tm_try:
+    if(tries++ < _RTM_MAX_TRIES){
+        if ((tm_status = _xbegin()) == _XBEGIN_STARTED) {
+            pthread_mutex_t* val = lock; // Just read
+            return true;
+        } 
+        else {
+            // _xbegin could have had a conflict, been aborted, etc 
+            if (tm_status & _XABORT_RETRY) {
+                if(retries++ < _RTM_MAX_ABORTS)
+                    goto tm_try; // Retry 
+                else
+                    goto tm_fail;
+            }
+            if (tm_status & _XABORT_EXPLICIT) {
+                if (_XABORT_CODE(tm_status) == 0xff) 
+                    goto tm_fail; // Lock was taken; fallback 
+            }
+        }
+    }
+
+tm_fail:
+    pthread_mutex_lock(lock);
+    return false;
+
+}
+
+static ALWAYS_INLINE void rtm_optimistic_release(pthread_mutex_t* lock, bool noLock)
+{
+    if (noLock) {
+        _xend(); // Commit transaction 
+    } else {
+        pthread_mutex_unlock(lock);
+    }
+}
+ 
 
 #endif /* _RTM_H_ */
