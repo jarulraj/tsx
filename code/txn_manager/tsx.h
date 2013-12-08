@@ -353,12 +353,18 @@ static ALWAYS_INLINE bool rtm_optimistic_acquire(pthread_mutex_t* lock)
 {
     unsigned int tm_status = 0;
     int tries = 0, retries = 0;
-    pthread_mutex_t* val;
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
+    int val;
+#pragma GCC pop_options
 
 tm_try:
     if(tries++ < _RTM_OPT_MAX_TRIES){
         if ((tm_status = _xbegin()) == _XBEGIN_STARTED) {
-            val = lock; // Just read
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
+            val = lock->__data.__lock; // Just read
+#pragma GCC pop_options
             return true;
         } 
         else {
