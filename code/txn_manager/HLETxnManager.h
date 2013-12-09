@@ -24,10 +24,11 @@ class HLETxnManager : public TxnManager {
                     exit(-1);
                 }
 
-                subsets = HLE_SUBSETS;
+                //subsets = HLE_SUBSETS;
+                subsets = num_keys;
 
                 // Initiliaze lock table
-                for (int i=0; i<HLE_SUBSETS; i++) {
+                for (int i=0; i<subsets; i++) {
                     spinlock_t key_lock = { 0 };
                     lockTable[i] = key_lock;  
                 }

@@ -102,7 +102,8 @@ bool HLETxnManager::RunTxn(const vector<OpDescription> &operations,
         // Construct an ordered set of keys to lock.
         set<long> keys;
         for (const OpDescription &op : operations) {
-            keys.insert(op.key%HLE_SUBSETS);
+            keys.insert(op.key);
+            //keys.insert(op.key%HLE_SUBSETS);
         }
 
         // Lock keys in order.

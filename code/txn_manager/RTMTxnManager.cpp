@@ -11,7 +11,8 @@ bool RTMTxnManager::RunTxn(const vector<OpDescription> &operations,
         // Construct an ordered set of keys to lock.
         set<long> keys;
         for (const OpDescription &op : operations) {
-            keys.insert(op.key%RTM_SUBSETS);
+            //keys.insert(op.key%RTM_SUBSETS);
+            keys.insert(op.key);
         }
 
         // Lock keys in order.
@@ -40,7 +41,8 @@ bool RTMTxnManager::RunTxn(const vector<OpDescription> &operations,
             long modkey;
 
             for (const OpDescription &op : operations) {
-                modkey = op.key%RTM_SUBSETS ; 
+                //modkey = op.key%RTM_SUBSETS ; 
+                modkey = op.key ; 
 
                 if (keys.count(op.key) == 0) {
 
@@ -88,7 +90,8 @@ bool RTMTxnManager::RunTxn(const vector<OpDescription> &operations,
             // Unlock all keys in reverse order.
             for (auto rit = keys.rbegin(); rit != keys.rend(); ++rit) {
                 TIME_CODE(stats, rtm_mutex_acquire(&table_lock));
-                modkey = (*rit)%RTM_SUBSETS;
+                //modkey = (*rit)%RTM_SUBSETS;
+                modkey = (*rit);
                 rtm_mutex_release(&lockTable[modkey]);
                 rtm_mutex_release(&table_lock);
             }

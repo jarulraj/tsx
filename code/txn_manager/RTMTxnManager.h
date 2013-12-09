@@ -23,11 +23,11 @@ class RTMTxnManager : public TxnManager {
                     exit(-1);
                 }
 
-               subsets = RTM_SUBSETS;
-               //subsets = num_keys;
+               //subsets = RTM_SUBSETS;
+               subsets = num_keys;
 
                 // Initiliaze lock table
-                for (int i=0; i<RTM_SUBSETS; i++) {
+                for (int i=0; i<subsets; i++) {
                     pthread_mutex_t key_lock = PTHREAD_MUTEX_INITIALIZER ;
                     lockTable[i] = key_lock;  
                 }
