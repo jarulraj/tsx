@@ -23,46 +23,34 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
             abort = false;
             
             for (const OpDescription &op : operations) {
-                if (keys.count(op.key) == 0) {
-                    
-                    TIME_CODE(stats, tableMutex.lock()); // Lock tableMutex
-                    
-                    if (lockTable.count(op.key) == 0) {
-                        atomic_flag *a = &lockTable[op.key];  // Inserts flag
-                        TIME_CODE(stats, a->test_and_set(memory_order_acquire));
-                        tableMutex.unlock();    // Unlock tableMutex
-                    } 
-                    else {
-                        atomic_flag *a = &lockTable[op.key];
-                        tableMutex.unlock();    // Unlock tableMutex
-                        
-                        int tries = 0;
-                        auto start = std::chrono::high_resolution_clock::now();
-                        
-                        while (a->test_and_set(memory_order_acquire)) {
-                            auto end = std::chrono::high_resolution_clock::now();
-                            stats->lock_acq_time += end - start;
+                if (keys.count(op.key) == 0) {                    
+		    atomic_flag *a = &lockTable[op.key];
+		    int tries = 0;
+		    auto start = std::chrono::high_resolution_clock::now();
 
-                            tries++;
-                            if (tries == MAX_TRIES) {
-                                abort = true;
-                                if (get_results != NULL) {
-                                    get_results->clear();
-                                }
-                                break;
-                            }
+		    while (a->test_and_set(memory_order_acquire)) {
+			auto end = std::chrono::high_resolution_clock::now();
+			stats->lock_acq_time += end - start;
 
-                            // Prepare timing info for next iteration.
-                            start = std::chrono::high_resolution_clock::now();
-                        }
+			tries++;
+			if (tries == MAX_TRIES) {
+			    abort = true;
+			    if (get_results != NULL) {
+				get_results->clear();
+			    }
+			    break;
+			}
 
-                        auto end = std::chrono::high_resolution_clock::now();
-                        stats->lock_acq_time += end - start;
+			// Prepare timing info for next iteration.
+			start = std::chrono::high_resolution_clock::now();
+		    }
 
-                        if (abort) {
-                            break;
-                        }
-                    }
+		    auto end = std::chrono::high_resolution_clock::now();
+		    stats->lock_acq_time += end - start;
+
+		    if (abort) {
+			break;
+		    }
                 
                     keys.insert(op.key);
                 }
@@ -92,9 +80,7 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
 
             // Unlock all keys in reverse order.
             for (auto rit = keys.rbegin(); rit != keys.rend(); ++rit) {
-                TIME_CODE(stats, tableMutex.lock());
                 lockTable[*rit].clear(memory_order_release);
-                tableMutex.unlock();
             }
         }
     } 
