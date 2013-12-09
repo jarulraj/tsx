@@ -7,12 +7,13 @@
 #include "TxnManager.h"       
 #include "tsx.h"
 
-const int RTM_MAX_TRIES = 10   ;
+const int RTM_MAX_TRIES = 8    ;
 const int RTM_SUBSETS   = 128  ;
 
 class RTMTxnManager : public TxnManager {
     public:
         RTMTxnManager(std::unordered_map<long,std::string> *table , bool _dynamic, int num_keys)
+        //RTMTxnManager(HashTable *table , bool _dynamic, int num_keys)
             : TxnManager(table), dynamic(_dynamic) {
 
                 int rtm = cpu_has_rtm();
@@ -22,8 +23,8 @@ class RTMTxnManager : public TxnManager {
                     exit(-1);
                 }
 
-               //subsets = RTM_SUBSETS;
-               subsets = num_keys;
+               subsets = RTM_SUBSETS;
+               //subsets = num_keys;
 
                 // Initiliaze lock table
                 for (int i=0; i<RTM_SUBSETS; i++) {

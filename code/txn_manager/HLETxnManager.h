@@ -8,12 +8,13 @@
 #include "TxnManager.h"       
 #include "tsx.h"
 
-const int HLE_MAX_TRIES = 10 ;
-const int HLE_SUBSETS  =  8 ;
+const int HLE_MAX_TRIES = 8 ;
+const int HLE_SUBSETS  =  128 ;
 
 class HLETxnManager : public TxnManager {
     public:
         HLETxnManager(std::unordered_map<long,std::string> *table, bool _dynamic, int num_keys)
+        //HLETxnManager(HashTable *table, bool _dynamic, int num_keys)
             : TxnManager(table), dynamic(_dynamic) {
 
                 int hle = cpu_has_hle();

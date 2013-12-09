@@ -163,7 +163,6 @@ inline static uint8_t machine_try_lock_elided( volatile bool* lk )
 
 inline static void machine_try_lock_elided_cancel()
 {
-    // 'pause' instruction aborts HLE/RTM transactions
     __asm__ volatile ("pause\n" : : : "memory" );
 }
 
@@ -173,12 +172,15 @@ inline static void machine_unlock_elided( volatile bool* lk )
                       : "=m"(*lk) : "m"(*lk) : "memory" );
 }
 
-inline void TryLockElidedCancel() { machine_try_lock_elided_cancel(); }
+inline void TryLockElidedCancel() { 
+    machine_try_lock_elided_cancel(); 
+}
 
 inline bool TryLockElided( spinlock_t* flag ) {
     bool res = machine_try_lock_elided( &(flag->v) )!=0;
     // to avoid the "lemming" effect, we need to abort the transaction
-    if( !res ) TryLockElidedCancel();
+    if( !res ) 
+        TryLockElidedCancel();
     return res;
 }
 
@@ -195,7 +197,8 @@ inline void LockElided( spinlock_t* flag )
     }
 }
 
-inline void UnlockElided( spinlock_t* flag ) {
+inline void UnlockElided( spinlock_t* flag ) 
+{
     machine_unlock_elided( &(flag->v) );
 }
 
