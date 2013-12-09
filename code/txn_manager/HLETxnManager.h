@@ -8,7 +8,7 @@
 #include "TxnManager.h"       
 #include "tsx.h"
 
-const int HLE_MAX_TRIES = 8 ;
+const int HLE_MAX_TRIES = 3 ;
 const int HLE_SUBSETS  =  128 ;
 
 class HLETxnManager : public TxnManager {

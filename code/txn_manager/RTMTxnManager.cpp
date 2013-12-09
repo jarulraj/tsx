@@ -31,6 +31,16 @@ bool RTMTxnManager::RunTxn(const vector<OpDescription> &operations,
     // DYNAMIC KEY SET 
     // Deadlock detection and txn termination after undoing effects 
     else{
+        TIME_CODE(stats, rtm_mutex_acquire(&table_lock));
+
+        // Do transaction.
+        ExecuteTxnOps(operations, get_results);
+
+        rtm_mutex_release(&table_lock);
+
+        return true; 
+
+        /*
         bool abort = true;
         string result;
 
@@ -58,22 +68,22 @@ bool RTMTxnManager::RunTxn(const vector<OpDescription> &operations,
                         rtm_mutex_release(&table_lock);
 
                         int tries = 0;
-                        
+
                         while (rtm_mutex_try_acquire(a) == true && abort == false) { 
-                                tries++;
-                                if(tries == RTM_MAX_TRIES) {
-                                    abort = true;
-                                    if (get_results != NULL) {
-                                        get_results->clear();
-                                    }
-                                    break;
-                                }                        
+                            tries++;
+                            if(tries == RTM_MAX_TRIES) {
+                                abort = true;
+                                if (get_results != NULL) {
+                                    get_results->clear();
+                                }
+                                break;
+                            }                        
                         } 
 
                         if (abort) {
                             break;
                         }
- 
+
                     }
 
                     keys.insert(op.key);
@@ -112,23 +122,25 @@ bool RTMTxnManager::RunTxn(const vector<OpDescription> &operations,
                 rtm_mutex_release(&table_lock);
             }
         }
+        */
+
     } 
 
     return true;
 }
 
 /*
-bool RTMTxnManager::RunTxn(const std::vector<OpDescription> &operations,
-        std::vector<string> *get_results, ThreadStats *stats) {
+   bool RTMTxnManager::RunTxn(const std::vector<OpDescription> &operations,
+   std::vector<string> *get_results, ThreadStats *stats) {
 
-    TIME_CODE(stats, rtm_mutex_acquire(&table_lock));
+   TIME_CODE(stats, rtm_mutex_acquire(&table_lock));
 
-    // Do transaction.
-    ExecuteTxnOps(operations, get_results);
+// Do transaction.
+ExecuteTxnOps(operations, get_results);
 
-    rtm_mutex_release(&table_lock);
+rtm_mutex_release(&table_lock);
 
-    return true;
+return true;
 }
 */
 

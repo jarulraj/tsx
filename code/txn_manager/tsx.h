@@ -331,7 +331,9 @@ static ALWAYS_INLINE void rtm_spinlock_release(pthread_spinlock_t* lock)
 static ALWAYS_INLINE bool rtm_mutex_isfree(pthread_mutex_t* lock)
 {
     // use lock value itself
-    return (__sync_bool_compare_and_swap(&lock, 0, 0) ? true : false);
+    if(lock==NULL)
+        return false;
+    return (__sync_bool_compare_and_swap(&lock->__data.__lock, 0, 0) ? true : false);
 }
 
 

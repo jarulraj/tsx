@@ -23,6 +23,17 @@ bool HLETxnManager::RunTxn(const vector<OpDescription> &operations,
     // DYNAMIC KEY SET 
     // Deadlock detection and txn termination after undoing effects 
     if (dynamic) {
+        
+        TIME_CODE(stats, hle_spinlock_acquire(&table_lock));
+
+        // Do transaction.
+        ExecuteTxnOps(operations, get_results);
+
+        hle_spinlock_release(&table_lock);
+
+        return true;   
+
+        /*
         bool abort = true;
         string result;
 
@@ -46,16 +57,16 @@ bool HLETxnManager::RunTxn(const vector<OpDescription> &operations,
                         hle_spinlock_release(&table_lock);
 
                         int tries = 0;
-                        
+
                         while (!hle_spinlock_try_acquire(a) && abort == false) { 
-                                tries++;
-                                if(tries == HLE_MAX_TRIES) {
-                                    abort = true;
-                                    if (get_results != NULL) {
-                                        get_results->clear();
-                                    }
-                                    break;
-                                }                        
+                            tries++;
+                            if(tries == HLE_MAX_TRIES) {
+                                abort = true;
+                                if (get_results != NULL) {
+                                    get_results->clear();
+                                }
+                                break;
+                            }                        
                         } 
 
                         if (abort) {
@@ -96,6 +107,7 @@ bool HLETxnManager::RunTxn(const vector<OpDescription> &operations,
                 hle_spinlock_release(&table_lock);
             }
         }
+        */
     } 
     // STATIC KEY SET  
     else {
