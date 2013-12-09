@@ -65,7 +65,8 @@ def experiment(num_vals, iters):
                 for j in range(0, num_vals):
                     val = experiments[i+j]
 
-                    cmd = [ EXEC, '-d', '-s'+str(val['s']), '-t'+str(val['t']), '-o'+str(val['o']), '-k'+val['k'], '-y'+str(val['y']), '-e0', control_schemes[l]]
+                    #cmd = [ EXEC, '-d', '-s'+str(val['s']), '-t'+str(val['t']), '-o'+str(val['o']), '-k'+val['k'], '-y'+str(val['y']), '-e0', control_schemes[l]]
+                    cmd = [ EXEC, '-s'+str(val['s']), '-t'+str(val['t']), '-o'+str(val['o']), '-k'+val['k'], '-y'+str(val['y']), '-e0', control_schemes[l]]
                     #print str(cmd)
                     task =  subprocess.Popen(cmd, 
                                              stdout=subprocess.PIPE,
