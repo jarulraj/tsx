@@ -144,33 +144,116 @@ static ALWAYS_INLINE void rtm_mutex_release(pthread_mutex_t* lock);
 
 /* ---- DEFINITIONS ---- */
 
-static ALWAYS_INLINE void dyn_spinlock_init(spinlock_t* lock)
+#define OP_XACQUIRE 0xF2
+#define OP_XRELEASE 0xF3
+#define OP_LOCK     0xF0
+
+#define STRINGIZE_INTERNAL(arg) #arg
+#define STRINGIZE(arg) STRINGIZE_INTERNAL(arg)
+
+#define r_out "=r"
+
+inline static uint8_t machine_try_lock_elided( volatile bool* lk )
 {
-    lock->v = 0;
+    uint8_t value = 1;
+    __asm__ volatile (".byte " STRINGIZE(OP_XACQUIRE)"; lock; xchgb %0, %1;"
+                      : r_out(value), "=m"(*lk)  : "0"(value), "m"(*lk) : "memory" );
+    return uint8_t(value^1);
+}
+
+inline static void machine_try_lock_elided_cancel()
+{
+    // 'pause' instruction aborts HLE/RTM transactions
+    __asm__ volatile ("pause\n" : : : "memory" );
+}
+
+inline static void machine_unlock_elided( volatile bool* lk )
+{
+    __asm__ volatile (".byte " STRINGIZE(OP_XRELEASE)"; movb $0, %0"
+                      : "=m"(*lk) : "m"(*lk) : "memory" );
+}
+
+inline void TryLockElidedCancel() { machine_try_lock_elided_cancel(); }
+
+inline bool TryLockElided( spinlock_t* flag ) {
+    bool res = machine_try_lock_elided( &(flag->v) )!=0;
+    // to avoid the "lemming" effect, we need to abort the transaction
+    if( !res ) TryLockElidedCancel();
+    return res;
+}
+
+inline void LockElided( spinlock_t* flag )
+{                                               
+    for(;;) {
+        while( flag->v==true )
+            _mm_pause(); // pause
+
+        if( machine_try_lock_elided( &(flag->v) ) )
+            return;
+        // Another thread acquired the lock "for real" -  abort the transaction.
+        TryLockElidedCancel();
+    }
+}
+
+inline void UnlockElided( spinlock_t* flag ) {
+    machine_unlock_elided( &(flag->v) );
 }
 
 static ALWAYS_INLINE void hle_spinlock_acquire(spinlock_t* lock)
-{            
-    while (__atomic_exchange_n(&lock->v, true, __ATOMIC_ACQUIRE|__ATOMIC_HLE_ACQUIRE))
-    { 
-        // Wait for lock to become free again before retrying. 
-        do { 
-            _mm_pause();       
-            //__asm__ __volatile__ ("pause" ::: "memory");
-            // Abort speculation 
-        } while (__atomic_load_n(&lock->v, __ATOMIC_CONSUME)); 
-    } 
+{
+    LockElided(lock);
 }
+
+static ALWAYS_INLINE bool hle_spinlock_try_acquire(spinlock_t* lock)
+{ 
+    return TryLockElided(lock);
+}
+
+static ALWAYS_INLINE void hle_spinlock_release(spinlock_t* lock)
+{ 
+    UnlockElided( lock );
+}
+
+
+/*
+   static ALWAYS_INLINE void hle_spinlock_acquire(spinlock_t* lock)
+   {            
+   while (__atomic_exchange_n(&lock->v, true, __ATOMIC_ACQUIRE|__ATOMIC_HLE_ACQUIRE))
+   { 
+// Wait for lock to become free again before retrying. 
+do { 
+_mm_pause();       
+//__asm__ __volatile__ ("pause" ::: "memory");
+// Abort speculation 
+} while (__atomic_load_n(&lock->v, __ATOMIC_CONSUME)); 
+} 
+}
+
+static ALWAYS_INLINE bool hle_spinlock_try_acquire(spinlock_t* lock)
+{            
+while (__atomic_exchange_n(&lock->v, true, __ATOMIC_ACQUIRE|__ATOMIC_HLE_ACQUIRE))
+{ 
+// Wait for lock to become free again before retrying. 
+do { 
+_mm_pause();       
+//__asm__ __volatile__ ("pause" ::: "memory");
+// Abort speculation 
+} while (__atomic_load_n(&lock->v, __ATOMIC_CONSUME)); 
+} 
+}
+*/
 
 static ALWAYS_INLINE bool hle_spinlock_isfree(spinlock_t* lock)
 {
     return (__sync_bool_compare_and_swap(&lock->v, false, false) ? true : false);
 }
 
-static ALWAYS_INLINE void hle_spinlock_release(spinlock_t* lock)
-{
-    __atomic_clear(&lock->v, __ATOMIC_RELEASE|__ATOMIC_HLE_RELEASE);
-}
+/*
+   static ALWAYS_INLINE void hle_spinlock_release(spinlock_t* lock)
+   {
+   __atomic_clear(&lock->v, __ATOMIC_RELEASE|__ATOMIC_HLE_RELEASE);
+   }
+   */
 
 static ALWAYS_INLINE bool rtm_spinlock_isfree(pthread_spinlock_t* lock)
 {
@@ -364,10 +447,10 @@ tm_try:
         else {
             // _xbegin could have had a conflict, been aborted, etc 
             if (tm_status & _XABORT_RETRY) {
-              if(retries++ < _RTM_OPT_MAX_ABORTS)
-                  goto tm_try; // Retry 
-              else
-                  goto tm_fail;
+                if(retries++ < _RTM_OPT_MAX_ABORTS)
+                    goto tm_try; // Retry 
+                else
+                    goto tm_fail;
             }
             if (tm_status & _XABORT_EXPLICIT) {
                 if (_XABORT_CODE(tm_status) == 0xff) 
