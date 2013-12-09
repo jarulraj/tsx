@@ -45,8 +45,8 @@ int cpu_has_rtm(void) ;
 
 int cpu_has_hle(void) ;
 
-#define _RTM_MAX_TRIES          3
-#define _RTM_MAX_ABORTS         2
+#define _RTM_MAX_TRIES          10
+#define _RTM_MAX_ABORTS          3
 
 #define _RTM_OPT_MAX_TRIES      3
 #define _RTM_OPT_MAX_ABORTS     2
@@ -331,9 +331,8 @@ static ALWAYS_INLINE void rtm_spinlock_release(pthread_spinlock_t* lock)
 static ALWAYS_INLINE bool rtm_mutex_isfree(pthread_mutex_t* lock)
 {
     // use lock value itself
-    if(lock==NULL)
-        return false;
-    return (__sync_bool_compare_and_swap(&lock->__data.__lock, 0, 0) ? true : false);
+    //return (__sync_bool_compare_and_swap(&lock->__data.__lock, 0, 0) ? true : false);
+    return (__sync_bool_compare_and_swap(&lock, 0, 0) ? true : false);
 }
 
 
