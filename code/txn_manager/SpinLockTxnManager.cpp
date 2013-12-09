@@ -24,36 +24,46 @@ bool SpinLockTxnManager::RunTxn(const vector<OpDescription> &operations,
             
             for (const OpDescription &op : operations) {
                 if (keys.count(op.key) == 0) {
-                    atomic_flag *a = &lockTable[op.key];
-                    tableMutex.unlock();    // Unlock tableMutex
+                    
+                    TIME_CODE(stats, tableMutex.lock()); // Lock tableMutex
+                    
+                    if (lockTable.count(op.key) == 0) {
+                        atomic_flag *a = &lockTable[op.key];  // Inserts flag
+                        TIME_CODE(stats, a->test_and_set(memory_order_acquire));
+                        tableMutex.unlock();    // Unlock tableMutex
+                    } 
+                    else {
+                        atomic_flag *a = &lockTable[op.key];
+                        tableMutex.unlock();    // Unlock tableMutex
                         
-                    int tries = 0;
-                    auto start = std::chrono::high_resolution_clock::now();
+                        int tries = 0;
+                        auto start = std::chrono::high_resolution_clock::now();
                         
-                    while (a->test_and_set(memory_order_acquire)) {
+                        while (a->test_and_set(memory_order_acquire)) {
+                            auto end = std::chrono::high_resolution_clock::now();
+                            stats->lock_acq_time += end - start;
+
+                            tries++;
+                            if (tries == MAX_TRIES) {
+                                abort = true;
+                                if (get_results != NULL) {
+                                    get_results->clear();
+                                }
+                                break;
+                            }
+
+                            // Prepare timing info for next iteration.
+                            start = std::chrono::high_resolution_clock::now();
+                        }
+
                         auto end = std::chrono::high_resolution_clock::now();
                         stats->lock_acq_time += end - start;
 
-                        tries++;
-                        if (tries == MAX_TRIES) {
-                            abort = true;
-                            if (get_results != NULL) {
-                                get_results->clear();
-                            }
+                        if (abort) {
                             break;
                         }
-
-                        // Prepare timing info for next iteration.
-                        start = std::chrono::high_resolution_clock::now();
                     }
-
-                    auto end = std::chrono::high_resolution_clock::now();
-                    stats->lock_acq_time += end - start;
-
-                    if (abort) {
-                        break;
-                    }
-            
+                
                     keys.insert(op.key);
                 }
 
