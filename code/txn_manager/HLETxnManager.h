@@ -13,8 +13,8 @@ const int HLE_SUBSETS  =  128 ;
 
 class HLETxnManager : public TxnManager {
     public:
-        HLETxnManager(std::unordered_map<long,std::string> *table, bool _dynamic, int num_keys)
-        //HLETxnManager(HashTable *table, bool _dynamic, int num_keys)
+        //HLETxnManager(std::unordered_map<long,std::string> *table, bool _dynamic, int num_keys)
+        HLETxnManager(HashTable *table, bool _dynamic, int num_keys)
             : TxnManager(table), dynamic(_dynamic) {
 
                 int hle = cpu_has_hle();

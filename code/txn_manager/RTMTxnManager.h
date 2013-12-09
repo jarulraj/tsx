@@ -12,8 +12,8 @@ const int RTM_SUBSETS   = 128  ;
 
 class RTMTxnManager : public TxnManager {
     public:
-        RTMTxnManager(std::unordered_map<long,std::string> *table , bool _dynamic, int num_keys)
-        //RTMTxnManager(HashTable *table , bool _dynamic, int num_keys)
+        //RTMTxnManager(std::unordered_map<long,std::string> *table , bool _dynamic, int num_keys)
+        RTMTxnManager(HashTable *table , bool _dynamic, int num_keys)
             : TxnManager(table), dynamic(_dynamic) {
 
                 int rtm = cpu_has_rtm();

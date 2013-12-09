@@ -22,7 +22,8 @@ struct Lock {
 
 class LockTableRWTxnManager : public TxnManager {
 public:
-     LockTableRWTxnManager(std::unordered_map<long,std::string> *table,
+     //LockTableRWTxnManager(std::unordered_map<long,std::string> *table,
+     LockTableRWTxnManager(HashTable *table,
 			 bool _dynamic, int num_keys)
        : TxnManager(table),
   	 dynamic(_dynamic){

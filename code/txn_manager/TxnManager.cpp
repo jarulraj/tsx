@@ -27,6 +27,7 @@ bool TxnManager::ExecuteTxnOps(const vector<OpDescription> &operations,
 }
 
 // UNORDERED MAP
+/*
 void TxnManager::ExecuteTxnOp(const OpDescription &op, string *result) {
     if (op.type == INSERT) {
         if (result) {
@@ -52,33 +53,34 @@ void TxnManager::ExecuteTxnOp(const OpDescription &op, string *result) {
         table_->erase(op.key);
     }
 }
+*/
 
 // CUSTOM HASHTABLE
-/*
-   void TxnManager::ExecuteTxnOp(const OpDescription &op, string *result) {
-   if (op.type == INSERT) {
-   if (result) {
-   table_->Get(op.key, result);
-   }
 
-   table_->Insert(op.key, op.value);
-   }
-   else if (op.type == GET) {
-   string get_result;
-   table_->Get(op.key, &get_result);
-   if (result) {
- *result = get_result;
- }
- }
- else { // op.type == DELETE
- if (result) {
- table_->Get(op.key, result);
- }
+void TxnManager::ExecuteTxnOp(const OpDescription &op, string *result) {
+    if (op.type == INSERT) {
+        if (result) {
+            table_->Get(op.key, result);
+        }
 
- table_->Delete(op.key);
- }
- }
- */
+        table_->Insert(op.key, op.value);
+    }
+    else if (op.type == GET) {
+        string get_result;
+        table_->Get(op.key, &get_result);
+        if (result) {
+            *result = get_result;
+        }
+    }
+    else { // op.type == DELETE
+        if (result) {
+            table_->Get(op.key, result);
+        }
+
+        table_->Delete(op.key);
+    }
+}
+
 
 void TxnManager::printStats(){
     cout<<"TxnManager Stats"<<endl;

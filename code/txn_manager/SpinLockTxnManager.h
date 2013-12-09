@@ -11,7 +11,8 @@
  
 class SpinLockTxnManager : public TxnManager {
     public:
-        SpinLockTxnManager(std::unordered_map<long,std::string> *table,
+        //SpinLockTxnManager(std::unordered_map<long,std::string> *table,
+        SpinLockTxnManager(HashTable *table,
                 bool _dynamic, int num_keys)
             : TxnManager(table), dynamic(_dynamic) {
                 for (int i=0; i<num_keys; i++) {

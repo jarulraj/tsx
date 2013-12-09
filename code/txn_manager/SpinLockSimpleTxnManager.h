@@ -9,7 +9,8 @@
  
 class SpinLockSimpleTxnManager : public TxnManager {
 public:
-    SpinLockSimpleTxnManager(std::unordered_map<long,std::string> *table) :
+    //SpinLockSimpleTxnManager(std::unordered_map<long,std::string> *table) :
+    SpinLockSimpleTxnManager(HashTable *table) :
             TxnManager(table) {
         pthread_spin_init(&table_lock, PTHREAD_PROCESS_PRIVATE);
     }

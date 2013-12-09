@@ -12,7 +12,8 @@ const int RTM_OPT_SUBSETS   = 128  ;
 
 class RTMOptimisticTxnManager : public TxnManager {
     public:
-        RTMOptimisticTxnManager(std::unordered_map<long,std::string> *table , bool _dynamic, int num_keys)
+        //RTMOptimisticTxnManager(std::unordered_map<long,std::string> *table , bool _dynamic, int num_keys)
+        RTMOptimisticTxnManager(HashTable* table , bool _dynamic, int num_keys)
             : TxnManager(table), dynamic(_dynamic) {
 
                 int rtm = cpu_has_rtm();

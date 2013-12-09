@@ -41,10 +41,10 @@ struct ThreadStats;
 class TxnManager {
 public:
     // CUSTOM HASHTABLE
-    //TxnManager(HashTable *table) : table_(table) {}
+    TxnManager(HashTable *table) : table_(table) {}
 
     // UNORDERED MAP
-    TxnManager(std::unordered_map<long,std::string> *table) : table_(table) {}
+    //TxnManager(std::unordered_map<long,std::string> *table) : table_(table) {}
 
     virtual ~TxnManager() {
         delete table_;
@@ -71,10 +71,10 @@ protected:
 
 private:
     // UNORDERED MAP
-    std::unordered_map<long, std::string> *table_;
+    //std::unordered_map<long, std::string> *table_;
 
     // CUSTOM HASHTABLE
-    //HashTable *table_;
+    HashTable *table_;
 };
 
 #endif /* _TXN_MANAGER_H_ */

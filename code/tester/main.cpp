@@ -92,9 +92,9 @@ int main(int argc, const char* argv[]) {
 
     // Initialize hashtable
     // Custom HashTable
-    //HashTable table(static_cast<ht_flags>(HT_KEY_CONST | HT_VALUE_CONST), 0.05);
+    HashTable table(static_cast<ht_flags>(HT_KEY_CONST | HT_VALUE_CONST), 0.05);
     // std::unordered_map 
-    unordered_map<long, string> table;
+    //unordered_map<long, string> table;
 
 
     TxnManager *manager;
@@ -130,11 +130,11 @@ int main(int argc, const char* argv[]) {
         string istr = std::to_string(i) ;
         
         // Unordered map
-        std::pair<long,std::string> entry (i,istr);
-        table.insert(entry);
+        //std::pair<long,std::string> entry (i,istr);
+        //table.insert(entry);
         
         // Custom Hashtable
-	    //table.Insert(i, istr);
+	    table.Insert(i, istr);
     }
 
     //for (auto& x: table)
