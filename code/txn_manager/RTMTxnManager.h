@@ -7,7 +7,7 @@
 #include "TxnManager.h"       
 #include "tsx.h"
 
-const int RTM_MAX_TRIES = 8    ;
+const int RTM_MAX_TRIES = 2    ;
 const int RTM_SUBSETS   = 128  ;
 
 class RTMTxnManager : public TxnManager {

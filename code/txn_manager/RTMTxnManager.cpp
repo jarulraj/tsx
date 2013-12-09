@@ -57,12 +57,28 @@ bool RTMTxnManager::RunTxn(const vector<OpDescription> &operations,
                         pthread_mutex_t* a = &lockTable[modkey];
                         rtm_mutex_release(&table_lock);
 
-                        if(rtm_mutex_try_acquire(a) == false)
+                        int tries = 0;
+                        
+                        while (rtm_mutex_try_acquire(a) == true && abort == false) { 
+                                tries++;
+                                if(tries == RTM_MAX_TRIES) {
+                                    abort = true;
+                                    if (get_results != NULL) {
+                                        get_results->clear();
+                                    }
+                                    break;
+                                }                        
+                        } 
+
+                        if (abort) {
                             break;
+                        }
+ 
                     }
 
                     keys.insert(op.key);
                 }
+
 
                 // Run this op.
                 ExecuteTxnOp(op, &result);
