@@ -65,14 +65,14 @@ def experiment(num_vals, iters):
                 for j in range(0, num_vals):
                     val = experiments[i+j]
 
-                    cmd = [ EXEC, '-d', '-s'+str(val['s']), '-t'+str(val['t']), '-o'+str(val['o']), '-k'+val['k'], '-y'+str(val['y']), '-e0', control_schemes[l]]
-                    print str(cmd)
+                    cmd = [ EXEC, '-s'+str(val['s']), '-t'+str(val['t']), '-o'+str(val['o']), '-k'+val['k'], '-y'+str(val['y']), '-e0', control_schemes[l]]
+                    #print str(cmd)
                     task =  subprocess.Popen(cmd, 
                                              stdout=subprocess.PIPE,
                                              stderr=subprocess.PIPE
                                              )
                     (out, err) = task.communicate()
-                    print out
+                    #print out
                     output[l][j] += (int(out) * int(val['o']) / int(val['s'])) / iters
         for i in range (0, len(control_schemes)):
             print("%s" % control_schemes[i]),
