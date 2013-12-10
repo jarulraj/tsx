@@ -1,1 +1,233 @@
-\section{Evaluation Plan} \label{sec:eval}
+\section{Evaluation} \label{sec:eval}
+
+In order to demonstrate the differences in performance between the various 
+concurrency control schemes that we implemented, we ran a number of tests 
+that varied different parameters and recorded the results.
+
+Possible parameters that we could very include: the distribution of keys 
+accessed, number of workload threads, number of operations per transaction, 
+number of distinct keys accessed per transaction, length of values being 
+stored, ratio of reads to writes, whether the read/write sets are static 
+or dynamic, the total number of keys present in the hashtable, and the number 
+of aborts to allow before reverting to the fallback path in the hardware 
+based schemes.
+
+Because trying every possible combination of these parameters would result in 
+an overwhelming amount of data, we keep a few of them constant throughout the 
+tests: all tests use a Zipfian distribution for key accesses, which we beileve 
+is representative of many real world workloads, all values are strings of length 
+4, the ratio of reads to writes is 1:1, the hashtable contains 16384 keys, which 
+we estimated to be appropriate for the cache size of the machine we were running 
+the experiments on, and the maximum allowed retries after 
+abort is tuned to what we found to be the optimal value on a per scheme basis.
+
+All tests were performed on the Haswell box with support for hardware 
+transactional memory which we were given access to. All data reflects an 
+average over three runs, and performance is measured in millions of hashtable 
+operations per second. For the sake of simplicity, we populate the hashtable 
+with values prior to running the experiments, and allow only read and update 
+opreations duing transactions.
+
+\subsection{Varying Contention}
+
+One of the most important differences between the schemes that we compared is 
+their performance in the face of varying levels of contention. In order to 
+measure this, we implemented a distinction between the 'size' of a transaction, 
+meaning the amount of work each transaction does, which is determined by the 
+number of hashtable operations each transaction performs,  and the level of 
+potential contention each transaction could introduce to the system, which is 
+determined by the number of distinct keys that each tranaction acts on. This 
+allows us to observe the effect of increasing contention in the presence of 
+large or small transactions.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.4\textwidth]{figure/small_txns.png}
+  \caption{Effect on different schemes of varying contention, using small txns.}
+  \label{fig:small_txns} 
+\end{figure}
+
+The results of varying contention when using small transaction sizes is 
+displayed in \Cref{fig:small_txns}. For this experiment, we used transactions 
+that performed eight operations on the hashtable, while varying the number of 
+distinct keys that each transaction touches from one to eight. The data 
+reflects four running threads, which we found to be the sweet spot for 
+generating a large enough workload to saturate the CPU without overwhelming it, 
+except for the baseline which is run single threaded and without any 
+concurrency control.
+
+As the graph shows, the baseline implementation is relatively unaffected by the 
+increase in contention, due to the fact that it is single threaded and never has 
+to stop transactions to wait for another to complete. The slight drop in 
+performance is due to the increased amount of time that it takes to generate 
+transactions with a large number of keys.
+
+The simple spin lock implementation is similarly unaffected by increased 
+contention, due to the fact that it grabs a single lock for the entire table 
+for each transaction regardless of the keys in the transaction. This scheme 
+achieves a higher throughput than the baseline implementation, and is also less 
+affected by increases in contention, due to the fact that per transaction 
+overheads, such as the generation of the keys each transaction will touch, 
+are not performed in the lock's critical section, allowing for a very small 
+degree of parallelism that the baseline implementation does not have.
+
+The worst performace is achieved by the simple RTM scheme, which aborts 
+essentially every transaction due its niave use of hardware transactional memory. 
+As a result, it falls back to using a single lock to protect the entire table on 
+every transaction, leading to a performance that, like the simple spin lock, 
+doesn't degrade with increased contention, but it significantly lower due to 
+time spent aborting and retrying transactions.
+
+All of the other schemes are fine-grained in order to increase concurrency, 
+and as a result their performance degrades as contention is increased. As 
+shown, the hardware schemes do not perform any better than the sortware 
+schemes.
+
+We believe that this is because there are two different effects at 
+work - on the one hand, when locks are elided and a transaction is able to 
+complete successfully without interference, the hardware transactional memory 
+schemes are faster than the software schemes, which never elide the locks. 
+However, when locks are elided but there is a conflict causing an abort, 
+the hardware based methods are slower than the software methods.
+
+These factors roughly cancel each other out when the maximum number of aborts 
+before taking the fallback path of locking the entire table is configured 
+optimally for the hardware schemes. This also accounts for the greater drop in 
+performance of the hardware based schemes as conention increases, since greater 
+contention leads to more aborts.
+
+A final takeaway from this graph is that the performance of fine-grained spin 
+locks is better than that of the fine-grained lock table under high contention, 
+due to the fact that spin locks impose less overhead, such as not forcing the 
+many context switches that a lock table causes when sleeping and waking theads 
+whenever a conflict occurs.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.4\textwidth]{figure/large_txns.png}
+  \caption{Effect on different schemes of varying contention, using large txns.}
+  \label{fig:large_txns} 
+\end{figure}
+
+We additionally wanted to measure the effects of increased contention while 
+using a large transaction size. The results of this experiment are reflected 
+in \Cref{fig:large_txns}.
+
+For this experiment, we used transactions that performed 64 hashtable operations, 
+and varied the number of distinct keys in each transaction from 2 to 32. As with 
+the small transactions, results reflect running with four threads, except for 
+the baseline which uses one thread.
+
+As expected, the shape of the performace of the different schemes follows the 
+same pattern as for the small transactions experiment. The peak throughput here 
+is somewhat higher than for small transactions, over 2.6 million versus about 
+2.5 million for small transactions.
+
+This is because each transaction performs more work, and therefore there is less 
+of a slowdown from per transaction overheads such as passing the transaction to 
+the transaction manager. Despite the significant increase in transaction size, 
+this effect is small because most of the per transaction overhead, such as 
+generating keys for the transaction, increases with an increased number of 
+operations.
+
+It is also notable that the performance of the fine-grained schemes degrades 
+much more dramatically here than in the small transactions experiment. This is 
+partially due to a much longer per transaction critical section, for example resulting in 
+more aborts for the hardware based schemes.
+
+This also results from the fact that this experiment achieves much higher 
+contention than the small transactions example. Since our hashtable contains $2^{14}$ 
+keys, there are up to four transactions attempting to run simultaneously, and we're using 
+a Zipfian distribution which produces a large number of accesses to a small number of 'hot' 
+keys, in the case where each transaction touches 32 distinct keys, the probability of a 
+conflict between two tranactions is extremely high.
+
+In fact, as the graph demonstrates, when the contention becomes high enough it 
+is actually more efficient to use the simple spin lock implementation than one of 
+the more sophisticated schemes, due to the fact that fine-grained locking adds a lot 
+of overhead, and in the case of very high contention adds little to the potential 
+concurrency of the system.
+
+\subsection{Varying Threads}
+
+Another effect that we wished to study is the performance of the different schemes 
+under workloads of different sizes, where we determined the size of the workload 
+by varying the number of threads concurrently accessing the hash table.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.4\textwidth]{figure/threads.png}
+  \caption{Effect on different schemes of varying the number of threads.}
+  \label{fig:threads} 
+\end{figure}
+
+The results of this experiment as shown in \Cref{fig:threads}, where we varied the number 
+of threads from 2 to 8. For this experiment, we used large transactions with 64 
+operations each and a medium level of contention, with each transaction working on 
+8 distinct keys.
+
+As expected, most of the schemes follow the pattern of initially increasing performace, 
+peaking at around four threads, and then declining with increasing threads. This is 
+because a very small number of threads does not take advantage of all of the potential 
+parallelism, resulting in lower throughput, whereas a very large number of threads 
+results in too much contention and degrades performance as a result.
+
+Additionally, where the fine-grained spin lock implementation performed better than 
+the lock table implementation for increasing contention between a given sized 
+workload, increasing the workload size gives the opposite result. This results from 
+contention for CPU resources, where spin lock suffers because it uses a lot of CPU 
+whereas the lock table ust sleeps threads while they're waiting on a lock to become 
+free, allowing the lock table to handle a high number of threads more gracefully.
+
+It ia also notable that RTM's performance is similar to that of the lock table's, 
+whereas HLE's performance more closely matches that of the fine-grained spin locks. 
+This is because the fallback path for HLE is to grab a table wide spin lock, whereas 
+the fallback path for RTM is customizable and we configured it to use a table wide 
+mutex, similar to the lock table.
+
+The other schemes do not follow this same pattern of increasing then decreasing 
+performance. In particular, the simple spin lock scheme does not have any increase 
+in performace, due to the fact that it only allows a single transaction to be 
+executing at a time, regardless of the number of threads. The baseline is a 
+perfectly horizontal line on this chart as it always uses one thread.
+
+\subsection{Dynamic Read/Write Sets}
+
+The final experiment that we ran was to measure the effects of using dynamic 
+read/write sets on the different concurrency control methods. This is 
+significant because it leads to the possibility of deadlock, which we avoided 
+in the previous experiment by enforcing an ordering in which the locks much 
+be grabbed by the fine-grained schemes.
+
+For this experiment, we reused the parameters from the second experiment - 
+large transactions of 64 operations, 4 running threads, and varying 
+contention by increasing the number of distinct keys for each transaction 
+from 2 to 32.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.4\textwidth]{figure/dynamic.png}
+  \caption{Effect of dynamic read/write sets.}
+  \label{fig:dynamic} 
+\end{figure}
+
+As \Cref{fig:dynamic} reflects, using dynamic read/write sets has a dramatic 
+impact on the performance of the software-based schemes, resulting from the 
+possibility of deadlocks. We deal with deadlocks by timing out transactions 
+that have been waiting on a lock too long and aborting them. As contention 
+increases, the effect becomes very dramatic, dropping the throughput by over 
+a factor of 2.
+
+By contrast, the performance of the hardware based schemes is unaffected by 
+the dynamic read/write sets. This is because the only time these schemes 
+actually grab a lock is in the fallback path, in which case there is only a 
+single lock for the entire table and therefore no possibility of deadlock.
+
+Admittedly, our deadlock prevention method is rather simple, and a more 
+sophisticated approach could offer better performance. However, implementing 
+an algorithm such as deadlock detection through dependency graphs is difficult 
+and complicated, and the hardware based schemes are able to give good 
+performance in the face of dynamic read/write sets while still having 
+simple code.
+
+
