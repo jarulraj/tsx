@@ -1,32 +1,39 @@
-\section{Evaluation} \label{sec:eval}
+\section{Performance Evaluation} \label{sec:eval}
+We first present the experimental setup we used to evaluate both software- and hardware-based concurrency control schemes. We then present the experiments themselves and their results.
 
-In order to demonstrate the differences in performance between the various 
-concurrency control schemes that we implemented, we ran a number of tests 
-that varied different parameters and recorded the results.
+\subsection{Experimental Setup}
+(Insert description of the test framework program basic architecture,
+particularly the fact that it was single-process with multiple threads, so no
+IPC overhead.)
 
-Possible parameters that we could very include: the distribution of keys 
-accessed, number of workload threads, number of operations per transaction, 
-number of distinct keys accessed per transaction, length of values being 
-stored, ratio of reads to writes, whether the read/write sets are static 
-or dynamic, the total number of keys present in the hashtable, and the number 
-of aborts to allow before reverting to the fallback path in the hardware 
-based schemes.
+All tests were performed on a recent Haswell box with support for hardware
+transactional memory. All data reflects an average over three runs, and
+performance is measured in millions of hashtable operations per second. For the
+sake of simplicity, we populate the hashtable with values prior to running the
+experiments, and allow only read and update operations during transactions.
+
+Possible parameters that we could have varied included: the distribution of keys
+accessed, number of workload threads, number of operations per transaction,
+number of distinct keys accessed per transaction, length of values being stored,
+ratio of reads to writes, whether the read/write sets are static or dynamic, the
+total number of keys present in the hashtable, and the number of aborts to allow
+before reverting to the fallback path in the hardware based schemes.
 
 Because trying every possible combination of these parameters would result in 
-an overwhelming amount of data, we keep a few of them constant throughout the 
-tests: all tests use a Zipfian distribution for key accesses, which we beileve 
-is representative of many real world workloads, all values are strings of length 
-4, the ratio of reads to writes is 1:1, the hashtable contains 16384 keys, which 
-we estimated to be appropriate for the cache size of the machine we were running 
-the experiments on, and the maximum allowed retries after 
-abort is tuned to what we found to be the optimal value on a per scheme basis.
-
-All tests were performed on the Haswell box with support for hardware 
-transactional memory which we were given access to. All data reflects an 
-average over three runs, and performance is measured in millions of hashtable 
-operations per second. For the sake of simplicity, we populate the hashtable 
-with values prior to running the experiments, and allow only read and update 
-opreations duing transactions.
+an overwhelming amount of data, we kept several of them constant throughout the 
+tests:
+\begin{itemize}
+\item All tests use a Zipfian distribution for key accesses, which we believe is
+  representative of many real world-workloads.
+\item All values are random strings of length 4.
+\item The ratio of reads to writes is 1:1. (This is not fully representative of
+  real workloads, but this parameter was found to have little impact on
+  performance numbers).
+\item The hashtable contains 16384 keys, which we estimated to be appropriate
+  for the cache size of the machine we were running the experiments on.
+\item The maximum allowed retries after abort is tuned to what we found to be
+  the optimal value on a per-scheme basis.
+\end{itemize}
 
 \subsection{Varying Contention}
 
@@ -43,33 +50,33 @@ large or small transactions.
 \begin{figure}[h!]
   \centering
   \includegraphics[width=0.4\textwidth]{figure/small_txns.png}
-  \caption{Effect on different schemes of varying contention, using small txns.}
+  \caption{Effect on different schemes of varying contention, using small
+    transactions.}
   \label{fig:small_txns} 
 \end{figure}
 
-The results of varying contention when using small transaction sizes is 
-displayed in \Cref{fig:small_txns}. For this experiment, we used transactions 
-that performed eight operations on the hashtable, while varying the number of 
-distinct keys that each transaction touches from one to eight. The data 
-reflects four running threads, which we found to be the sweet spot for 
-generating a large enough workload to saturate the CPU without overwhelming it, 
-except for the baseline which is run single threaded and without any 
-concurrency control.
+The results of varying contention when using small transaction sizes is
+displayed in \Cref{fig:small_txns}. For this experiment, we used transactions
+that performed eight operations on the hashtable, while varying the number of
+distinct keys that each transaction touches from one to eight. The data reflects
+four running threads, which we found to be the sweet spot for generating a large
+enough workload to saturate the CPU without overwhelming it, except for the
+baseline which is run single threaded and without any concurrency control.
 
-As the graph shows, the baseline implementation is relatively unaffected by the 
-increase in contention, due to the fact that it is single threaded and never has 
-to stop transactions to wait for another to complete. The slight drop in 
-performance is due to the increased amount of time that it takes to generate 
+As the graph shows, the baseline implementation is relatively unaffected by the
+increase in contention, due to the fact that it is single threaded and never has
+to stop transactions to wait for another to complete. The slight drop in
+performance is due to the increased amount of time that it takes to generate
 transactions with a large number of keys.
 
-The simple spin lock implementation is similarly unaffected by increased 
-contention, due to the fact that it grabs a single lock for the entire table 
-for each transaction regardless of the keys in the transaction. This scheme 
-achieves a higher throughput than the baseline implementation, and is also less 
-affected by increases in contention, due to the fact that per transaction 
-overheads, such as the generation of the keys each transaction will touch, 
-are not performed in the lock's critical section, allowing for a very small 
-degree of parallelism that the baseline implementation does not have.
+The simple spin lock implementation is similarly unaffected by increased
+contention, due to the fact that it grabs a single lock for the entire table for
+each transaction regardless of the keys in the transaction. This scheme achieves
+a higher throughput than the baseline implementation, and is also less affected
+by increases in contention, due to the fact that per transaction overheads, such
+as the generation of the keys each transaction will touch, are not performed in
+the lock's critical section, allowing for a very small degree of parallelism
+that the baseline implementation does not have.
 
 The worst performace is achieved by the simple RTM scheme, which aborts 
 essentially every transaction due its niave use of hardware transactional memory. 

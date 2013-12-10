@@ -49,13 +49,18 @@ Extensions (TSX). TSX supports two interfaces \citep{tsx-intro}: \\
   the programmer to specify the fallback path for transaction failures. \\
 \end{itemize}
 
-In this paper, we contribute a study of the effects of the Haswell HTM
-implementation (RTM, specifically) on synchronous access to in-memory data
+In this paper, we contribute a study of the effects of these Haswell HTM
+implementations on synchronous access to in-memory data
 structures. Specifically, we focus on \textit{multi-key transactions} on a
 \textit{key-value store}, comparing the performance of an HTM concurrency
-control with pessimistic alternatives. In \Cref{sec:tm}, we describe the problem
-of synchronizing multi-key transactions on a key-value store using hardware TM
-support, and related work to date on this problem. We then present the
-traditional pessimistic concurrency control protocols we use for comparison in
-\Cref{sec:pessimistic}. We define the goals of this project, our progress so
-far, and our plan to accomplish the remaining workload in \Cref{sec:plan}. Finally, we sketch our evaluation plan \Cref{sec:eval}.
+control with pessimistic alternatives. We also study the performance of HTM in
+the case of \textit{dynamic read/write sets}, which historically lead to much
+worse performance in pessimistic schemes.
+
+In \Cref{sec:tm}, we describe the problem of synchronizing multi-key
+transactions on a key-value store using hardware TM support, and related work to
+date on this problem. We then present the traditional pessimistic concurrency
+control protocols we use for comparison in \Cref{sec:pessimistic}. In
+\Cref{sec:eval}, we describe the test framework we used, the tests we performed,
+and the results we obtained. Finally, we summarize the conclusions we drew from
+our results in \Cref{sec:conclusion}.
