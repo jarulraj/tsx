@@ -204,8 +204,8 @@ handle a high number of threads more gracefully.
 
 It is also noteworthy that RTM's performance is similar to that of the lock
 table's, whereas HLE's performance more closely matches that of the fine-grained
-spin locks.  This is because the fallback path for HLE is to grab a table-wide
-spin lock, whereas the fallback path for RTM was configured to use a table-wide
+spin locks.  This is because the fallback path for HLE is to grab a 
+spin lock, whereas the fallback path for RTM was configured to use a 
 mutex, like the locks in the lock table.
 
 The other schemes do not follow this same pattern of increasing then decreasing

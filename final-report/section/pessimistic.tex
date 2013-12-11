@@ -12,7 +12,7 @@ to records in the key-value store by granting locks to requesting transactions.
 In our implementation, each key-value pair has its own lock. (Some lock managers
 maintain coarser-grained locks, protecting groups of keys, to decrease locking
 overhead; we did not use this optimization in this project.)
-The lock manager consists of a lock table hashed on keys. Each lock record
+The \textit{lock manager} consists of a lock table hashed on keys. Each lock record
 includes a list of transactions waiting to acquire the lock. A transaction may
 only access a given key-value pair once it has requested and been granted the
 appropriate lock, which prevents conflicting concurrent operations.
@@ -23,7 +23,7 @@ the lock releases it, the lock manager grants the lock to the transaction at the
 head of the waiting queue for that lock.
 
 We experimented with both simple mutex locks, in which every lock is either free
-or locked, and read/write locks, in which each lock has a ``mode'' (read, write,
+or locked, and \textit{read/write locks}, in which each lock has a ``mode'' (read, write,
 or free), and multiple readers may hold the lock simultaneously in ``read''
 mode. We found that read/write locks imposed enormous overhead and were not
 competitive with any other concurrency control schemes, so we omitted them from
@@ -44,7 +44,7 @@ repeatedly attempts to grab the lock until it succeeds.
 
 We implemented two different spin lock-based schemes. In one version, there is a
 single spin lock for the entire table, serializing all transactions. We call
-this the ``simple spin lock'' implementation. The second implementation uses
+this the \textit{simple spin lock} manager. The more sophisticated \textit{spin lock manager} uses
 fine-grained locks, much like the lock manager scheme: each key is protected by
 a single spin lock. In this scheme, deadlock prevention is implemented exactly
 as in the lock table scheme.

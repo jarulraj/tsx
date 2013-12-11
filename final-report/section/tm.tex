@@ -56,11 +56,30 @@ interfaces \citep{tsx-intro}: \\
   is shown in \Cref{fig:rtm}.\\
 \end{itemize}
 
-We evaluated both interfaces in this project.
-
 \lstset{basicstyle=\ttfamily\fontsize{9}{10}\selectfont,
 morekeywords={if,else,end}, numbers=left} \begin{figure}
     \parbox[t]{0.45\textwidth}{\lstinputlisting{figure/rtm.c}} \caption{Group
         sum operation using RTM interface. A mutex is obtained in fallback path
 to avoid data race with the normal transaction execution path.} \label{fig:rtm}
 \end{figure}
+
+We evaluated both interfaces in this project. We implemented two different 
+RTM schemes and one HLE scheme.
+The \textit{simple RTM manager} nests the entire transaction execution within the RTM
+instructions \texttt{XBEGIN} and \texttt{XEND} and grabs a mutex in the fallback path.
+The more sophisticated \textit{RTM manager} only protects accesses to the lock table 
+using the RTM instructions and the transaction execution itself is not in the critical 
+path. We designed this scheme to perform well especially for large multi-key 
+transactions.  
+The \textit{HLE manager} is, by design, similar to the sophisticated RTM manager, except 
+that it's fallback path involves execution of instructions while ignoring 
+the \texttt{XACQUIRE} and \texttt{XRELEASE} prefixes.
+
+When the read/write sets are static (known a priori), we prevent deadlocks in our
+fine-grained schemes by enforcing an ordering in which a transaction may request 
+locks. For dynamic read/write sets, we observed that using a simple coarse-grained 
+lock delivered performance comparable to a more sophisticated fine-grained 
+locking scheme with deadlock detection. We therefore use a coarse-grained locking
+scheme in all the hardware-based concurrency control managers for handling
+dynamic read/write sets effectively. This is a significant engineering benefit that 
+we believe exemplifies the benefits of using HTM.  \\
