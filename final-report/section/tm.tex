@@ -72,7 +72,7 @@ using the RTM instructions \citep{tsx-guide} and the transaction execution itsel
 path. We designed this scheme to perform well especially for large multi-key 
 transactions.  
 The \textit{HLE manager} is, by design, similar to the sophisticated RTM manager, except 
-that it's fallback path involves execution of instructions while ignoring 
+that its fallback path involves execution of instructions while ignoring 
 the \texttt{XACQUIRE} and \texttt{XRELEASE} prefixes.
 
 When the read/write sets are static (known a priori), we prevent deadlocks in our
