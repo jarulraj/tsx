@@ -1,5 +1,26 @@
 \section{Introduction} \label{sec:intro}
 
+
+Concurrent programming is challenging due to larger state space and our natural  
+sequential perspective. Hardware transactional memory (HTM) can  
+simplify concurrent programming by supporting memory transactions \citep{tm}. 
+To better understand the practical benefits of HTM, we implemented a main-memory 
+key-value store that supports multi-key transactions by leveraging the 
+primitives provided by HTM. 
+
+We motivate the problem addressed by this project along with related work in
+\Cref{sec:related}.
+In \Cref{sec:problem}, we describe the problem of synchronizing multi-key
+transactions on a key-value store. In \Cref{sec:tm}, we outline the operation of
+HTM, its use in transaction management, and related work to date on TM and HTM
+performance. We then present the traditional pessimistic concurrency control
+protocols, against which we compare HTM, in \Cref{sec:pessimistic} . In
+\Cref{sec:eval}, we describe the test framework we used, the tests we performed,
+and the results we obtained. Finally, we summarize the conclusions we draw from
+our results in \Cref{sec:conclusion}.
+
+\section{Motivation and Related Work} \label{sec:related}
+
 Most conventional concurrency techniques are pessimistic -- they rely on some
 form of mutual exclusion to ensure isolation between concurrent
 transactions. Using locks, however, can impose significant overhead. Under some
@@ -46,11 +67,3 @@ HTM-based concurrency control with pessimistic alternatives. We also study the
 performance of HTM while handling \textit{dynamic read/write sets}, which
 generally leads to liveness problems in pessimistic schemes.
 
-In \Cref{sec:problem}, we describe the problem of synchronizing multi-key
-transactions on a key-value store. In \Cref{sec:tm}, we outline the operation of
-HTM, its use in transaction management, and related work to date on TM and HTM
-performance. We then present the traditional pessimistic concurrency control
-protocols, against which we compare HTM, in \Cref{sec:pessimistic} . In
-\Cref{sec:eval}, we describe the test framework we used, the tests we performed,
-and the results we obtained. Finally, we summarize the conclusions we draw from
-our results in \Cref{sec:conclusion}.
