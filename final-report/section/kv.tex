@@ -1,0 +1,36 @@
+\section{Key-Value Stores as a Concurrency Control Testbed} \label{sec:problem}
+
+In our tests, we wished to explore the performance effects of HTM in a simple
+environment, with relatively few confounding factors that could impact
+experimental results. We therefore chose to implement concurrency control (CC)
+for an \textit{in-memory key-value store}.
+
+A key-value store presents an associative data access interface: it maps a set
+of keys $K$ to a set of values $V$, where the keys and values can be arbitrary
+objects. The keys are generally prehashed to obtain an uniform distribution. The
+values can be stored separately, with fixed-length pointers representing them in
+the key-value store implementation. The primary operations provided by a
+key-value store's interface are \textsc{GET}(key), \textsc{PUT}(key,value), and
+\textsc{DELETE}(key).
+
+Despite their simplicity, in-memory key-value stores present many of the same CC
+challenges as more complex database systems. Readers can conflict with writers
+writing the same key, and writers can conflict with other writers. Thus, some CC
+mechanism is required to provide isolation between conflicting
+accesses. Furthermore, clients of a key-value store often perform operations on
+multiple keys in a single transaction (a \textit{multi-key
+  transaction}). Clients generally require that such a transaction appear atomic
+and isolated: it must commit all changes or none, and it should not see effects
+from other incomplete transactions. Providing such synchronization for multi-key
+transactions is the focus of this project.
+
+There are several possible levels of isolation a CC mechanism could provide. At
+a minimum, most datastore clients require \textit{read committed} isolation --
+all values read have been committed by some transaction. Multi-key transactions
+also raise the possibility that a transaction could read a value and write
+another value based on it, unaware that the value has been updated in the
+interim. Many datastore systems therefore also guarantee \textit{repeatable
+  reads} -- if a value were to be read multiple times within a transaction, the
+same value would be read each time. Because it is so frequently required and
+raises additional CC challenges, this is the level of isolation we implemented
+in each of the CC schemes we tested.
