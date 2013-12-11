@@ -1,13 +1,13 @@
 \section{Key-Value Stores as a Concurrency Control Testbed} \label{sec:problem}
 
-In our tests, we wished to explore the performance effects of HTM in a simple
+In our tests, we wanted to explore the performance effects of HTM in a simple
 environment, with relatively few confounding factors that could impact
 experimental results. We therefore chose to implement concurrency control for an
 \textit{in-memory key-value store}.
 
 A key-value store presents an associative data access interface: it maps a set
 of keys $K$ to a set of values $V$, where the keys and values can be arbitrary
-objects. The keys are generally prehashed to obtain an uniform distribution. The
+objects. The keys are generally pre-hashed to obtain an uniform distribution. The
 values can be stored separately, with fixed-length pointers representing them in
 the key-value store implementation. The primary operations provided by a
 key-value store's interface are \textsc{GET}(key), \textsc{PUT}(key,value), and
@@ -16,11 +16,11 @@ key-value store's interface are \textsc{GET}(key), \textsc{PUT}(key,value), and
 Despite their simplicity, in-memory key-value stores present many of the same
 concurrency control challenges as more complex database systems. Readers can
 conflict with writers writing the same key, and writers can conflict with other
-writers. Thus, some concurrency control mechanism is required to provide
+writers writing the same key. Thus, a concurrency control mechanism is required to provide
 isolation between conflicting accesses. Furthermore, clients of a key-value
 store often perform operations on multiple keys in a single transaction (a
 \textit{multi-key transaction}). Clients generally require that such a
-transaction appear atomic and isolated: it must commit all changes or none, and
+transaction appear \textit{atomic} and \textit{isolated}: it must commit all changes or none, and
 it should not see effects from other incomplete transactions. Providing such
 synchronization for multi-key transactions is the focus of this project.
 

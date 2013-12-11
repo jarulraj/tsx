@@ -3,7 +3,7 @@
 A simple mechanism that can be used to provide atomicity and isolation is
 coarse-grained locks. This allows at least a limited amount of safe concurrency.
 However, this is a pessimistic concurrency control protocol that targets
-high-contention workloads. Read accesses also need to incur the locking overhead
+\textit{high-contention} workloads. Read accesses also need to incur the locking overhead
 in this scheme.
 
 For low-contention workloads (e.g, read-dominant workloads), an optimistic

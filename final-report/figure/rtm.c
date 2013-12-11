@@ -1,5 +1,5 @@
 // Example : Group sum operation in RTM
-mutex fb_mutex;
+mutex fb_mutex; // fallback mutex
 
 #pragma omp parallel for 
 for(int i = 0; i < N; i++){
