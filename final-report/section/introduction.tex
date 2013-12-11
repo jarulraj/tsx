@@ -22,7 +22,11 @@ word. Hardware implementations generally rely on extensions to the
 cache-coherence protocol, whereas software implementations provide transactional
 interfaces via basic hardware primitives like atomic compare-and-swap
 (CAS). These software-based approaches tend to introduce too much overhead to be
-competitive with lock-based solutions. Hardware approaches, on the other hand,
+competitive with lock-based solutions. Algorithms like K-means and 
+B+ tree indexing have been observed to perform $4-100$X
+slower than the serial non-transactionalized version in different 
+software TM implementations \citep{cacm08}. 
+Hardware approaches, on the other hand,
 can be implemented efficiently, making them very appealing in principle. Indeed,
 simulations have suggested that hardware transactional memory (HTM) can match or
 outperform pessimistic schemes. However, very few practical chips to date have
@@ -32,13 +36,15 @@ the impact of HTM on datastore systems, one of the primary motivations for
 transactional semantics.
 
 Recent Intel Haswell processors have brought transactional memory support to
-non-mainframe systems for the first time. In this paper, we contribute a study
-of the effects of these Haswell HTM implementations on synchronous access to
+non-mainframe systems with potential for a widespread impact. 
+In this paper, we contribute a study
+of the effects of these Haswell HTM implementations on concurrency control over 
+accesses to
 in-memory data structures. Specifically, we focus on \textit{multi-key
   transactions} on a \textit{key-value store}, comparing the performance of
 HTM-based concurrency control with pessimistic alternatives. We also study the
-performance of HTM in the case of \textit{dynamic read/write sets}, which
-historically lead to much worse performance in pessimistic schemes.
+performance of HTM while handling \textit{dynamic read/write sets}, which
+generally leads to liveness problems in pessimistic schemes.
 
 In \Cref{sec:problem}, we describe the problem of synchronizing multi-key
 transactions on a key-value store. In \Cref{sec:tm}, we outline the operation of
