@@ -2,25 +2,38 @@
 We first present the experimental setup we used to evaluate both software- and hardware-based concurrency control schemes. We then present the experiments themselves and their results.
 
 \subsection{Experimental Setup}
-(Insert description of the test framework program basic architecture,
-particularly the fact that it was single-process with multiple threads, so no
-IPC overhead.)
+The architecture of our test program is extremely simple. The tester runs in a
+single process, spawning multiple threads within that process' address
+space. This eliminates the need for any inter-process communication, which could
+confound experimental results. Each thread runs a workload generator, which
+generates transactions consisting of fixed-size sequences of reads and
+updates. (For the sake of simplicity, we populate the hashtable with values
+prior to running the experiments, and allow only read and update operations
+during transactions.)
+
+All workload generators pass their transactions to a single transaction manager
+(in an unsynchronized fashion). The transaction manager is responsible for
+executing the transactions on the underlying hashtable, providing concurrency
+control between transactions. Each concurrency control scheme is implemented as
+a specialization of the transaction manager interface.
+
+The underlying hashtable is a simple, linear-chaining implementation, ported to
+C++ from an open-source C implementation we found online. The simplicity of this
+implementation allowed us to ensure that there were no surprising memory
+management operations going on behind the scenes.
 
 All tests were performed on a recent Haswell box with support for hardware
-transactional memory. All data reflects an average over 3 runs, and
-performance is measured in millions of hashtable operations per second. For the
-sake of simplicity, we populate the hashtable with values prior to running the
-experiments, and allow only read and update operations during transactions.
+transactional memory. All data reflects an average over 3 1-second runs, and
+performance is measured in millions of hashtable operations per second.
 
 Possible parameters that we could have varied included: the distribution of keys
 accessed, number of workload threads, number of operations per transaction,
 number of distinct keys accessed per transaction, length of values being stored,
 ratio of reads to writes, whether the read/write sets are static or dynamic, the
 total number of keys present in the hashtable, and the number of aborts to allow
-before reverting to the fallback path in the hardware based schemes.
-
-Because trying every possible combination of these parameters would result in 
-an overwhelming amount of data, we kept several of them constant throughout the 
+before reverting to the fallback path in the hardware based schemes. Because
+trying every possible combination of these parameters would result in an
+overwhelming amount of data, we kept several of them constant throughout the
 tests:
 \begin{itemize}
 \item All tests use a Zipfian distribution for key accesses, which we believe is
