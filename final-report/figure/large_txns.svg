@@ -7,15 +7,15 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="537.8045"
-   height="334.14862"
+   width="549.8045"
+   height="320.64862"
    style="overflow:hidden"
    id="svg2"
    version="1.1"
    inkscape:version="0.48.3.1 r9886"
    sodipodi:docname="large_txns.svg">
   <metadata
-     id="metadata262">
+     id="metadata280">
     <rdf:RDF>
       <cc:Work
          rdf:about="">
@@ -37,11 +37,11 @@
      inkscape:pageshadow="2"
      inkscape:window-width="1859"
      inkscape:window-height="1056"
-     id="namedview260"
+     id="namedview278"
      showgrid="false"
-     inkscape:zoom="0.97333333"
-     inkscape:cx="187.12123"
-     inkscape:cy="49.373067"
+     inkscape:zoom="1.3765012"
+     inkscape:cx="252.36088"
+     inkscape:cy="167.26972"
      inkscape:window-x="61"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
@@ -53,7 +53,7 @@
   <defs
      id="defs">
     <clipPath
-       id="_ABSTRACT_RENDERER_ID_495">
+       id="_ABSTRACT_RENDERER_ID_405">
       <rect
          x="115"
          y="71"
@@ -64,48 +64,41 @@
   </defs>
   <g
      id="g10"
-     transform="translate(-52.195508,-14.939453)">
+     transform="translate(-36.195508,-34.439453)">
     <text
        x="115"
-       y="29.5"
+       y="49"
        font-size="20"
        font-weight="bold"
        id="text12"
-       style="font-size:20px;font-weight:bold;text-anchor:start;fill:#000000;stroke:none;font-family:Arial">Dynamic RW Sets, 4 Threads, 64 Ops</text>
-    <text
-       x="115"
-       y="55.5"
-       font-size="20"
-       font-weight="bold"
-       id="text14"
-       style="font-size:20px;font-weight:bold;text-anchor:start;fill:#000000;stroke:none;font-family:Arial">Per Txn</text>
+       style="font-size:20px;font-weight:bold;text-anchor:start;fill:#000000;stroke:none;font-family:Arial">4 Threads, 64 Ops per Txn</text>
   </g>
   <g
-     id="g16"
-     transform="translate(-48.195508,-14.939453)">
+     id="g14"
+     transform="translate(-52.195508,-34.439453)">
     <rect
        x="500"
        y="71"
        width="86"
        height="188"
-       id="rect18"
+       id="rect16"
        style="fill:#ffffff;fill-opacity:0;stroke:none" />
     <g
-       id="g20">
+       id="g18">
       <rect
          x="500"
          y="71"
          width="86"
          height="14"
-         id="rect22"
+         id="rect20"
          style="fill:#ffffff;fill-opacity:0;stroke:none" />
       <g
-         id="g24">
+         id="g22">
         <text
            x="519"
            y="82.900002"
            font-size="14"
-           id="text26"
+           id="text24"
            style="font-size:14px;text-anchor:start;fill:#222222;stroke:none;font-family:Arial">HLE</text>
       </g>
       <rect
@@ -113,25 +106,25 @@
          y="71"
          width="14"
          height="14"
-         id="rect28"
+         id="rect26"
          style="fill:#3366cc;stroke:none" />
     </g>
     <g
-       id="g30">
+       id="g28">
       <rect
          x="500"
          y="94"
          width="86"
          height="14"
-         id="rect32"
+         id="rect30"
          style="fill:#ffffff;fill-opacity:0;stroke:none" />
       <g
-         id="g34">
+         id="g32">
         <text
            x="519"
            y="105.9"
            font-size="14"
-           id="text36"
+           id="text34"
            style="font-size:14px;text-anchor:start;fill:#222222;stroke:none;font-family:Arial">RTM</text>
       </g>
       <rect
@@ -139,25 +132,25 @@
          y="94"
          width="14"
          height="14"
-         id="rect38"
+         id="rect36"
          style="fill:#dc3912;stroke:none" />
     </g>
     <g
-       id="g40">
+       id="g38">
       <rect
          x="500"
          y="117"
          width="86"
          height="14"
-         id="rect42"
+         id="rect40"
          style="fill:#ffffff;fill-opacity:0;stroke:none" />
       <g
-         id="g44">
+         id="g42">
         <text
            x="519"
            y="128.89999"
            font-size="14"
-           id="text46"
+           id="text44"
            style="font-size:14px;text-anchor:start;fill:#222222;stroke:none;font-family:Arial">Lock table</text>
       </g>
       <rect
@@ -165,25 +158,25 @@
          y="117"
          width="14"
          height="14"
-         id="rect48"
+         id="rect46"
          style="fill:#ff9900;stroke:none" />
     </g>
     <g
-       id="g50">
+       id="g48">
       <rect
          x="500"
          y="140"
          width="86"
          height="14"
-         id="rect52"
+         id="rect50"
          style="fill:#ffffff;fill-opacity:0;stroke:none" />
       <g
-         id="g54">
+         id="g52">
         <text
            x="519"
            y="151.89999"
            font-size="14"
-           id="text56"
+           id="text54"
            style="font-size:14px;text-anchor:start;fill:#222222;stroke:none;font-family:Arial">Spin</text>
       </g>
       <rect
@@ -191,31 +184,31 @@
          y="140"
          width="14"
          height="14"
-         id="rect58"
+         id="rect56"
          style="fill:#109618;stroke:none" />
     </g>
     <g
-       id="g60">
+       id="g58">
       <rect
          x="500"
          y="163"
          width="86"
          height="32"
-         id="rect62"
+         id="rect60"
          style="fill:#ffffff;fill-opacity:0;stroke:none" />
       <g
-         id="g64">
+         id="g62">
         <text
            x="519"
            y="174.89999"
            font-size="14"
-           id="text66"
+           id="text64"
            style="font-size:14px;text-anchor:start;fill:#222222;stroke:none;font-family:Arial">Simple</text>
         <text
            x="519"
            y="192.89999"
            font-size="14"
-           id="text68"
+           id="text66"
            style="font-size:14px;text-anchor:start;fill:#222222;stroke:none;font-family:Arial">spin</text>
       </g>
       <rect
@@ -223,31 +216,31 @@
          y="163"
          width="14"
          height="14"
-         id="rect70"
+         id="rect68"
          style="fill:#990099;stroke:none" />
     </g>
     <g
-       id="g72">
+       id="g70">
       <rect
          x="500"
          y="204"
          width="86"
          height="32"
-         id="rect74"
+         id="rect72"
          style="fill:#ffffff;fill-opacity:0;stroke:none" />
       <g
-         id="g76">
+         id="g74">
         <text
            x="519"
            y="215.89999"
            font-size="14"
-           id="text78"
+           id="text76"
            style="font-size:14px;text-anchor:start;fill:#222222;stroke:none;font-family:Arial">Simple</text>
         <text
            x="519"
            y="233.89999"
            font-size="14"
-           id="text80"
+           id="text78"
            style="font-size:14px;text-anchor:start;fill:#222222;stroke:none;font-family:Arial">RTM</text>
       </g>
       <rect
@@ -255,25 +248,25 @@
          y="204"
          width="14"
          height="14"
-         id="rect82"
+         id="rect80"
          style="fill:#0099c6;stroke:none" />
     </g>
     <g
-       id="g84">
+       id="g82">
       <rect
          x="500"
          y="245"
          width="86"
          height="14"
-         id="rect86"
+         id="rect84"
          style="fill:#ffffff;fill-opacity:0;stroke:none" />
       <g
-         id="g88">
+         id="g86">
         <text
            x="519"
            y="256.89999"
            font-size="14"
-           id="text90"
+           id="text88"
            style="font-size:14px;text-anchor:start;fill:#222222;stroke:none;font-family:Arial">Baseline</text>
       </g>
       <rect
@@ -281,625 +274,628 @@
          y="245"
          width="14"
          height="14"
-         id="rect92"
+         id="rect90"
          style="fill:#dd4477;stroke:none" />
     </g>
   </g>
   <g
-     id="g94"
-     transform="translate(-52.195508,-14.939453)">
+     id="g92"
+     transform="translate(-36.195508,-34.439453)">
     <rect
        x="115"
        y="71"
        width="371"
        height="229"
-       id="rect96"
+       id="rect94"
        style="fill:#ffffff;fill-opacity:0;stroke:none" />
     <g
-       clip-path="url(https://docs.google.com/spreadsheet/ccc?key=0AmZyP9czufnudDBOWXg5WUNKT1FiWDI3MHN1RkdHS2c&amp;usp=drive_web#_ABSTRACT_RENDERER_ID_495)"
-       id="g98">
-      <g
-         id="g100">
-        <rect
-           x="115"
-           y="299"
-           width="371"
-           height="1"
-           id="rect102"
-           style="fill:#cccccc;stroke:none" />
-        <rect
-           x="115"
-           y="242"
-           width="371"
-           height="1"
-           id="rect104"
-           style="fill:#cccccc;stroke:none" />
-        <rect
-           x="115"
-           y="185"
-           width="371"
-           height="1"
-           id="rect106"
-           style="fill:#cccccc;stroke:none" />
-        <rect
-           x="115"
-           y="128"
-           width="371"
-           height="1"
-           id="rect108"
-           style="fill:#cccccc;stroke:none" />
-        <rect
-           x="115"
-           y="71"
-           width="371"
-           height="1"
-           id="rect110"
-           style="fill:#cccccc;stroke:none" />
-      </g>
-      <g
-         id="g112">
-        <rect
-           x="115"
-           y="71"
-           width="1"
-           height="229"
-           id="rect114"
-           style="fill:#333333;stroke:none" />
-        <rect
-           x="115"
-           y="299"
-           width="371"
-           height="1"
-           id="rect116"
-           style="fill:#333333;stroke:none" />
-      </g>
-      <g
-         id="g118">
-        <path
-           d="m 115.5,115.67737 24.66667,3.20616 49.33333,1.53016 98.66667,2.48473 197.33333,6.8096"
-           id="path120"
-           inkscape:connector-curvature="0"
-           style="fill:none;stroke:#3366cc;stroke-width:2" />
-        <path
-           d="m 115.5,137.12144 24.66667,0.73378 49.33333,5.8044 98.66667,3.1332 197.33333,0.31407"
-           id="path122"
-           inkscape:connector-curvature="0"
-           style="fill:none;stroke:#dc3912;stroke-width:2" />
-        <path
-           d="M 115.5,107.71048 140.16667,123.54081 189.5,170.62034 288.16667,229.68345 485.5,275.12547"
-           id="path124"
-           inkscape:connector-curvature="0"
-           style="fill:none;stroke:#ff9900;stroke-width:2" />
-        <path
-           d="m 115.5,111.19233 24.66667,11.6108 49.33333,46.058 98.66667,58.07217 L 485.5,274.95105"
-           id="path126"
-           inkscape:connector-curvature="0"
-           style="fill:none;stroke:#109618;stroke-width:2" />
-        <path
-           d="m 115.5,116.06849 24.66667,1.53216 49.33333,1.29912 98.66667,7.33448 197.33333,2.70151"
-           id="path128"
-           inkscape:connector-curvature="0"
-           style="fill:none;stroke:#990099;stroke-width:2" />
-        <path
-           d="m 115.5,138.21394 24.66667,1.78742 49.33333,-1.17135 98.66667,10.56505 197.33333,3.75535"
-           id="path130"
-           inkscape:connector-curvature="0"
-           style="fill:none;stroke:#0099c6;stroke-width:2" />
-        <path
-           d="m 115.5,150.91097 24.66667,-2.58001 49.33333,10.89546 98.66667,6.48935 L 485.5,177.27385"
-           id="path132"
-           inkscape:connector-curvature="0"
-           style="fill:none;stroke:#dd4477;stroke-width:2" />
-      </g>
+       id="g98"
+       transform="matrix(0.9487686,0,0,1,5.8916109,0)">
+      <rect
+         style="fill:#cccccc;stroke:none"
+         id="rect100"
+         height="1"
+         width="371"
+         y="299"
+         x="115" />
+      <rect
+         style="fill:#cccccc;stroke:none"
+         id="rect102"
+         height="1"
+         width="371"
+         y="248"
+         x="115" />
+      <rect
+         style="fill:#cccccc;stroke:none"
+         id="rect104"
+         height="1"
+         width="371"
+         y="198"
+         x="115" />
+      <rect
+         style="fill:#cccccc;stroke:none"
+         id="rect106"
+         height="1"
+         width="371"
+         y="147"
+         x="115" />
+      <rect
+         style="fill:#cccccc;stroke:none"
+         id="rect108"
+         height="1"
+         width="371"
+         y="96"
+         x="115" />
     </g>
     <g
-       id="g134">
-      <circle
-         cx="115.5"
-         cy="115.67738"
-         r="2.5"
-         id="circle136"
-         sodipodi:cx="115.5"
-         sodipodi:cy="115.67738"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#3366cc;stroke:none"
-         d="m 118,115.67738 c 0,1.38072 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11928 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="140.16667"
-         cy="118.88353"
-         r="2.5"
-         id="circle138"
-         sodipodi:cx="140.16667"
-         sodipodi:cy="118.88353"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#3366cc;stroke:none"
-         d="m 142.66667,118.88353 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="189.5"
-         cy="120.4137"
-         r="2.5"
-         id="circle140"
-         sodipodi:cx="189.5"
-         sodipodi:cy="120.4137"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#3366cc;stroke:none"
-         d="m 192,120.4137 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38072 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11928 2.5,2.5 z" />
-      <circle
-         cx="288.16666"
-         cy="122.89842"
-         r="2.5"
-         id="circle142"
-         sodipodi:cx="288.16666"
-         sodipodi:cy="122.89842"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#3366cc;stroke:none"
-         d="m 290.66666,122.89842 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38072,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11928,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="485.5"
-         cy="129.70802"
-         r="2.5"
-         id="circle144"
-         sodipodi:cx="485.5"
-         sodipodi:cy="129.70802"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#3366cc;stroke:none"
-         d="m 488,129.70802 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="115.5"
-         cy="137.12144"
-         r="2.5"
-         id="circle146"
-         sodipodi:cx="115.5"
-         sodipodi:cy="137.12144"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#dc3912;stroke:none"
-         d="m 118,137.12144 c 0,1.38072 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11928 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="140.16667"
-         cy="137.85522"
-         r="2.5"
-         id="circle148"
-         sodipodi:cx="140.16667"
-         sodipodi:cy="137.85522"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#dc3912;stroke:none"
-         d="m 142.66667,137.85522 c 0,1.38072 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11928 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="189.5"
-         cy="143.65962"
-         r="2.5"
-         id="circle150"
-         sodipodi:cx="189.5"
-         sodipodi:cy="143.65962"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#dc3912;stroke:none"
-         d="m 192,143.65962 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="288.16666"
-         cy="146.79282"
-         r="2.5"
-         id="circle152"
-         sodipodi:cx="288.16666"
-         sodipodi:cy="146.79282"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#dc3912;stroke:none"
-         d="m 290.66666,146.79282 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38072,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38072 1.11928,-2.5 2.5,-2.5 1.38071,0 2.5,1.11928 2.5,2.5 z" />
-      <circle
-         cx="485.5"
-         cy="147.10689"
-         r="2.5"
-         id="circle154"
-         sodipodi:cx="485.5"
-         sodipodi:cy="147.10689"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#dc3912;stroke:none"
-         d="m 488,147.10689 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="115.5"
-         cy="107.71049"
-         r="2.5"
-         id="circle156"
-         sodipodi:cx="115.5"
-         sodipodi:cy="107.71049"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#ff9900;stroke:none"
-         d="m 118,107.71049 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="140.16667"
-         cy="123.54081"
-         r="2.5"
-         id="circle158"
-         sodipodi:cx="140.16667"
-         sodipodi:cy="123.54081"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#ff9900;stroke:none"
-         d="m 142.66667,123.54081 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="189.5"
-         cy="170.62035"
-         r="2.5"
-         id="circle160"
-         sodipodi:cx="189.5"
-         sodipodi:cy="170.62035"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#ff9900;stroke:none"
-         d="m 192,170.62035 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38072 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11928 2.5,2.5 z" />
-      <circle
-         cx="288.16666"
-         cy="229.68346"
-         r="2.5"
-         id="circle162"
-         sodipodi:cx="288.16666"
-         sodipodi:cy="229.68346"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#ff9900;stroke:none"
-         d="m 290.66666,229.68346 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38072,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38072 1.11928,-2.5 2.5,-2.5 1.38071,0 2.5,1.11928 2.5,2.5 z" />
-      <circle
-         cx="485.5"
-         cy="275.12546"
-         r="2.5"
-         id="circle164"
-         sodipodi:cx="485.5"
-         sodipodi:cy="275.12546"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#ff9900;stroke:none"
-         d="m 488,275.12546 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="115.5"
-         cy="111.19233"
-         r="2.5"
-         id="circle166"
-         sodipodi:cx="115.5"
-         sodipodi:cy="111.19233"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#109618;stroke:none"
-         d="m 118,111.19233 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="140.16667"
-         cy="122.80314"
-         r="2.5"
-         id="circle168"
-         sodipodi:cx="140.16667"
-         sodipodi:cy="122.80314"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#109618;stroke:none"
-         d="m 142.66667,122.80314 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="189.5"
-         cy="168.86113"
-         r="2.5"
-         id="circle170"
-         sodipodi:cx="189.5"
-         sodipodi:cy="168.86113"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#109618;stroke:none"
-         d="m 192,168.86113 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="288.16666"
-         cy="226.9333"
-         r="2.5"
-         id="circle172"
-         sodipodi:cx="288.16666"
-         sodipodi:cy="226.9333"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#109618;stroke:none"
-         d="m 290.66666,226.9333 c 0,1.38072 -1.11929,2.5 -2.5,2.5 -1.38072,0 -2.5,-1.11928 -2.5,-2.5 0,-1.38071 1.11928,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="485.5"
-         cy="274.95105"
-         r="2.5"
-         id="circle174"
-         sodipodi:cx="485.5"
-         sodipodi:cy="274.95105"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#109618;stroke:none"
-         d="m 488,274.95105 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="115.5"
-         cy="116.06849"
-         r="2.5"
-         id="circle176"
-         sodipodi:cx="115.5"
-         sodipodi:cy="116.06849"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#990099;stroke:none"
-         d="m 118,116.06849 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="140.16667"
-         cy="117.60065"
-         r="2.5"
-         id="circle178"
-         sodipodi:cx="140.16667"
-         sodipodi:cy="117.60065"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#990099;stroke:none"
-         d="m 142.66667,117.60065 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="189.5"
-         cy="118.89977"
-         r="2.5"
-         id="circle180"
-         sodipodi:cx="189.5"
-         sodipodi:cy="118.89977"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#990099;stroke:none"
-         d="m 192,118.89977 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="288.16666"
-         cy="126.23425"
-         r="2.5"
-         id="circle182"
-         sodipodi:cx="288.16666"
-         sodipodi:cy="126.23425"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#990099;stroke:none"
-         d="m 290.66666,126.23425 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38072,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11928,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="485.5"
-         cy="128.93576"
-         r="2.5"
-         id="circle184"
-         sodipodi:cx="485.5"
-         sodipodi:cy="128.93576"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#990099;stroke:none"
-         d="m 488,128.93576 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="115.5"
-         cy="138.21394"
-         r="2.5"
-         id="circle186"
-         sodipodi:cx="115.5"
-         sodipodi:cy="138.21394"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#0099c6;stroke:none"
-         d="m 118,138.21394 c 0,1.38072 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11928 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="140.16667"
-         cy="140.00136"
-         r="2.5"
-         id="circle188"
-         sodipodi:cx="140.16667"
-         sodipodi:cy="140.00136"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#0099c6;stroke:none"
-         d="m 142.66667,140.00136 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="189.5"
-         cy="138.83002"
-         r="2.5"
-         id="circle190"
-         sodipodi:cx="189.5"
-         sodipodi:cy="138.83002"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#0099c6;stroke:none"
-         d="m 192,138.83002 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="288.16666"
-         cy="149.39507"
-         r="2.5"
-         id="circle192"
-         sodipodi:cx="288.16666"
-         sodipodi:cy="149.39507"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#0099c6;stroke:none"
-         d="m 290.66666,149.39507 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38072,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38072 1.11928,-2.5 2.5,-2.5 1.38071,0 2.5,1.11928 2.5,2.5 z" />
-      <circle
-         cx="485.5"
-         cy="153.15041"
-         r="2.5"
-         id="circle194"
-         sodipodi:cx="485.5"
-         sodipodi:cy="153.15041"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#0099c6;stroke:none"
-         d="m 488,153.15041 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38072 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11928 2.5,2.5 z" />
-      <circle
-         cx="115.5"
-         cy="150.91098"
-         r="2.5"
-         id="circle196"
-         sodipodi:cx="115.5"
-         sodipodi:cy="150.91098"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#dd4477;stroke:none"
-         d="m 118,150.91098 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="140.16667"
-         cy="148.33096"
-         r="2.5"
-         id="circle198"
-         sodipodi:cx="140.16667"
-         sodipodi:cy="148.33096"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#dd4477;stroke:none"
-         d="m 142.66667,148.33096 c 0,1.38072 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11928 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="189.5"
-         cy="159.22643"
-         r="2.5"
-         id="circle200"
-         sodipodi:cx="189.5"
-         sodipodi:cy="159.22643"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#dd4477;stroke:none"
-         d="m 192,159.22643 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38072 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11928 2.5,2.5 z" />
-      <circle
-         cx="288.16666"
-         cy="165.71577"
-         r="2.5"
-         id="circle202"
-         sodipodi:cx="288.16666"
-         sodipodi:cy="165.71577"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#dd4477;stroke:none"
-         d="m 290.66666,165.71577 c 0,1.38072 -1.11929,2.5 -2.5,2.5 -1.38072,0 -2.5,-1.11928 -2.5,-2.5 0,-1.38071 1.11928,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
-      <circle
-         cx="485.5"
-         cy="177.27385"
-         r="2.5"
-         id="circle204"
-         sodipodi:cx="485.5"
-         sodipodi:cy="177.27385"
-         sodipodi:rx="2.5"
-         sodipodi:ry="2.5"
-         style="fill:#dd4477;stroke:none"
-         d="m 488,177.27385 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z" />
+       id="g110"
+       transform="matrix(0.9487686,0,0,1,5.8916109,0)">
+      <rect
+         style="fill:#333333;stroke:none"
+         id="rect112"
+         height="229"
+         width="1"
+         y="71"
+         x="115" />
+      <rect
+         style="fill:#333333;stroke:none"
+         id="rect114"
+         height="1"
+         width="371"
+         y="299"
+         x="115" />
     </g>
     <g
+       id="g116">
+      <path
+         style="fill:none;stroke:#3366cc;stroke-width:2"
+         inkscape:connector-curvature="0"
+         id="path118"
+         d="m 136.05556,89.110467 20.55555,4.15074 41.11111,25.565643 82.22222,93.21868 164.44445,57.60585" />
+      <path
+         style="fill:none;stroke:#dc3912;stroke-width:2"
+         inkscape:connector-curvature="0"
+         id="path120"
+         d="m 136.05556,97.306307 20.55555,-2.923847 41.11111,35.99373 82.22222,99.74164 164.44445,48.05366" />
+      <path
+         style="fill:none;stroke:#ff9900;stroke-width:2"
+         inkscape:connector-curvature="0"
+         id="path122"
+         d="m 136.05556,92.74238 20.55555,2.1698 41.11111,35.90709 82.22222,88.62752 164.44445,53.69324" />
+      <path
+         style="fill:none;stroke:#109618;stroke-width:2"
+         inkscape:connector-curvature="0"
+         id="path124"
+         d="m 136.05556,94.458207 20.55555,-0.321607 41.11111,27.83563 82.22222,78.83734 164.44445,44.80554" />
+      <path
+         style="fill:none;stroke:#990099;stroke-width:2"
+         inkscape:connector-curvature="0"
+         id="path126"
+         d="m 136.05556,184.42599 20.55555,2.3023 41.11111,3.21568 82.22222,3.20214 164.44445,7.6689" />
+      <path
+         style="fill:none;stroke:#0099c6;stroke-width:2"
+         inkscape:connector-curvature="0"
+         id="path128"
+         d="m 136.05556,211.05107 20.55555,-4.40204 41.11111,7.5473 82.22222,2.93196 164.44445,9.18219" />
+      <path
+         style="fill:none;stroke:#dd4477;stroke-width:2"
+         inkscape:connector-curvature="0"
+         id="path130"
+         d="m 136.05556,220.50877 20.55555,10.70067 41.11111,9.27415 82.22222,0.72694 164.44445,15.83511" />
+    </g>
+    <circle
+       d="m 138.55556,89.110466 c 0,1.380712 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.119288 -2.5,-2.5 0,-1.380712 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.119288 2.5,2.5 z"
+       style="fill:#3366cc;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="89.110466"
+       sodipodi:cx="136.05556"
+       id="circle134"
+       r="2.5"
+       cy="89.110466"
+       cx="136.05556" />
+    <circle
+       d="m 159.11111,93.261208 c 0,1.380711 -1.11928,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.119289 -2.5,-2.5 0,-1.380712 1.11929,-2.5 2.5,-2.5 1.38072,0 2.5,1.119288 2.5,2.5 z"
+       style="fill:#3366cc;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="93.261208"
+       sodipodi:cx="156.61111"
+       id="circle136"
+       r="2.5"
+       cy="93.261208"
+       cx="156.61111" />
+    <circle
+       d="m 200.22223,118.82684 c 0,1.38072 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11928 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#3366cc;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="118.82684"
+       sodipodi:cx="197.72223"
+       id="circle138"
+       r="2.5"
+       cy="118.82684"
+       cx="197.72223" />
+    <circle
+       d="m 282.44446,212.04553 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#3366cc;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="212.04553"
+       sodipodi:cx="279.94446"
+       id="circle140"
+       r="2.5"
+       cy="212.04553"
+       cx="279.94446" />
+    <circle
+       d="m 446.88889,269.65137 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38072,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11928,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#3366cc;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="269.65137"
+       sodipodi:cx="444.38889"
+       id="circle142"
+       r="2.5"
+       cy="269.65137"
+       cx="444.38889" />
+    <circle
+       d="m 138.55556,97.306305 c 0,1.380712 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.119288 -2.5,-2.5 0,-1.380712 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.119288 2.5,2.5 z"
+       style="fill:#dc3912;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="97.306305"
+       sodipodi:cx="136.05556"
+       id="circle144"
+       r="2.5"
+       cy="97.306305"
+       cx="136.05556" />
+    <circle
+       d="m 159.11111,94.382462 c 0,1.380711 -1.11928,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.119289 -2.5,-2.5 0,-1.380712 1.11929,-2.5 2.5,-2.5 1.38072,0 2.5,1.119288 2.5,2.5 z"
+       style="fill:#dc3912;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="94.382462"
+       sodipodi:cx="156.61111"
+       id="circle146"
+       r="2.5"
+       cy="94.382462"
+       cx="156.61111" />
+    <circle
+       d="m 200.22223,130.37619 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#dc3912;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="130.37619"
+       sodipodi:cx="197.72223"
+       id="circle148"
+       r="2.5"
+       cy="130.37619"
+       cx="197.72223" />
+    <circle
+       d="m 282.44446,230.11783 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#dc3912;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="230.11783"
+       sodipodi:cx="279.94446"
+       id="circle150"
+       r="2.5"
+       cy="230.11783"
+       cx="279.94446" />
+    <circle
+       d="m 446.88889,278.17148 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38072,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11928,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#dc3912;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="278.17148"
+       sodipodi:cx="444.38889"
+       id="circle152"
+       r="2.5"
+       cy="278.17148"
+       cx="444.38889" />
+    <circle
+       d="m 138.55556,92.742378 c 0,1.380712 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.119288 -2.5,-2.5 0,-1.380712 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.119288 2.5,2.5 z"
+       style="fill:#ff9900;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="92.742378"
+       sodipodi:cx="136.05556"
+       id="circle154"
+       r="2.5"
+       cy="92.742378"
+       cx="136.05556" />
+    <circle
+       d="m 159.11111,94.912178 c 0,1.380712 -1.11928,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.119288 -2.5,-2.5 0,-1.380712 1.11929,-2.5 2.5,-2.5 1.38072,0 2.5,1.119288 2.5,2.5 z"
+       style="fill:#ff9900;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="94.912178"
+       sodipodi:cx="156.61111"
+       id="circle156"
+       r="2.5"
+       cy="94.912178"
+       cx="156.61111" />
+    <circle
+       d="m 200.22223,130.81926 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#ff9900;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="130.81926"
+       sodipodi:cx="197.72223"
+       id="circle158"
+       r="2.5"
+       cy="130.81926"
+       cx="197.72223" />
+    <circle
+       d="m 282.44446,219.44679 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#ff9900;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="219.44679"
+       sodipodi:cx="279.94446"
+       id="circle160"
+       r="2.5"
+       cy="219.44679"
+       cx="279.94446" />
+    <circle
+       d="m 446.88889,273.14005 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38072,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38072 1.11928,-2.5 2.5,-2.5 1.38071,0 2.5,1.11928 2.5,2.5 z"
+       style="fill:#ff9900;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="273.14005"
+       sodipodi:cx="444.38889"
+       id="circle162"
+       r="2.5"
+       cy="273.14005"
+       cx="444.38889" />
+    <circle
+       d="m 138.55556,94.458206 c 0,1.380712 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.119288 -2.5,-2.5 0,-1.380712 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.119288 2.5,2.5 z"
+       style="fill:#109618;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="94.458206"
+       sodipodi:cx="136.05556"
+       id="circle164"
+       r="2.5"
+       cy="94.458206"
+       cx="136.05556" />
+    <circle
+       d="m 159.11111,94.136597 c 0,1.380712 -1.11928,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.119288 -2.5,-2.5 0,-1.380712 1.11929,-2.5 2.5,-2.5 1.38072,0 2.5,1.119288 2.5,2.5 z"
+       style="fill:#109618;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="94.136597"
+       sodipodi:cx="156.61111"
+       id="circle166"
+       r="2.5"
+       cy="94.136597"
+       cx="156.61111" />
+    <circle
+       d="m 200.22223,121.97224 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38072 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11928 2.5,2.5 z"
+       style="fill:#109618;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="121.97224"
+       sodipodi:cx="197.72223"
+       id="circle168"
+       r="2.5"
+       cy="121.97224"
+       cx="197.72223" />
+    <circle
+       d="m 282.44446,200.80957 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#109618;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="200.80957"
+       sodipodi:cx="279.94446"
+       id="circle170"
+       r="2.5"
+       cy="200.80957"
+       cx="279.94446" />
+    <circle
+       d="m 446.88889,245.61511 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38072,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11928,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#109618;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="245.61511"
+       sodipodi:cx="444.38889"
+       id="circle172"
+       r="2.5"
+       cy="245.61511"
+       cx="444.38889" />
+    <circle
+       d="m 138.55556,184.42599 c 0,1.38072 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11928 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#990099;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="184.42599"
+       sodipodi:cx="136.05556"
+       id="circle174"
+       r="2.5"
+       cy="184.42599"
+       cx="136.05556" />
+    <circle
+       d="m 159.11111,186.72829 c 0,1.38071 -1.11928,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38072 1.11929,-2.5 2.5,-2.5 1.38072,0 2.5,1.11928 2.5,2.5 z"
+       style="fill:#990099;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="186.72829"
+       sodipodi:cx="156.61111"
+       id="circle176"
+       r="2.5"
+       cy="186.72829"
+       cx="156.61111" />
+    <circle
+       d="m 200.22223,189.94397 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#990099;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="189.94397"
+       sodipodi:cx="197.72223"
+       id="circle178"
+       r="2.5"
+       cy="189.94397"
+       cx="197.72223" />
+    <circle
+       d="m 282.44446,193.1461 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#990099;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="193.1461"
+       sodipodi:cx="279.94446"
+       id="circle180"
+       r="2.5"
+       cy="193.1461"
+       cx="279.94446" />
+    <circle
+       d="m 446.88889,200.81502 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38072,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11928,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#990099;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="200.81502"
+       sodipodi:cx="444.38889"
+       id="circle182"
+       r="2.5"
+       cy="200.81502"
+       cx="444.38889" />
+    <circle
+       d="m 138.55556,211.05107 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#0099c6;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="211.05107"
+       sodipodi:cx="136.05556"
+       id="circle184"
+       r="2.5"
+       cy="211.05107"
+       cx="136.05556" />
+    <circle
+       d="m 159.11111,206.64903 c 0,1.38071 -1.11928,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38072,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#0099c6;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="206.64903"
+       sodipodi:cx="156.61111"
+       id="circle186"
+       r="2.5"
+       cy="206.64903"
+       cx="156.61111" />
+    <circle
+       d="m 200.22223,214.19633 c 0,1.38072 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11928 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#0099c6;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="214.19633"
+       sodipodi:cx="197.72223"
+       id="circle188"
+       r="2.5"
+       cy="214.19633"
+       cx="197.72223" />
+    <circle
+       d="m 282.44446,217.12828 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#0099c6;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="217.12828"
+       sodipodi:cx="279.94446"
+       id="circle190"
+       r="2.5"
+       cy="217.12828"
+       cx="279.94446" />
+    <circle
+       d="m 446.88889,226.31049 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38072,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38072 1.11928,-2.5 2.5,-2.5 1.38071,0 2.5,1.11928 2.5,2.5 z"
+       style="fill:#0099c6;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="226.31049"
+       sodipodi:cx="444.38889"
+       id="circle192"
+       r="2.5"
+       cy="226.31049"
+       cx="444.38889" />
+    <circle
+       d="m 138.55556,220.50877 c 0,1.38072 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11928 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#dd4477;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="220.50877"
+       sodipodi:cx="136.05556"
+       id="circle194"
+       r="2.5"
+       cy="220.50877"
+       cx="136.05556" />
+    <circle
+       d="m 159.11111,231.20944 c 0,1.38071 -1.11928,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38072,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#dd4477;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="231.20944"
+       sodipodi:cx="156.61111"
+       id="circle196"
+       r="2.5"
+       cy="231.20944"
+       cx="156.61111" />
+    <circle
+       d="m 200.22223,240.4836 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38072 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11928 2.5,2.5 z"
+       style="fill:#dd4477;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="240.4836"
+       sodipodi:cx="197.72223"
+       id="circle198"
+       r="2.5"
+       cy="240.4836"
+       cx="197.72223" />
+    <circle
+       d="m 282.44446,241.21054 c 0,1.38071 -1.11929,2.5 -2.5,2.5 -1.38071,0 -2.5,-1.11929 -2.5,-2.5 0,-1.38071 1.11929,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#dd4477;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="241.21054"
+       sodipodi:cx="279.94446"
+       id="circle200"
+       r="2.5"
+       cy="241.21054"
+       cx="279.94446" />
+    <circle
+       d="m 446.88889,257.04565 c 0,1.38072 -1.11929,2.5 -2.5,2.5 -1.38072,0 -2.5,-1.11928 -2.5,-2.5 0,-1.38071 1.11928,-2.5 2.5,-2.5 1.38071,0 2.5,1.11929 2.5,2.5 z"
+       style="fill:#dd4477;stroke:none"
+       sodipodi:ry="2.5"
+       sodipodi:rx="2.5"
+       sodipodi:cy="257.04565"
+       sodipodi:cx="444.38889"
+       id="circle202"
+       r="2.5"
+       cy="257.04565"
+       cx="444.38889" />
+    <g
+       transform="translate(20.596573,-0.1464844)"
        id="g206">
-      <g
-         id="g208">
-        <text
-           x="115.5"
-           y="317.20001"
-           font-size="12"
-           id="text210"
-           style="font-size:12px;text-anchor:middle;fill:#444444;stroke:none;font-family:Arial">2</text>
-      </g>
-      <g
-         id="g212">
-        <text
-           x="201.83333"
-           y="317.20001"
-           font-size="12"
-           id="text214"
-           style="font-size:12px;text-anchor:middle;fill:#444444;stroke:none;font-family:Arial">9</text>
-      </g>
-      <g
-         id="g216">
-        <text
-           x="288.16666"
-           y="317.20001"
-           font-size="12"
-           id="text218"
-           style="font-size:12px;text-anchor:middle;fill:#444444;stroke:none;font-family:Arial">16</text>
-      </g>
-      <g
-         id="g220">
-        <text
-           x="374.5"
-           y="317.20001"
-           font-size="12"
-           id="text222"
-           style="font-size:12px;text-anchor:middle;fill:#444444;stroke:none;font-family:Arial">23</text>
-      </g>
-      <g
-         id="g224">
-        <text
-           x="460.83334"
-           y="317.20001"
-           font-size="12"
-           id="text226"
-           style="font-size:12px;text-anchor:middle;fill:#444444;stroke:none;font-family:Arial">30</text>
-      </g>
-      <g
-         id="g228">
-        <text
-           x="103"
-           y="303.70001"
-           font-size="12"
-           id="text230"
-           style="font-size:12px;text-anchor:end;fill:#444444;stroke:none;font-family:Arial">0</text>
-      </g>
-      <g
-         id="g232">
-        <text
-           x="103"
-           y="246.7"
-           font-size="12"
-           id="text234"
-           style="font-size:12px;text-anchor:end;fill:#444444;stroke:none;font-family:Arial">0.6</text>
-      </g>
-      <g
-         id="g236">
-        <text
-           x="103"
-           y="189.7"
-           font-size="12"
-           id="text238"
-           style="font-size:12px;text-anchor:end;fill:#444444;stroke:none;font-family:Arial">1.2</text>
-      </g>
-      <g
-         id="g240">
-        <text
-           x="103"
-           y="132.7"
-           font-size="12"
-           id="text242"
-           style="font-size:12px;text-anchor:end;fill:#444444;stroke:none;font-family:Arial">1.8</text>
-      </g>
-      <g
-         id="g244">
-        <text
-           x="103"
-           y="75.699997"
-           font-size="12"
-           id="text246"
-           style="font-size:12px;text-anchor:end;fill:#444444;stroke:none;font-family:Arial">2.4</text>
-      </g>
+      <text
+         style="font-size:12px;text-anchor:middle;fill:#444444;stroke:none;font-family:Arial"
+         id="text208"
+         font-size="12"
+         y="317.20001"
+         x="115.5">2</text>
+    </g>
+    <g
+       id="g210">
+      <text
+         style="font-size:12px;text-anchor:middle;fill:#444444;stroke:none;font-family:Arial"
+         id="text212"
+         font-size="12"
+         y="317.20001"
+         x="156.61111">4</text>
+    </g>
+    <g
+       id="g214">
+      <text
+         style="font-size:12px;text-anchor:middle;fill:#444444;stroke:none;font-family:Arial"
+         id="text216"
+         font-size="12"
+         y="317.20001"
+         x="197.72223">8</text>
+    </g>
+    <g
+       id="g222">
+      <text
+         style="font-size:12px;text-anchor:middle;fill:#444444;stroke:none;font-family:Arial"
+         id="text224"
+         font-size="12"
+         y="317.20001"
+         x="279.94446">16</text>
+    </g>
+    <g
+       id="g238">
+      <text
+         style="font-size:12px;text-anchor:middle;fill:#444444;stroke:none;font-family:Arial"
+         id="text240"
+         font-size="12"
+         y="317.20001"
+         x="444.38889">32</text>
+    </g>
+    <g
+       id="g246">
+      <text
+         style="font-size:12px;text-anchor:end;fill:#444444;stroke:none;font-family:Arial"
+         id="text248"
+         font-size="12"
+         y="303.70001"
+         x="103">1</text>
+    </g>
+    <g
+       id="g250">
+      <text
+         style="font-size:12px;text-anchor:end;fill:#444444;stroke:none;font-family:Arial"
+         id="text252"
+         font-size="12"
+         y="253.03334"
+         x="103">1.4</text>
+    </g>
+    <g
+       id="g254">
+      <text
+         style="font-size:12px;text-anchor:end;fill:#444444;stroke:none;font-family:Arial"
+         id="text256"
+         font-size="12"
+         y="202.36667"
+         x="103">1.8</text>
+    </g>
+    <g
+       id="g258">
+      <text
+         style="font-size:12px;text-anchor:end;fill:#444444;stroke:none;font-family:Arial"
+         id="text260"
+         font-size="12"
+         y="151.7"
+         x="103">2.2</text>
+    </g>
+    <g
+       id="g262">
+      <text
+         style="font-size:12px;text-anchor:end;fill:#444444;stroke:none;font-family:Arial"
+         id="text264"
+         font-size="12"
+         y="101.03333"
+         x="103">2.6</text>
     </g>
   </g>
   <g
-     id="g248"
-     transform="translate(-52.195508,-14.939453)">
+     id="g266"
+     transform="translate(-36.195508,-34.439453)">
     <g
-       id="g250"
+       id="g268"
        transform="translate(0,-6)">
       <text
          x="300.5"
          y="351.29999"
          font-size="18"
-         id="text252"
-         style="font-size:18px;text-anchor:middle;fill:#222222;stroke:none;font-family:Arial">Distinct Keys Per Txn</text>
+         font-style="italic"
+         id="text270"
+         style="font-size:18px;font-style:italic;text-anchor:middle;fill:#222222;stroke:none;font-family:Arial">
+        <tspan
+           style="font-style:normal;-inkscape-font-specification:Arial"
+           id="tspan3333">Distinct Keys Per Txn</tspan>
+      </text>
     </g>
     <g
-       id="g254"
+       id="g272"
        transform="translate(16,0)">
       <text
          x="49.299999"
          y="185.5"
          font-size="18"
+         font-style="italic"
          transform="matrix(0,-1,1,0,-136.2,234.8)"
-         id="text256"
-         style="font-size:18px;text-anchor:middle;fill:#222222;stroke:none;font-family:Arial">Performance (million ops/sec)</text>
+         id="text274"
+         style="font-size:18px;font-style:italic;text-anchor:middle;fill:#222222;stroke:none;font-family:Arial">
+        <tspan
+           style="font-style:normal;-inkscape-font-specification:Arial"
+           id="tspan3335">Performance (million ops/sec)</tspan>
+      </text>
     </g>
   </g>
   <g
-     id="g258"
-     transform="translate(-52.195508,-14.939453)" />
+     id="g276"
+     transform="translate(-36.195508,-34.439453)" />
 </svg>
