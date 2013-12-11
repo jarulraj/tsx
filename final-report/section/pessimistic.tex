@@ -2,7 +2,8 @@
 
 To provide a baseline against which to compare the performance of HTM, we
 implemented two different forms of traditional, software-based pessimistic
-concurrency control protocols: a lock manager and spin locks.
+concurrency control managers : a traditional lock (blocking) manager 
+and a spin lock manager.
 
 \subsection{Lock Manager}
 
@@ -10,7 +11,7 @@ Traditional locking schemes make use of a lock manager, which arbitrates access
 to records in the key-value store by granting locks to requesting transactions.
 In our implementation, each key-value pair has its own lock. (Some lock managers
 maintain coarser-grained locks, protecting groups of keys, to decrease locking
-overhead; we did not attempt this optimization in the course of this project.)
+overhead; we did not use this optimization in this project.)
 The lock manager consists of a lock table hashed on keys. Each lock record
 includes a list of transactions waiting to acquire the lock. A transaction may
 only access a given key-value pair once it has requested and been granted the
@@ -31,8 +32,8 @@ our tests.
 For static read/write sets, we prevented deadlocks by enforcing an ordering in
 which a transaction may request locks, which ensures that no circular
 dependencies between transactions waiting on locks may occur. For dynamic
-read/write sets, we implemented a very simple scheme to break deadlocks
-based on timeouts.\\
+read/write sets, we implemented a basic scheme to detect deadlocks
+based on timeouts and handle it by terminating the transaction. \\
 
 \subsection{Spin Locks}
 
