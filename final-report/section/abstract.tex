@@ -11,9 +11,11 @@
   customisable (Hardware Lock Elision). We applied these new hardware primitives
   to control concurrency in transactions on an in-memory key-value store, and
   compared their performance against traditional pessimistic concurrency control
-  schemes.  We tested multiple-key transactions with both static and dynamic
+  schemes \footnote{Source code of the project is available at : 
+  \url{https://github.com/jarulraj/CMU-OS/tree/master/code}}.  
+  We tested multiple-key transactions with both static and dynamic
   read/write sets. Our results indicate that, at least in this setting, HTM
   performance is essentially comparable with similarly structured lock-based
-  schemes. HTM thus appears unlikely to offer many performance benefits, though
-  it may still ease the burden on programmers.
+  schemes. HTM thus appears unlikely to offer significant performance benefits, 
+  though it may still ease the burden on programmers.
 \end{abstract}
