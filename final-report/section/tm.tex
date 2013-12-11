@@ -63,17 +63,18 @@ morekeywords={if,else,end}, numbers=left} \begin{figure}
 to avoid data race with the normal transaction execution path.} \label{fig:rtm}
 \end{figure}
 
-We evaluated both interfaces in this project. We implemented two different 
-RTM schemes and one HLE scheme.
-The \textit{simple RTM manager} nests the entire transaction execution within the RTM
-instructions \texttt{XBEGIN} and \texttt{XEND} and grabs a mutex in the fallback path.
-The more sophisticated \textit{RTM manager} only protects accesses to the lock table 
-using the RTM instructions \citep{tsx-guide} and the transaction execution itself is not in the critical 
-path. We designed this scheme to perform well especially for large multi-key 
-transactions.  
-The \textit{HLE manager} is, by design, similar to the sophisticated RTM manager, except 
-that its fallback path involves execution of instructions while ignoring 
-the \texttt{XACQUIRE} and \texttt{XRELEASE} prefixes.
+We evaluated both interfaces in this project. We implemented two different RTM
+schemes and one HLE scheme.  The \textit{simple RTM manager} nests the entire
+transaction execution within the RTM instructions \texttt{XBEGIN} and
+\texttt{XEND} and simply grabs a table-wide mutex in the fallback path.  The
+more sophisticated \textit{RTM manager} uses a table of mutexes, one per
+key. The manager initially attempts to execute the transaction eliding the
+locks, using the RTM instructions \citep{tsx-guide}. After several aborts, it
+falls back to grabbing the individual keys' locks . We designed this scheme to
+perform well especially for large multi-key transactions.  The \textit{HLE
+  manager} is, by design, similar to the sophisticated RTM manager, except that
+its fallback path involves execution of instructions while ignoring the
+\texttt{XACQUIRE} and \texttt{XRELEASE} prefixes.
 
 When the read/write sets are static (known a priori), we prevent deadlocks in our
 fine-grained schemes by enforcing an ordering in which a transaction may request 
