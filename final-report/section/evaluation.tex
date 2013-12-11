@@ -22,9 +22,29 @@ C++ from an open-source C implementation we found online. The simplicity of this
 implementation allowed us to ensure that there were no surprising memory
 management operations going on behind the scenes.
 
-All tests were performed on a recent Haswell box with support for hardware
-transactional memory. All data reflects an average over 3 1-second runs, and
+All tests were performed on a Haswell box with support for hardware
+transactional memory \cref{tab:specs}. All data reflects an average over 3 runs, and
 performance is measured in millions of hashtable operations per second.
+
+\begin{table}
+\centering
+\small{
+  \centering
+  \begin{tabular}{ll} \toprule
+   Processor      &  Intel Haswell i7-4770 @ 3.4GHz \\
+   Physical cores &  4  \\
+   Logical cores  &  8  \\
+   L1D cache      &  32 KB  \\
+   L2 cache       &  256 KB \\
+   L3 cache       &  8 MB   \\
+   DRAM           & 16 GB DDR3 SDRAM \\
+   \bottomrule
+   \end{tabular}
+ }
+%\nocaptionrule
+\caption{Environment specifications.}
+\label{tab:specs}
+\end{table}
 
 Possible parameters that we could have varied included: the distribution of keys
 accessed, number of workload threads, number of operations per transaction,
@@ -33,12 +53,30 @@ ratio of reads to writes, whether the read/write sets are static or dynamic, the
 total number of keys present in the hashtable, and the number of aborts to allow
 before reverting to the fallback path in the hardware based schemes. Because
 trying every possible combination of these parameters would result in an
-overwhelming amount of data, we kept several of them constant throughout the
-tests:
+overwhelming amount of data, we kept several of them constant in our evaluation.
+The configuration used in our experiments is summarized in \cref{tab:conf}.
+
+\begin{table}
+\centering
+\small{
+  \centering
+  \begin{tabular}{ll} \toprule
+   Key access distribution & Zipfian \\	  
+   Key size   & 4 bytes \\
+   Value size & 4 bytes \\  
+   Reads:Updates & $1:1$ \\  
+   Number of keys & $2^{14}$ \\  
+   \bottomrule
+   \end{tabular}
+ }
+%\nocaptionrule
+\caption{Experiment configuration.}
+\label{tab:conf}
+\end{table}
+
 \begin{itemize}
 \item All tests use a Zipfian distribution for key accesses, which we believe is
   representative of many real world-workloads.
-\item All values are random strings of length 4.
 \item The ratio of reads to writes is 1:1. (This is not fully representative of
   real workloads, but this parameter was found to have little impact on
   performance numbers).
@@ -47,6 +85,7 @@ tests:
 \item The maximum allowed retries after abort is tuned to what we found to be
   the optimal value on a per-scheme basis.
 \end{itemize}
+
 
 \subsection{Varying Contention}
 
