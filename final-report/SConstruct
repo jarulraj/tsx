@@ -1,7 +1,7 @@
 import os
 
 env = Environment(
-    tools=['pdflatex', 'pdftex', 'tex'],
+    tools=['pdftex', 'pdflatex', 'tex'],
     )
 
 env = Environment( 
