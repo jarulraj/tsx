@@ -1,17 +1,20 @@
 \section{Conclusions} \label{sec:conclusion}
 
-There are a number of interesting conclusions that can be drawn from the 
-results printed in this paper. Based on our results, hardware transactional 
-memory is unlikely to provide any significent performance improvement over 
-traditional software based concurrency schemes in most situations.
+There are a number of interesting conclusions that can be drawn from our
+results. Most importantly, our experiments suggest that hardware transactional
+memory is unlikely to provide any significent performance improvement over
+traditional, software-based concurrency schemes in most situations.
 
-Additionally, we did not feel that at this time it provides a large engineering 
-benefit in making the code simpler or easier to get correct. This results from the 
-fact that hardware transaction memory is still in development and not fully 
-documented, whereas there exist many tools for implementing the traditional 
-software based methods.
+Additionally, we did not feel that at this time it provides a large engineering
+benefit in making concurrent code simpler or easier to get right. This is
+primarily due to the fact that hardware transaction memory is still in
+development and is not fully documented, whereas there exist many tools for
+implementing the traditional software based methods. (In particular, we found
+the C++11 concurrency libraries effective and easy to use.)
 
-However, we see the potential of hardware transactional memory and conclude 
-that it is a perfectly viable option for implementing concurrency control in 
-a key-value store, including support for multi-key transactions and dynamic 
-read/write sets.
+However, hardware transactional memory is certainly a perfectly viable option
+for implementing concurrency control in a datastore, including support for
+multi-key transactions and dynamic read/write sets. It is already easier to
+handle dynamic read/write sets in HTM than in conventional schemes, and we do
+see the potential for more engineering benefits in the future, as the technology
+becomes more mature and well-documented.
