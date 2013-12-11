@@ -6,20 +6,30 @@ However, this is a pessimistic concurrency control protocol that targets
 high-contention workloads. Read accesses also need to incur the locking overhead
 in this scheme.
 
-For low contention workloads (e.g, read-dominant workloads), an optimistic
-concurrency control scheme generally provides better performance, as the
-validation is postponed to the end of the transaction. The concurrency control
-protocol is essentially not exposed to the user, which allows non-conflicting
-accesses to avoid the overhead of locking.  Optimistic concurrency control
-mechanisms still rely on locking while speculatively executed transactions are
-being committed, but they move this functionality to the language runtime layer
-in the case of software transactional memory schemes or to the hardware layer in
-the case of HTM schemes. The programmer is presented only the higher-level
-abstraction of transactions.
+For low-contention workloads (e.g, read-dominant workloads), an optimistic
+concurrency control scheme generally provides better performance, as
+transactions can be mostly executed in parallel, and only the few that conflict
+will need to be aborted or retried. (Optimistic concurrency control mechanisms
+generally still rely on locking to validate and commit speculatively executed
+changes, but this critical section is relatively small.) This allows
+non-conflicting accesses to avoid the overhead of locking, providing a
+significant boost in throughput.
 
-HTM simplifies concurrent programming by providing support for atomic execution
-of a set of load and store instructions by using transactional caches. Intel's
-new Haswell processors provide an HTM implementation that allows non-conflicting
+Originally proposed in the context of database transaction managers, OCC schemes
+have also been applied to concurrent programming, in the form of transactional
+memory. Such schemes expose very little of the concurrency control protocol to
+the user. Instead of requiring the programmer to maintain complex locking code,
+all of complexity of concurrency control is pushed lower in the programming
+stack: to the language runtime layer (in the case of software transactional
+memory schemes) or to the hardware layer (in the case of HTM schemes). The
+programmer is presented only with the higher-level abstraction of
+transactions. Transactional memory thus provides the additional benefit of
+greatly simplifying concurrent programming.
+
+Intel's Haswell processor provides a transactional memory abstraction at the
+hardware level. Transactions are executed within a core's own L1 cache, and the
+cache-coherence protocol is extended to check at commit time whether other cores
+have committed conflicting writes. This implementation allows non-conflicting
 transactions to elide locks entirely, serializing only conflicting transactions.
 
 The Haswell processors implement HTM in the form of instruction set extensions
@@ -28,23 +38,25 @@ interfaces \citep{tsx-intro}: \\
 
 \begin{itemize} 
 \item \textbf{Hardware Lock Elision (HLE):} \\ This is a backwards-compatible
-  extension which allows specifying transaction regions via \textrm{XACQUIRE}
-  and \textrm{XRELEASE} instruction prefixes. HLE is compatible with the
-  lock-based programming model. In HLE, when the transaction execution fails,
-  the TM implementation simply reverts to normal lock semantics during
-  re-execution. \\
+  extension which allows specifying transaction regions via \texttt{XACQUIRE}
+  and \texttt{XRELEASE} instruction prefixes. These prefixes are added to a set
+  of existing atomic load/store instructions which are typically used to
+  read/write locks. When the \texttt{XACQUIRE} prefix is included, the locking
+  code is speculatively elided, and the transaction is checked for conflicts
+  when the \texttt{XRELEASE} prefix next appears. If conflicts have occurred,
+  transaction execution fails, and the TM implementation simply reverts to
+  normal lock semantics: the transaction is re-executed, but this time using the
+  normal load/store instructions. HLE is thus fully compatible with the
+  conventional, lock-based programming model. \\
 \item \textbf{Restricted Transactional Memory (RTM):} \\ This is a more flexible
   extension, albeit not a backward compatible one, which allows specification of
-  transactions using \textrm{XBEGIN, XEND and XABORT} instructions. It allows
-  the programmer to specify the fallback path for transaction failures. \\
+  transactions using new \texttt{XBEGIN}, \texttt{XEND}, and \texttt{XABORT}
+  instructions. It allows the programmer to specify the fallback path for
+  transaction failures. An example of a group sum operation using RTM interface
+  is shown in \Cref{fig:rtm}.\\
 \end{itemize}
 
-In the RTM interface, the conflict resolution mechanism is flexible -- the
-programmer can define the fallback mechanism to resolve conflicts. For instance,
-a group sum operation using RTM interface in Intel Haswell is shown in
-\Cref{fig:rtm}.  In contrast, the HLE interface relies on a more conservative
-policy in the case of conflicts: the processor simply grabs the lock that had
-been elided. We evaluated both interfaces in this project.
+We evaluated both interfaces in this project.
 
 \lstset{basicstyle=\ttfamily\fontsize{9}{10}\selectfont,
 morekeywords={if,else,end}, numbers=left} \begin{figure}
