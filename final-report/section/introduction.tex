@@ -19,7 +19,7 @@ TM can be realized either in hardware or in software. For instance, the
 load-linked/store-conditional primitive available in modern processors is a
 special case of hardware TM, where access is regulated for only a single memory
 word. Hardware implementations generally rely on extensions to the
-cache-coherence protocol, whereas software implementations provide transactional
+cache-coherence protocol \citep{htm}, whereas software implementations provide transactional
 interfaces via basic hardware primitives like atomic compare-and-swap
 (CAS). These software-based approaches tend to introduce too much overhead to be
 competitive with lock-based solutions. Algorithms like K-means and 
@@ -36,7 +36,7 @@ the impact of HTM on datastore systems, one of the primary motivations for
 transactional semantics.
 
 Recent Intel Haswell processors have brought transactional memory support to
-non-mainframe systems with potential for a widespread impact. 
+non-mainframe systems with potential for a widespread impact \citep{tsx-tools,lwn}. 
 In this paper, we contribute a study
 of the effects of these Haswell HTM implementations on concurrency control over 
 accesses to

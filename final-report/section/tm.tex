@@ -68,7 +68,7 @@ RTM schemes and one HLE scheme.
 The \textit{simple RTM manager} nests the entire transaction execution within the RTM
 instructions \texttt{XBEGIN} and \texttt{XEND} and grabs a mutex in the fallback path.
 The more sophisticated \textit{RTM manager} only protects accesses to the lock table 
-using the RTM instructions and the transaction execution itself is not in the critical 
+using the RTM instructions \citep{tsx-guide} and the transaction execution itself is not in the critical 
 path. We designed this scheme to perform well especially for large multi-key 
 transactions.  
 The \textit{HLE manager} is, by design, similar to the sophisticated RTM manager, except 
